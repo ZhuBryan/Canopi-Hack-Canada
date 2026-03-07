@@ -7,6 +7,9 @@ import type { Listing, ScoreBand } from "@/lib/avenuex-data";
 
 interface NearbyBucket {
   count: number;
+  places?: {
+    distance_meters: number | null;
+  }[];
 }
 
 interface RawListing {
@@ -53,6 +56,18 @@ const BUCKET_LABELS: Record<BucketKey, string> = {
   transit: "Transit",
 };
 
+const EFFECTIVE_RADIUS_METERS = 1000;
+
+const BUCKET_CAPS = {
+  schools: 5,
+  groceries: 5,
+  restaurants: 15,
+  cafes: 10,
+  parks: 5,
+  pharmacies: 5,
+  transit: 10,
+} as const;
+
 // ── Helpers (duplicated minimally to keep this route self-contained) ─────────
 
 function parsePrice(raw: string | null | undefined): number {
@@ -75,8 +90,25 @@ function extractAddress(location: string | null | undefined): string {
   return parts[0] ?? location;
 }
 
-function bucketScore(count: number | undefined): number {
-  return Math.round(Math.min(count ?? 0, 5) / 5 * 100);
+function countWithinRadius(bucket: NearbyBucket | undefined): number {
+  if (!bucket) return 0;
+
+  if (Array.isArray(bucket.places) && bucket.places.length > 0) {
+    return bucket.places.filter((place) => {
+      if (!Number.isFinite(place.distance_meters)) return false;
+      return (place.distance_meters ?? Infinity) <= EFFECTIVE_RADIUS_METERS;
+    }).length;
+  }
+
+  return bucket.count ?? 0;
+}
+
+function bucketScore(
+  key: keyof typeof BUCKET_CAPS,
+  count: number,
+): number {
+  const cap = BUCKET_CAPS[key];
+  return Math.round((Math.min(count, cap) / cap) * 100);
 }
 
 function deriveBand(score: number): ScoreBand {
@@ -124,8 +156,9 @@ function computePersonalScore(
   for (const key of BUCKET_KEYS) {
     const w = weights[key];
     if (w <= 0) continue;
-    const count = nearby[key]?.count ?? 0;
-    const normalized = Math.min(count, 5) / 5;
+    const count = countWithinRadius(nearby[key]);
+    const cap = BUCKET_CAPS[key];
+    const normalized = Math.min(count, cap) / cap;
     weightedSum += w * normalized;
     totalWeight += w;
   }
@@ -141,8 +174,9 @@ function buildMatchReason(nearby: RawListing["nearby"], weights: Weights): strin
 
   for (const key of BUCKET_KEYS) {
     const w = weights[key];
-    const count = nearby[key]?.count ?? 0;
-    const normalized = Math.min(count, 5) / 5;
+    const count = countWithinRadius(nearby[key]);
+    const cap = BUCKET_CAPS[key];
+    const normalized = Math.min(count, cap) / cap;
     scored.push({ key, contribution: w * normalized });
   }
 
@@ -196,22 +230,29 @@ export async function GET(request: Request) {
         const city = extractCity(item.location);
         const address = extractAddress(item.location);
         const nearby = item.nearby ?? {};
+        const schoolsCount = countWithinRadius(nearby.schools);
+        const groceriesCount = countWithinRadius(nearby.groceries);
+        const restaurantsCount = countWithinRadius(nearby.restaurants);
+        const cafesCount = countWithinRadius(nearby.cafes);
+        const parksCount = countWithinRadius(nearby.parks);
+        const pharmaciesCount = countWithinRadius(nearby.pharmacies);
+        const transitCount = countWithinRadius(nearby.transit);
 
         const foodDrink = Math.round(
-          (bucketScore(nearby.restaurants?.count) + bucketScore(nearby.cafes?.count)) / 2
+          (bucketScore("restaurants", restaurantsCount) + bucketScore("cafes", cafesCount)) / 2
         );
-        const health = bucketScore(nearby.pharmacies?.count);
+        const health = bucketScore("pharmacies", pharmaciesCount);
         const groceryParks = Math.round(
-          (bucketScore(nearby.groceries?.count) + bucketScore(nearby.parks?.count)) / 2
+          (bucketScore("groceries", groceriesCount) + bucketScore("parks", parksCount)) / 2
         );
-        const education = bucketScore(nearby.schools?.count);
-        const emergency = Math.round(health * 0.6 + bucketScore(nearby.transit?.count) * 0.4);
+        const education = bucketScore("schools", schoolsCount);
+        const emergency = Math.round(health * 0.6 + bucketScore("transit", transitCount) * 0.4);
 
         const score = Math.round((foodDrink + health + groceryParks + education + emergency) / 5);
         const scoreBand = deriveBand(score);
 
-        const personalScore = computePersonalScore(item.nearby, weights);
-        const matchReason = buildMatchReason(item.nearby, weights);
+        const personalScore = computePersonalScore(nearby, weights);
+        const matchReason = buildMatchReason(nearby, weights);
 
         return {
           id: `rf-${item.listing_id}`,
@@ -236,7 +277,15 @@ export async function GET(request: Request) {
           availableDate: "Available now",
           leaseTerm: "12 months",
           about: item.title ?? "",
-          amenities: buildAmenityLabels(nearby),
+          amenities: buildAmenityLabels({
+            schools: schoolsCount,
+            groceries: groceriesCount,
+            restaurants: restaurantsCount,
+            cafes: cafesCount,
+            parks: parksCount,
+            pharmacies: pharmaciesCount,
+            transit: transitCount,
+          }),
           categoryScores: { foodDrink, health, groceryParks, education, emergency },
           incomeNeeded: computeIncomeNeeded(monthlyRent),
           personalScore,
@@ -263,12 +312,12 @@ function parseWeight(raw: string | null): number {
 }
 
 function buildAmenityLabels(
-  nearby: Record<string, NearbyBucket | undefined>
+  counts: Partial<Record<keyof typeof BUCKET_CAPS, number>>
 ): string[] {
   const labels: string[] = [];
   for (const key of BUCKET_KEYS) {
-    const count = nearby[key]?.count ?? 0;
-    if (count > 0) labels.push(`${count} ${BUCKET_LABELS[key].toLowerCase()}`);
+    const count = counts[key] ?? 0;
+    if (count > 0) labels.push(`${count} ${BUCKET_LABELS[key].toLowerCase()} (1km)`);
   }
   return labels;
 }
