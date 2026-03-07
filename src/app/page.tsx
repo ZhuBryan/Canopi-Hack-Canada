@@ -14,6 +14,7 @@ import { avenueNav, listingsCatalog } from "@/lib/avenuex-data";
 import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
 import { useSavedListings } from "@/hooks/useSavedListings";
+import ChatPanel from "@/components/avenuex/ChatPanel";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
 
@@ -205,8 +206,8 @@ export default function HeroPage() {
                   type="button"
                   onClick={() => isLoggedIn && toggleSave(selectedListing.id)}
                   className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${isSaved(selectedListing.id)
-                      ? "border-green-500 bg-green-50 text-green-700"
-                      : "border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
+                    ? "border-green-500 bg-green-50 text-green-700"
+                    : "border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
                     }`}
                   title={isLoggedIn ? undefined : "Sign in to save"}
                 >
@@ -356,6 +357,9 @@ export default function HeroPage() {
           </aside>
         )}
       </div>
+
+      {/* Chatbot Panel */}
+      <ChatPanel />
     </div>
   );
 }
