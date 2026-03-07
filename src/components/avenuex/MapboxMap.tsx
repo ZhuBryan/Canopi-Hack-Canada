@@ -30,7 +30,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       container: containerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [-79.3832, 43.6532],
-      zoom: 12,
+      zoom: 14,
       pitch: 45,
       bearing: -10,
       dragRotate: false,
