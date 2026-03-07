@@ -13,6 +13,7 @@ import {
 import { avenueNav, listingsCatalog } from "@/lib/avenuex-data";
 import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
+import { useSavedListings } from "@/hooks/useSavedListings";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
 
@@ -35,6 +36,7 @@ export default function HeroPage() {
   const [filter, setFilter] = useState<FilterType>("All");
   const [sort, setSort] = useState<SortMode>("recommended");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
 
   const filteredListings = useMemo<Listing[]>(() => {
     let items = listingsCatalog;
@@ -75,7 +77,7 @@ export default function HeroPage() {
       {/* Navbar */}
       <DesktopNavbar
         searchPlaceholder={avenueNav.searchPlaceholder}
-        savedCount={0}
+        savedCount={savedIds.size}
         searchValue={search}
         onSearchValueChange={setSearch}
         userMenu={<UserMenu />}
@@ -137,6 +139,20 @@ export default function HeroPage() {
                       sizes="80px"
                       className="object-cover"
                     />
+                    {/* Bookmark heart */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isLoggedIn) toggleSave(listing.id);
+                      }}
+                      className="absolute right-1 top-1 z-10 grid h-6 w-6 place-items-center rounded-full bg-white/80 backdrop-blur-sm transition hover:bg-white"
+                      title={isLoggedIn ? (isSaved(listing.id) ? "Unsave" : "Save") : "Sign in to save"}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={isSaved(listing.id) ? "#22c55e" : "none"} stroke={isSaved(listing.id) ? "#22c55e" : "#64748b"} strokeWidth="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
@@ -184,14 +200,30 @@ export default function HeroPage() {
               <h2 className="mr-2 truncate font-display text-sm font-bold text-slate-900">
                 {selectedListing.address}
               </h2>
-              <button
-                type="button"
-                onClick={() => setSelectedId(null)}
-                className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-slate-100 text-sm text-slate-500 transition hover:bg-slate-200"
-                aria-label="Close panel"
-              >
-                ×
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => isLoggedIn && toggleSave(selectedListing.id)}
+                  className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${isSaved(selectedListing.id)
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
+                    }`}
+                  title={isLoggedIn ? undefined : "Sign in to save"}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill={isSaved(selectedListing.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  {isSaved(selectedListing.id) ? "Saved" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-slate-100 text-sm text-slate-500 transition hover:bg-slate-200"
+                  aria-label="Close panel"
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
             {/* Hero image */}
