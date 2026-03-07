@@ -281,10 +281,15 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         type: "line",
         source: "amenity-paths",
         filter: ["==", ["geometry-type"], "LineString"],
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
         paint: {
           "line-color": ["coalesce", ["get", "color"], "#38bdf8"],
           "line-width": 2.8,
           "line-opacity": 0.88,
+          "line-dasharray": [0.6, 1.6],
         },
       });
       map.addLayer({
