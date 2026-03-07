@@ -1,20 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans, Inter } from "next/font/google";
+import { AvenueXProvider } from "@/lib/avenuex-store";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bricolageGrotesque = Bricolage_Grotesque({
+  variable: "--font-bricolage-grotesque",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "HackCanada Livable Rentals",
-  description: "Rental data pipeline with geocoding and livability-source selection.",
+  title: "Canopi",
+  description: "Canopi — find your next home",
 };
 
 export default function RootLayout({
@@ -25,9 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dmSans.variable} ${bricolageGrotesque.variable} ${inter.variable} antialiased`}
       >
-        {children}
+        <AvenueXProvider>{children}</AvenueXProvider>
       </body>
     </html>
   );

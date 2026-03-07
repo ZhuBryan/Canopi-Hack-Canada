@@ -1,0 +1,6 @@
+next.config.ts
+package-lock.json
+package.json
+src/app/globals.css
+src/app/layout.tsx
+src/app/page.tsx

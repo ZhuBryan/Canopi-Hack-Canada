@@ -1,0 +1,43 @@
+
+> hackcanada@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\bryan\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\bryan\Hackathons\Avenue-X-HackCanada\HackCanada\package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx:14:1
+Module not found: Can't resolve 'react-map-gl'
+[0m [90m 12 |[39m [36mimport[39m { useState } [36mfrom[39m [32m"react"[39m[33m;[39m
+ [90m 13 |[39m [36mimport[39m { useRouter } [36mfrom[39m [32m"next/navigation"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 14 |[39m [36mimport[39m [33mMap[39m[33m,[39m { [33mMarker[39m[33m,[39m [33mPopup[39m } [36mfrom[39m [32m"react-map-gl"[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 15 |[39m [36mimport[39m [32m"mapbox-gl/dist/mapbox-gl.css"[39m[33m;[39m
+ [90m 16 |[39m [36mimport[39m { [33mMapPin[39m[33m,[39m [33mBuilding2[39m[33m,[39m [33mChevronRight[39m[33m,[39m [33mActivity[39m } [36mfrom[39m [32m"lucide-react"[39m[33m;[39m
+ [90m 17 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx [Client Component Browser]
+    ./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx [Client Component SSR]
+    ./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./Hackathons/Avenue-X-HackCanada/HackCanada/src/app/page.tsx:14:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
