@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images-prod.r2.rentfaster.ca",
       },
+      {
+        protocol: "https",
+        hostname: "rf-images-prod-bcdn.rentfaster.ca",
+      },
     ],
   },
 };
