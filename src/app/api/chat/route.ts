@@ -250,7 +250,7 @@ async function buildSystemPrompt(): Promise<string> {
     const rawListings = await loadRaw();
     const summaries = rawListings
         .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng))
-        .slice(0, 130)
+        .slice(0, 30)
         .map((item) => {
             const rent = parsePrice(item.price);
             const addr = extractAddress(item.location);
@@ -318,6 +318,43 @@ async function geminiResponse(messages: ChatMessage[]): Promise<string> {
     );
 }
 
+// ── OpenAI path ──────────────────────────────────────────────────────────────
+
+async function openaiResponse(messages: ChatMessage[]): Promise<string> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) throw new Error("No OpenAI API key");
+
+    const systemPrompt = await buildSystemPrompt();
+
+    const openaiMessages = [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ];
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: openaiMessages,
+            max_tokens: 500,
+            temperature: 0.7,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        console.error("OpenAI API error:", text);
+        throw new Error("OpenAI API request failed");
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "I'm not sure how to help with that.";
+}
+
 // ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
@@ -333,7 +370,23 @@ export async function POST(request: Request) {
 
         let content: string;
 
-        if (process.env.GEMINI_API_KEY) {
+        if (process.env.OPENAI_API_KEY) {
+            try {
+                content = await openaiResponse(messages);
+            } catch (err) {
+                console.error("OpenAI error, trying Gemini:", err);
+                if (process.env.GEMINI_API_KEY) {
+                    try {
+                        content = await geminiResponse(messages);
+                    } catch (err2) {
+                        console.error("Gemini also failed:", err2);
+                        content = await fallbackResponse(lastUserMessage);
+                    }
+                } else {
+                    content = await fallbackResponse(lastUserMessage);
+                }
+            }
+        } else if (process.env.GEMINI_API_KEY) {
             try {
                 content = await geminiResponse(messages);
             } catch (err) {
