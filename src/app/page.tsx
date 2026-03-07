@@ -1,45 +1,79 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapboxMap } from "@/components/avenuex/MapboxMap";
 import {
   DesktopNavbar,
   GhostButton,
   PrimaryButton,
-  ScoreBar,
   ScorePill,
 } from "@/components/avenuex/primitives";
-import { avenueNav, listingsCatalog } from "@/lib/avenuex-data";
+import { avenueNav } from "@/lib/avenuex-data";
 import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
 import { useSavedListings } from "@/hooks/useSavedListings";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
 
-const CATEGORY_ROWS = [
-  { label: "Food & Drink", key: "foodDrink", color: "#F97316" },
-  { label: "Health", key: "health", color: "#EC4899" },
-  { label: "Grocery & Parks", key: "groceryParks", color: "#22C55E" },
-  { label: "Education", key: "education", color: "#3B82F6" },
-  { label: "Emergency", key: "emergency", color: "#8B5CF6" },
+const SERVICE_ROWS = [
+  { label: "Schools", key: "schools", color: "#3B82F6" },
+  { label: "Groceries", key: "groceries", color: "#22C55E" },
+  { label: "Restaurants", key: "restaurants", color: "#F97316" },
+  { label: "Cafes", key: "cafes", color: "#F59E0B" },
+  { label: "Parks", key: "parks", color: "#16A34A" },
+  { label: "Pharmacies", key: "pharmacies", color: "#EC4899" },
+  { label: "Transit", key: "transit", color: "#8B5CF6" },
 ] as const;
 
 const FILTER_OPTIONS: FilterType[] = ["All", "Apartment", "House", "Condo"];
 
 function bedLabel(listing: Listing) {
+  if (listing.bedsLabel) return listing.bedsLabel;
   return listing.beds === 0 ? "Studio" : `${listing.beds} Bed${listing.beds > 1 ? "s" : ""}`;
 }
 
+function bathLabel(listing: Listing) {
+  if (listing.bathsLabel) return listing.bathsLabel;
+  return `${listing.baths} Bath${listing.baths > 1 ? "s" : ""}`;
+}
+
+function sqftLabel(listing: Listing) {
+  return listing.sqft > 0 ? `${listing.sqft} sqft` : null;
+}
+
 export default function HeroPage() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("All");
   const [sort, setSort] = useState<SortMode>("recommended");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
 
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/listings");
+        if (!res.ok) throw new Error("Failed to fetch listings");
+        const data: Listing[] = await res.json();
+        if (!cancelled) setListings(data);
+      } catch (error) {
+        console.error("Failed to load listings:", error);
+      } finally {
+        if (!cancelled) setLoadingListings(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredListings = useMemo<Listing[]>(() => {
-    let items = listingsCatalog;
+    let items = listings;
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -65,11 +99,11 @@ export default function HeroPage() {
       default:
         return [...items].sort((a, b) => b.score - a.score);
     }
-  }, [search, filter, sort]);
+  }, [listings, search, filter, sort]);
 
   const selectedListing = useMemo(
-    () => (selectedId ? (listingsCatalog.find((l) => l.id === selectedId) ?? null) : null),
-    [selectedId]
+    () => (selectedId ? (listings.find((l) => l.id === selectedId) ?? null) : null),
+    [selectedId, listings]
   );
 
   return (
@@ -120,7 +154,13 @@ export default function HeroPage() {
 
           {/* Listing Cards */}
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
-            {filteredListings.map((listing) => (
+            {loadingListings && (
+              <div className="flex flex-col items-center justify-center gap-2 py-12">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
+                <p className="text-xs text-slate-400">Loading listings…</p>
+              </div>
+            )}
+            {!loadingListings && filteredListings.map((listing) => (
               <button
                 key={listing.id}
                 type="button"
@@ -165,9 +205,16 @@ export default function HeroPage() {
                       {listing.address}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      {bedLabel(listing)} · {listing.baths}ba · {listing.sqft} sqft
+                      {[bedLabel(listing), bathLabel(listing), sqftLabel(listing)]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-400">{listing.city}</p>
+                    {listing.matchReason && (
+                      <p className="mt-0.5 truncate text-xs font-medium text-green-600">
+                        {listing.matchReason}
+                      </p>
+                    )}
                   </div>
                 </div>
               </button>
@@ -246,6 +293,11 @@ export default function HeroPage() {
                     {selectedListing.priceLabel}
                   </p>
                   <p className="mt-0.5 text-xs text-slate-500">{selectedListing.fullAddress}</p>
+                  {selectedListing.incomeNeeded != null && (
+                    <span className="mt-1 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                      ${Math.round(selectedListing.incomeNeeded / 1000)}K+ income needed
+                    </span>
+                  )}
                 </div>
                 <ScorePill
                   label={`${selectedListing.score} / 100`}
@@ -258,10 +310,12 @@ export default function HeroPage() {
               <div className="flex flex-wrap gap-2">
                 {[
                   bedLabel(selectedListing),
-                  `${selectedListing.baths} Bath${selectedListing.baths > 1 ? "s" : ""}`,
-                  `${selectedListing.sqft} sqft`,
+                  bathLabel(selectedListing),
+                  sqftLabel(selectedListing),
                   selectedListing.propertyType,
-                ].map((m) => (
+                ]
+                  .filter(Boolean)
+                  .map((m) => (
                   <span
                     key={m}
                     className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
@@ -282,22 +336,29 @@ export default function HeroPage() {
               {/* Amenities */}
               <div>
                 <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                  Amenities
+                  Building Amenities
                 </h3>
-                <div className="grid grid-cols-2 gap-y-1.5">
-                  {selectedListing.amenities.map((a) => (
-                    <div key={a} className="flex items-center gap-1.5 text-xs text-slate-700">
-                      <span className="text-green-500">✓</span>
-                      {a}
-                    </div>
-                  ))}
-                </div>
+                {selectedListing.amenities.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-y-1.5">
+                    {selectedListing.amenities.map((a) => (
+                      <div key={a} className="flex items-center gap-1.5 text-xs text-slate-700">
+                        <span className="text-green-500">✓</span>
+                        {a}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">No building amenities scraped yet.</p>
+                )}
               </div>
 
-              {/* Vitality Scorecard */}
+              {/* Nearby Services */}
               <div className="rounded-xl border border-gray-200 p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900">Vitality Score</h3>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Nearby Services</h3>
+                    <p className="mt-0.5 text-[11px] text-slate-500">Actual counts within 1 km</p>
+                  </div>
                   <ScorePill
                     label={`${selectedListing.score} / 100`}
                     band={selectedListing.scoreBand}
@@ -305,15 +366,15 @@ export default function HeroPage() {
                   />
                 </div>
                 <div className="space-y-3">
-                  {CATEGORY_ROWS.map(({ label, key, color }) => {
-                    const val = selectedListing.categoryScores[key];
+                  {SERVICE_ROWS.map(({ label, key, color }) => {
+                    const val = selectedListing.nearbyServices?.[key] ?? 0;
                     return (
-                      <div key={key}>
-                        <div className="mb-1 flex justify-between text-xs">
+                      <div key={key} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                           <span className="text-slate-600">{label}</span>
-                          <span className="font-semibold text-slate-800">{val}</span>
                         </div>
-                        <ScoreBar value={val} color={color} />
+                        <span className="font-semibold text-slate-800">{val}</span>
                       </div>
                     );
                   })}

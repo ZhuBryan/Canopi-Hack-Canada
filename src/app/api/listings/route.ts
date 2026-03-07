@@ -38,6 +38,17 @@ interface RawListing {
     pharmacies?: NearbyBucket;
     transit?: NearbyBucket;
   };
+  details?: {
+    bedsMin: number | null;
+    bedsMax: number | null;
+    bedsLabel: string | null;
+    bathsMin: number | null;
+    bathsMax: number | null;
+    sqft: number | null;
+    pets: "pets_ok" | "cats_ok" | "dogs_ok" | "no_pets" | null;
+    availability: string | null;
+    propertyType: string | null;
+  } | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -123,7 +134,7 @@ let cachedListings: Listing[] | null = null;
 async function loadListings(): Promise<Listing[]> {
   if (cachedListings) return cachedListings;
 
-  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.livable-data.json");
+  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
   const raw = await readFile(filePath, "utf8");
   const items: RawListing[] = JSON.parse(raw);
 
@@ -134,6 +145,7 @@ async function loadListings(): Promise<Listing[]> {
       const city = extractCity(item.location);
       const address = extractAddress(item.location);
       const nearby = item.nearby ?? {};
+      const details = item.details ?? null;
       const schoolsCount = countWithinRadius(nearby.schools);
       const groceriesCount = countWithinRadius(nearby.groceries);
       const restaurantsCount = countWithinRadius(nearby.restaurants);
@@ -163,10 +175,10 @@ async function loadListings(): Promise<Listing[]> {
         monthlyRent,
         priceLabel: `$${monthlyRent.toLocaleString()}/mo`,
         shortPrice: formatShortPrice(monthlyRent),
-        beds: 1,
-        baths: 1,
-        sqft: 0,
-        propertyType: "Apartment",
+        beds: details?.bedsMin ?? (/studio/i.test(details?.bedsLabel ?? "") ? 0 : 1),
+        baths: details?.bathsMin ?? 1,
+        sqft: details?.sqft ?? 0,
+        propertyType: mapPropertyType(details?.propertyType),
         score,
         scoreStatus: deriveStatus(scoreBand),
         scoreBand,
@@ -175,10 +187,11 @@ async function loadListings(): Promise<Listing[]> {
         pinY: "50%",
         lat: item.lat!,
         lng: item.lng!,
-        availableDate: "Available now",
+        availableDate: details?.availability ?? "Available now",
         leaseTerm: "12 months",
         about: item.title ?? "",
-        amenities: buildAmenityLabels({
+        amenities: buildBuildingAmenities(item.title, details),
+        nearbyServices: {
           schools: schoolsCount,
           groceries: groceriesCount,
           restaurants: restaurantsCount,
@@ -186,13 +199,65 @@ async function loadListings(): Promise<Listing[]> {
           parks: parksCount,
           pharmacies: pharmaciesCount,
           transit: transitCount,
-        }),
+        },
         categoryScores: { foodDrink, health, groceryParks, education, emergency },
+        bedsLabel: details?.bedsLabel ?? undefined,
+        bathsLabel: buildBathsLabel(details?.bathsMin, details?.bathsMax),
         incomeNeeded: computeIncomeNeeded(monthlyRent),
       };
     });
 
   return cachedListings;
+}
+
+function mapPropertyType(raw: string | null | undefined): Listing["propertyType"] {
+  const normalized = (raw ?? "").toLowerCase();
+  if (normalized.includes("condo")) return "Condo";
+  if (normalized.includes("house") || normalized.includes("town")) return "House";
+  return "Apartment";
+}
+
+function buildBathsLabel(
+  bathsMin: number | null | undefined,
+  bathsMax: number | null | undefined,
+): string | undefined {
+  if (!Number.isFinite(bathsMin) && !Number.isFinite(bathsMax)) return undefined;
+  if (bathsMin === bathsMax) return `${bathsMin} ba`;
+  return `${bathsMin ?? bathsMax} - ${bathsMax ?? bathsMin} ba`;
+}
+
+function buildBuildingAmenities(
+  title: string | null | undefined,
+  details: RawListing["details"],
+): string[] {
+  const amenities = new Set<string>();
+  const titleText = (title ?? "").toLowerCase();
+
+  if (details?.pets === "pets_ok") amenities.add("Pet-friendly");
+  if (details?.pets === "cats_ok") amenities.add("Cats OK");
+  if (details?.pets === "dogs_ok") amenities.add("Dogs OK");
+  if (details?.pets === "no_pets") amenities.add("No pets");
+
+  const keywordAmenities: Array<[RegExp, string]> = [
+    [/\bparking\b/i, "Parking"],
+    [/\blaundry\b/i, "Laundry"],
+    [/\bwasher\b/i, "Laundry"],
+    [/\bgym\b/i, "Gym"],
+    [/\bfitness\b/i, "Gym"],
+    [/\bpool\b/i, "Pool"],
+    [/\bbalcony\b/i, "Balcony"],
+    [/\bdishwasher\b/i, "Dishwasher"],
+    [/\bair conditioning\b|\ba\/c\b/i, "A/C"],
+    [/\bstorage\b/i, "Storage"],
+    [/\bconcierge\b/i, "Concierge"],
+    [/\brooftop\b/i, "Rooftop deck"],
+  ];
+
+  for (const [pattern, label] of keywordAmenities) {
+    if (pattern.test(titleText)) amenities.add(label);
+  }
+
+  return [...amenities];
 }
 
 function buildAmenityLabels(

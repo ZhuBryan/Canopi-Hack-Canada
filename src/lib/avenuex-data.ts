@@ -26,6 +26,15 @@ export type Listing = {
   leaseTerm: string;
   about: string;
   amenities: string[];
+  nearbyServices?: {
+    schools: number;
+    groceries: number;
+    restaurants: number;
+    cafes: number;
+    parks: number;
+    pharmacies: number;
+    transit: number;
+  };
   categoryScores: {
     foodDrink: number;
     health: number;
@@ -33,6 +42,8 @@ export type Listing = {
     education: number;
     emergency: number;
   };
+  bedsLabel?: string;
+  bathsLabel?: string;
   incomeNeeded?: number;
   personalScore?: number;
   matchReason?: string;

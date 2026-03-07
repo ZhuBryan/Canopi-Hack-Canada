@@ -6,8 +6,8 @@
     "endpoint": "https://api.geoapify.com/v2/places",
     "envVar": "GEOAPIFY_API_KEY",
     "reason": "Works directly from the existing lat/lng data and can return nearby raw amenities instead of only aggregate scores.",
-    "defaultRadiusMeters": 1500,
-    "defaultLimit": 5,
+    "defaultRadiusMeters": 1000,
+    "defaultLimit": 50,
     "amenityBuckets": [
       {
         "id": "schools",
