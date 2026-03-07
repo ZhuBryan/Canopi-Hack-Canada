@@ -12,6 +12,7 @@ import {
 } from "@/components/avenuex/primitives";
 import { avenueNav, listingsCatalog } from "@/lib/avenuex-data";
 import type { FilterType, Listing } from "@/lib/avenuex-data";
+import UserMenu from "@/components/avenuex/UserMenu";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
 
@@ -77,6 +78,7 @@ export default function HeroPage() {
         savedCount={0}
         searchValue={search}
         onSearchValueChange={setSearch}
+        userMenu={<UserMenu />}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -90,11 +92,10 @@ export default function HeroPage() {
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    filter === f
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-slate-500 hover:bg-gray-200 hover:text-slate-700"
-                  }`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-slate-500 hover:bg-gray-200 hover:text-slate-700"
+                    }`}
                 >
                   {f}
                 </button>
@@ -122,11 +123,10 @@ export default function HeroPage() {
                 key={listing.id}
                 type="button"
                 onClick={() => setSelectedId(listing.id)}
-                className={`w-full rounded-xl border p-3 text-left transition ${
-                  selectedId === listing.id
-                    ? "border-green-500 bg-green-50"
-                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`w-full rounded-xl border p-3 text-left transition ${selectedId === listing.id
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex gap-3">
                   <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
