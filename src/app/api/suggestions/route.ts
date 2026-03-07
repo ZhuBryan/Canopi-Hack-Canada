@@ -36,10 +36,15 @@ interface RawListing {
     bedsLabel: string | null;
     bathsMin: number | null;
     bathsMax: number | null;
+    bathsLabel?: string | null;
     sqft: number | null;
     pets: "pets_ok" | "cats_ok" | "dogs_ok" | "no_pets" | null;
     availability: string | null;
+    leaseTerm?: string | null;
     propertyType: string | null;
+    utilitiesIncluded?: string[];
+    features?: string[];
+    buildingAmenities?: string[];
   } | null;
 }
 
@@ -287,7 +292,7 @@ export async function GET(request: Request) {
           lat: item.lat!,
           lng: item.lng!,
           availableDate: details?.availability ?? "Available now",
-          leaseTerm: "12 months",
+          leaseTerm: details?.leaseTerm ?? "12 months",
           about: item.title ?? "",
           amenities: buildBuildingAmenities(item.title, details),
           nearbyServices: {
@@ -301,7 +306,7 @@ export async function GET(request: Request) {
           },
           categoryScores: { foodDrink, health, groceryParks, education, emergency },
           bedsLabel: details?.bedsLabel ?? undefined,
-          bathsLabel: buildBathsLabel(details?.bathsMin, details?.bathsMax),
+          bathsLabel: details?.bathsLabel ?? buildBathsLabel(details?.bathsMin, details?.bathsMax),
           incomeNeeded: computeIncomeNeeded(monthlyRent),
           personalScore,
           matchReason,
@@ -357,6 +362,10 @@ function buildBuildingAmenities(
   title: string | null | undefined,
   details: RawListing["details"],
 ): string[] {
+  if (details?.buildingAmenities && details.buildingAmenities.length > 0) {
+    return details.buildingAmenities;
+  }
+
   const amenities = new Set<string>();
   const titleText = (title ?? "").toLowerCase();
 
