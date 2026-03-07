@@ -4,6 +4,7 @@ export type FilterType = "All" | PropertyType;
 
 export type Listing = {
   id: string;
+  url?: string;
   address: string;
   city: string;
   fullAddress: string;

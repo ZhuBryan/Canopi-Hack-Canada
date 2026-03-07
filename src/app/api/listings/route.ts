@@ -259,7 +259,7 @@ let cachedListings: Listing[] | null = null;
 async function loadListings(): Promise<Listing[]> {
   if (cachedListings) return cachedListings;
 
-  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
+  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.combined.json");
   const raw = await readFile(filePath, "utf8");
   const items: RawListing[] = JSON.parse(raw);
 
@@ -294,6 +294,7 @@ async function loadListings(): Promise<Listing[]> {
 
       return {
         id: `rf-${item.listing_id}`,
+        url: item.url ?? undefined,
         address,
         city,
         fullAddress: item.location ?? address,
@@ -315,7 +316,7 @@ async function loadListings(): Promise<Listing[]> {
         availableDate: details?.availability ?? "Available now",
         leaseTerm: details?.leaseTerm ?? "12 months",
         about: item.title ?? "",
-        amenities: buildBuildingAmenities(item.title, details),
+        amenities: buildBuildingAmenities(item.title, details, monthlyRent, mapPropertyType(details?.propertyType)),
         nearbyServices: {
           schools: schoolsCount,
           groceries: groceriesCount,
@@ -354,6 +355,8 @@ function buildBathsLabel(
 function buildBuildingAmenities(
   title: string | null | undefined,
   details: RawListing["details"],
+  monthlyRent: number,
+  propertyType: Listing["propertyType"],
 ): string[] {
   if (details?.buildingAmenities && details.buildingAmenities.length > 0) {
     return details.buildingAmenities;
@@ -384,6 +387,24 @@ function buildBuildingAmenities(
 
   for (const [pattern, label] of keywordAmenities) {
     if (pattern.test(titleText)) amenities.add(label);
+  }
+
+  if (amenities.size === 0) {
+    if (propertyType === "House") {
+      amenities.add("Laundry");
+      amenities.add("Parking");
+      if (monthlyRent >= 2200) amenities.add("Dishwasher");
+      if (monthlyRent >= 2600) amenities.add("Air Conditioning");
+    } else if (propertyType === "Condo") {
+      amenities.add("Laundry");
+      amenities.add("Dishwasher");
+      if (monthlyRent >= 2200) amenities.add("Air Conditioning");
+      if (monthlyRent >= 2800) amenities.add("Gym");
+    } else {
+      amenities.add("Laundry");
+      if (monthlyRent >= 1800) amenities.add("Dishwasher");
+      if (monthlyRent >= 2200) amenities.add("Air Conditioning");
+    }
   }
 
   return [...amenities];
