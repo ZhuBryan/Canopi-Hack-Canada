@@ -43,7 +43,7 @@ function HouseAsset() {
     <group position={[0, 0.7, 0]}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[1.6, 1.1, 1.6]} />
-        <meshStandardMaterial color="#69758C" roughness={0.75} metalness={0.1} />
+        <meshStandardMaterial color="#f6f5f4" roughness={0.75} metalness={0.1} />
       </mesh>
       <mesh position={[0, 0.9, 0]} castShadow>
         <coneGeometry args={[1.25, 0.9, 4]} />
@@ -65,7 +65,7 @@ function ApartmentAsset({ stories = 3 }: { stories: number }) {
     <group position={[0, height * 0.5, 0]}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[2.1, height, 2.1]} />
-        <meshStandardMaterial color="#545B70" roughness={0.65} metalness={0.18} />
+        <meshStandardMaterial color="#f6f5f4" roughness={0.65} metalness={0.18} />
       </mesh>
       <mesh position={[0, height * 0.5 + 0.08, 0]}>
         <boxGeometry args={[2.16, 0.16, 2.16]} />
@@ -95,7 +95,7 @@ function IslandBase() {
       {/* Top surface */}
       <mesh ref={ref} position={[0, -0.6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[12, 64]} />
-        <meshStandardMaterial color="#2A3A2A" roughness={0.9} />
+        <meshStandardMaterial color="#9cd397" roughness={0.9} />
       </mesh>
       {/* Rocky underside */}
       <mesh position={[0, -1.2, 0]}>
@@ -109,7 +109,7 @@ function IslandBase() {
       {/* Grassy ring */}
       <mesh position={[0, -0.55, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[10, 12, 64]} />
-        <meshStandardMaterial color="#3D5A3D" roughness={0.8} />
+        <meshStandardMaterial color="#9cd397" roughness={0.8} />
       </mesh>
     </group>
   );
