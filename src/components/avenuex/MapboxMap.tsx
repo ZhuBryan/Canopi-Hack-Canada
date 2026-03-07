@@ -39,6 +39,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
 
   const listingToFeatureIdsRef = useRef<Map<string, Set<BuildingId>>>(new Map());
   const featureToListingIdRef = useRef<Map<BuildingId, string>>(new Map());
+  const listingAnchorRef = useRef<Map<string, [number, number]>>(new Map());
   const activeSelectedBuildingIdsRef = useRef<Set<BuildingId>>(new Set());
   const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
   const highlightDirtyRef = useRef(true);
@@ -87,7 +88,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     element.addEventListener("click", () => onSelectRef.current(listing.id));
 
     const marker = new mapboxgl.Marker({ element, anchor: "bottom" })
-      .setLngLat([listing.lng, listing.lat])
+      .setLngLat(listingAnchorRef.current.get(listing.id) ?? [listing.lng, listing.lat])
       .addTo(map);
 
     markersRef.current.set(listing.id, marker);
@@ -303,6 +304,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         listingFeatureIds.clear();
         listingToFeatureIdsRef.current.clear();
         featureToListingIdRef.current.clear();
+        listingAnchorRef.current.clear();
 
         const buildingFeatures = map.querySourceFeatures("composite", {
           sourceLayer: "building",
@@ -325,6 +327,13 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
             }
           }
           if (!nearest) continue;
+          const nearestBounds = geomBounds(nearest.geometry);
+          if (nearestBounds) {
+            listingAnchorRef.current.set(listing.id, [
+              (nearestBounds.minLng + nearestBounds.maxLng) / 2,
+              (nearestBounds.minLat + nearestBounds.maxLat) / 2,
+            ]);
+          }
 
           const anchorKeys = vertexKeySet(nearest.geometry, 5);
           const idsForListing = new Set<BuildingId>();
@@ -355,6 +364,12 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         }
 
         setSelectedBuildingState(map, selectedIdRef.current);
+
+        for (const listing of listingsRef.current) {
+          const marker = markersRef.current.get(listing.id);
+          if (!marker) continue;
+          marker.setLngLat(listingAnchorRef.current.get(listing.id) ?? [listing.lng, listing.lat]);
+        }
       };
 
       let highlightTimer: number | null = null;
@@ -399,7 +414,10 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         const nearestListing = listingsRef.current
           .map((listing) => ({
             listing,
-            distance: Math.hypot(listing.lng - clicked.lng, listing.lat - clicked.lat),
+            distance: Math.hypot(
+              (listingAnchorRef.current.get(listing.id)?.[0] ?? listing.lng) - clicked.lng,
+              (listingAnchorRef.current.get(listing.id)?.[1] ?? listing.lat) - clicked.lat,
+            ),
           }))
           .sort((a, b) => a.distance - b.distance)[0]?.listing;
 
@@ -472,9 +490,9 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (map as any).setConfigProperty?.("basemap", "showTransitLabels", poisVisible);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).setConfigProperty?.("basemap", "show3dFacades", false);
+      (map as any).setConfigProperty?.("basemap", "show3dFacades", true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (map as any).setConfigProperty?.("basemap", "show3dBuildings", false);
+      (map as any).setConfigProperty?.("basemap", "show3dBuildings", true);
 
       for (const listing of listingsRef.current) {
         addMarker(map, listing, listing.id === selectedIdRef.current);
@@ -542,10 +560,13 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     setSelectedBuildingState(map, selectedId);
 
     const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) : null;
+    const selectedAnchor = selectedListing
+      ? (listingAnchorRef.current.get(selectedListing.id) ?? [selectedListing.lng, selectedListing.lat])
+      : null;
     const selectedSource = map.getSource("selected-listing") as mapboxgl.GeoJSONSource | undefined;
     if (selectedSource) {
       selectedSource.setData(
-        selectedListing
+        selectedListing && selectedAnchor
           ? {
               type: "FeatureCollection",
               features: [
@@ -554,7 +575,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
                   properties: { id: selectedListing.id },
                   geometry: {
                     type: "Point",
-                    coordinates: [selectedListing.lng, selectedListing.lat],
+                    coordinates: selectedAnchor,
                   },
                 },
               ],
@@ -563,9 +584,9 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
       );
     }
 
-    if (selectedListing) {
+    if (selectedListing && selectedAnchor) {
       map.flyTo({
-        center: [selectedListing.lng, selectedListing.lat],
+        center: selectedAnchor,
         zoom: 17.5,
         pitch: 52,
         duration: 900,
@@ -578,10 +599,13 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
     const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) : null;
+    const selectedAnchor = selectedListing
+      ? (listingAnchorRef.current.get(selectedListing.id) ?? [selectedListing.lng, selectedListing.lat])
+      : null;
     const source = map.getSource("amenity-paths") as mapboxgl.GeoJSONSource | undefined;
     if (!source) return;
 
-    if (!selectedListing) {
+    if (!selectedListing || !selectedAnchor) {
       source.setData({ type: "FeatureCollection", features: [] });
       amenityPopupRef.current?.remove();
       return;
@@ -607,7 +631,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         geometry: {
           type: "LineString",
           coordinates: [
-            [selectedListing.lng, selectedListing.lat],
+            selectedAnchor,
             [lng, lat],
           ],
         },
