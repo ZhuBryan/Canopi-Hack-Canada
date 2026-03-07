@@ -10,7 +10,7 @@
  * - Renders the BusinessBillboard at the end.
  */
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useFrame, extend } from "@react-three/fiber";
 import * as THREE from "three";
 import { shaderMaterial, Html } from "@react-three/drei";
@@ -25,6 +25,7 @@ const PathPulseMaterial = shaderMaterial(
     baseColor: new THREE.Color("#00D4FF"),
     pulseColor: new THREE.Color("#FFFFFF"),
     isGolden: false,
+    hoverIntensity: 0.0,
   },
   // Vertex Shader
   `
@@ -40,6 +41,7 @@ const PathPulseMaterial = shaderMaterial(
   uniform vec3 baseColor;
   uniform vec3 pulseColor;
   uniform bool isGolden;
+  uniform float hoverIntensity;
   varying vec2 vUv;
 
   void main() {
@@ -64,6 +66,8 @@ const PathPulseMaterial = shaderMaterial(
       finalColor += vec3(0.5, 0.4, 0.1) * shimmer * pulse;
     }
 
+    finalColor *= (1.0 + hoverIntensity * 1.5);
+
     gl_FragColor = vec4(finalColor, 1.0);
   }
   `
@@ -80,6 +84,7 @@ declare module "@react-three/fiber" {
       baseColor?: THREE.Color;
       pulseColor?: THREE.Color;
       isGolden?: boolean;
+      hoverIntensity?: number;
     };
   }
 }
@@ -91,6 +96,7 @@ interface PathTetherProps {
   distance: number; // in meters
   isSmallBusiness?: boolean;
   transportMode?: "walking" | "driving";
+  onClick?: () => void;
 }
 
 export default function PathTether({
@@ -100,8 +106,10 @@ export default function PathTether({
   distance,
   isSmallBusiness = false,
   transportMode = "walking",
+  onClick,
 }: PathTetherProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const [hovered, setHovered] = useState(false);
 
   // Setup colours
   const baseHex = getCategoryColor(category);
@@ -148,13 +156,23 @@ export default function PathTether({
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime * (transportMode === "driving" ? 2.0 : 1.0); // Drive pulse is faster
+      const targetHover = hovered ? 1.0 : 0.0;
+      materialRef.current.uniforms.hoverIntensity.value = THREE.MathUtils.lerp(
+        materialRef.current.uniforms.hoverIntensity.value,
+        targetHover,
+        0.1
+      );
     }
   });
 
   return (
     <group>
       {/* The 3D Path Line */}
-      <mesh>
+      <mesh
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = "pointer"; }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); document.body.style.cursor = "auto"; }}
+        onClick={(e) => { e.stopPropagation(); if (onClick) onClick(); }}
+      >
         <tubeGeometry args={[curve, 64, 0.08, 8, false]} />
         <pathPulseMaterial
           ref={materialRef}
@@ -197,6 +215,7 @@ export default function PathTether({
         name={businessName}
         category={category}
         isSmallBusiness={isSmallBusiness}
+        onClick={onClick}
       />
     </group>
   );

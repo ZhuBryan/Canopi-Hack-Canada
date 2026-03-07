@@ -127,6 +127,11 @@ export default function DioramaScene({ listing, vitalityScore, transportMode }: 
               distance={amenity.distance}
               isSmallBusiness={amenity.isSmallBusiness}
               transportMode={transportMode}
+              onClick={() => {
+                if (amenity.isSmallBusiness) {
+                  setSelectedBusiness({ amenity, position: pos3D });
+                }
+              }}
             />
           </group>
         ))}

@@ -7,24 +7,11 @@
  * Always faces the camera using Drei's Billboard component.
  */
 
-import { useRef } from "react";
+import { useRef, Suspense } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Billboard, Text, RoundedBox } from "@react-three/drei";
-import { getCategoryColor } from "@/lib/cloudinary";
+import { Billboard, useTexture } from "@react-three/drei";
+import { getBusinessTexture } from "@/lib/cloudinary";
 import * as THREE from "three";
-
-// Category icons (emoji-style text rendered in 3D)
-const CATEGORY_ICONS: Record<string, string> = {
-  cafe: "☕",
-  restaurant: "🍽",
-  pharmacy: "💊",
-  hospital: "🏥",
-  park: "🌳",
-  grocery: "🛒",
-  gym: "💪",
-  clinic: "⚕",
-  default: "📍",
-};
 
 interface BusinessBillboardProps {
   position: [number, number, number];
@@ -32,6 +19,36 @@ interface BusinessBillboardProps {
   category: string;
   isSmallBusiness?: boolean;
   onClick?: () => void;
+}
+
+function TextureCard({ name, category, isSmallBusiness, glowRef }: any) {
+  const textureUrl = getBusinessTexture(name, category, isSmallBusiness);
+  const texture = useTexture(textureUrl);
+  return (
+    <group>
+      {/* Glow ring behind (visible for small businesses) */}
+      {isSmallBusiness && (
+        <mesh ref={glowRef} position={[0, 0, -0.05]}>
+          <ringGeometry args={[0.55, 0.75, 32]} />
+          <meshBasicMaterial
+            color="#FFD700"
+            transparent
+            opacity={0.6}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* Cloudinary Texture Icon */}
+      <mesh>
+        <circleGeometry args={[0.7, 32]} />
+        {/* We use meshBasicMaterial because it's a neon sign, it should be self-illuminating */}
+        <meshBasicMaterial map={texture} transparent />
+      </mesh>
+    </group>
+  );
 }
 
 export default function BusinessBillboard({
@@ -43,8 +60,6 @@ export default function BusinessBillboard({
 }: BusinessBillboardProps) {
   const glowRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const color = getCategoryColor(category);
-  const icon = CATEGORY_ICONS[category.toLowerCase()] || CATEGORY_ICONS.default;
 
   useFrame((state) => {
     // Distance scaling to keep billboards readable when zoomed out (Map View)
@@ -73,86 +88,12 @@ export default function BusinessBillboard({
       <group
         ref={groupRef}
         onClick={onClick}
-        onPointerOver={() => { document.body.style.cursor = "pointer"; }}
-        onPointerOut={() => { document.body.style.cursor = "auto"; }}
+        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }}
+        onPointerOut={(e) => { e.stopPropagation(); document.body.style.cursor = "auto"; }}
       >
-        {/* Glow ring behind (visible for small businesses) */}
-        {isSmallBusiness && (
-          <mesh ref={glowRef} position={[0, 0, -0.05]}>
-            <ringGeometry args={[0.55, 0.75, 32]} />
-            <meshBasicMaterial
-              color="#FFD700"
-              transparent
-              opacity={0.6}
-              side={THREE.DoubleSide}
-              blending={THREE.AdditiveBlending}
-              depthWrite={false}
-            />
-          </mesh>
-        )}
-
-        {/* Card background */}
-        <RoundedBox args={[1.4, 0.9, 0.05]} radius={0.08}>
-          <meshStandardMaterial
-            color="#1A1A2E"
-            transparent
-            opacity={0.92}
-            roughness={0.3}
-            metalness={0.1}
-          />
-        </RoundedBox>
-
-        {/* Category icon */}
-        <Text
-          position={[0, 0.12, 0.04]}
-          fontSize={0.3}
-          anchorX="center"
-          anchorY="middle"
-        >
-          {icon}
-        </Text>
-
-        {/* Business name */}
-        <Text
-          position={[0, -0.22, 0.04]}
-          fontSize={0.1}
-          maxWidth={1.2}
-          anchorX="center"
-          anchorY="middle"
-          color={color}
-          outlineWidth={0.005}
-          outlineColor="#000000"
-        >
-          {name.length > 20 ? name.substring(0, 18) + "…" : name}
-        </Text>
-
-        {/* Accent line */}
-        <mesh position={[0, -0.35, 0.04]}>
-          <planeGeometry args={[0.8, 0.02]} />
-          <meshBasicMaterial
-            color={color}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
-
-        {/* Small business badge */}
-        {isSmallBusiness && (
-          <group position={[0.55, 0.35, 0.04]}>
-            <mesh>
-              <circleGeometry args={[0.12, 16]} />
-              <meshBasicMaterial color="#FFD700" />
-            </mesh>
-            <Text
-              fontSize={0.08}
-              anchorX="center"
-              anchorY="middle"
-              color="#1A1A2E"
-            >
-              ★
-            </Text>
-          </group>
-        )}
+        <Suspense fallback={<group />}>
+          <TextureCard name={name} category={category} isSmallBusiness={isSmallBusiness} glowRef={glowRef} />
+        </Suspense>
       </group>
     </Billboard>
   );

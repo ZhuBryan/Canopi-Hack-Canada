@@ -42,18 +42,26 @@ export const CATEGORY_COLORS: Record<string, string> = {
  *
  * @param businessName - The name of the business (e.g. "Seven Shores Cafe")
  * @param category - The OSM amenity category (e.g. "cafe", "pharmacy")
+ * @param isSponsored - Whether the business is sponsored (changes border to gold)
  * @returns A URL string for use as a 3D texture
  */
 export function getBusinessTexture(
   businessName: string,
-  category: string
+  category: string,
+  isSponsored: boolean = false
 ): string {
   const safeCategory = category.toLowerCase();
 
+  // Decide border/accent color
+  let color = "00D4FF"; // Cyan for regular
+  if (isSponsored) {
+    color = "FFD700"; // Gold for Sponsored
+  } else if (["pharmacy", "hospital", "clinic", "healthcare"].includes(safeCategory)) {
+    color = "FF1493"; // Pink for Vivirion
+  }
+
   // Build a Cloudinary text-overlay URL that creates a dynamic "logo card"
-  // This generates a 256x256 image with the category icon and business name
   const icon = CATEGORY_ICONS[safeCategory] || CATEGORY_ICONS.default;
-  const color = (CATEGORY_COLORS[safeCategory] || CATEGORY_COLORS.default).replace("#", "");
 
   // Truncate business name for the texture
   const shortName = businessName.length > 18
@@ -61,12 +69,12 @@ export function getBusinessTexture(
     : businessName;
 
   // Cloudinary text overlay URL
-  // Creates a solid color card with text overlay
+  // Creates a solid color circular card with text overlay and neon border
   const encodedName = encodeURIComponent(shortName);
   const encodedIcon = encodeURIComponent(icon);
 
   const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/` +
-    `w_256,h_256,c_fill,b_rgb:1a1a2e,r_max/` +
+    `w_256,h_256,c_fill,b_rgb:1a1a2e,r_max,bo_8px_solid_rgb:${color}/` +
     `l_text:Arial_48_bold:${encodedIcon},co_rgb:${color},g_center,y_-30/` +
     `l_text:Arial_18_bold:${encodedName},co_rgb:ffffff,g_center,y_40/` +
     `sample.png`;

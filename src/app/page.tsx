@@ -11,40 +11,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+// @ts-ignore
 import Map, { Marker, Popup } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Building2, ChevronRight, Activity } from "lucide-react";
 
-// Mock data: A few rentals in Waterloo, ON
-const MOCK_PROPERTIES = [
-  {
-    id: "prop-1",
-    address: "123 University Ave W",
-    price: 2200,
-    lat: 43.4723,
-    lng: -80.5449,
-    score: 85, // Vitality Score
-    type: "Apartment",
-  },
-  {
-    id: "prop-2",
-    address: "45 Columbia St W",
-    price: 1850,
-    lat: 43.4761,
-    lng: -80.5376,
-    score: 62,
-    type: "House",
-  },
-  {
-    id: "prop-3",
-    address: "100 King St N",
-    price: 2600,
-    lat: 43.4643,
-    lng: -80.5204,
-    score: 94,
-    type: "Condo",
-  },
-];
+import listingsData from "../../data/rentfaster-listings.livable-data.json";
+
+// Map the real JSON data into the format our map expects
+const MOCK_PROPERTIES = listingsData.slice(0, 10).map((listing: any, index: number) => ({
+  id: `prop-${listing.listing_id || index}`,
+  address: listing.location,
+  price: parseInt(String(listing.price).replace(/[^0-9]/g, "")) || 0,
+  lat: listing.lat,
+  lng: listing.lng,
+  score: 85, // Vitality Score placeholder
+  type: listing.title?.toLowerCase().includes("apartment") ? "Apartment" : "House",
+}));
 
 export default function Home() {
   const router = useRouter();
@@ -52,10 +35,10 @@ export default function Home() {
     typeof MOCK_PROPERTIES[0] | null
   >(null);
 
-  // Default viewport centered on Waterloo
+  // Default viewport centered on the first imported property
   const [viewState, setViewState] = useState({
-    longitude: -80.525,
-    latitude: 43.47,
+    longitude: MOCK_PROPERTIES[0]?.lng || -80.525,
+    latitude: MOCK_PROPERTIES[0]?.lat || 43.47,
     zoom: 13,
     pitch: 45,
     bearing: -17.6,
@@ -77,7 +60,7 @@ export default function Home() {
       {/* Mapbox Canvas */}
       <Map
         {...viewState}
-        onMove={(evt) => setViewState(evt.viewState)}
+        onMove={(evt: any) => setViewState(evt.viewState)}
         mapStyle="mapbox://styles/mapbox/dark-v11"
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
         style={{ width: "100%", height: "100%" }}
@@ -89,7 +72,7 @@ export default function Home() {
             longitude={prop.lng}
             latitude={prop.lat}
             anchor="bottom"
-            onClick={(e) => {
+            onClick={(e: any) => {
               e.originalEvent.stopPropagation(); // prevent map click
               setSelectedProperty(prop);
             }}

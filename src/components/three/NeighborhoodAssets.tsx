@@ -3,13 +3,12 @@
 /**
  * Avenue-X: NeighborhoodAssets
  *
- * Renders the central "island" with a procedural building, trees, and ground.
- * Uses boxes/spheres until real .glb models are available.
+ * Renders the central "island" with a dynamically loaded building depending on type.
  */
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 interface NeighborhoodAssetsProps {
@@ -17,7 +16,7 @@ interface NeighborhoodAssetsProps {
   buildingType?: "house" | "apartment";
 }
 
-// --- Procedural Tree ---
+// --- Procedural Tree (Keep this as surrounding context) ---
 function Tree({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
@@ -39,85 +38,23 @@ function Tree({ position }: { position: [number, number, number] }) {
   );
 }
 
-// --- Procedural House ---
-function House() {
-  return (
-    <group>
-      {/* Main body */}
-      <RoundedBox args={[2, 1.5, 2]} radius={0.05} position={[0, 0.75, 0]}>
-        <meshStandardMaterial color="#E8DCC8" roughness={0.6} />
-      </RoundedBox>
-      {/* Roof */}
-      <mesh position={[0, 1.8, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <coneGeometry args={[1.8, 0.8, 4]} />
-        <meshStandardMaterial color="#8B4513" roughness={0.7} />
-      </mesh>
-      {/* Door */}
-      <mesh position={[0, 0.5, 1.01]}>
-        <planeGeometry args={[0.4, 0.8]} />
-        <meshStandardMaterial color="#654321" />
-      </mesh>
-      {/* Windows */}
-      <mesh position={[-0.5, 1.0, 1.01]}>
-        <planeGeometry args={[0.35, 0.35]} />
-        <meshStandardMaterial color="#87CEEB" metalness={0.3} roughness={0.1} />
-      </mesh>
-      <mesh position={[0.5, 1.0, 1.01]}>
-        <planeGeometry args={[0.35, 0.35]} />
-        <meshStandardMaterial color="#87CEEB" metalness={0.3} roughness={0.1} />
-      </mesh>
-    </group>
-  );
+// --- Dynamic GLTF House Loader ---
+function GLTFHouse() {
+  const { scene } = useGLTF("/base_house.glb");
+  return <primitive object={scene.clone()} position={[0, 0, 0]} scale={[1, 1, 1]} />;
 }
 
-// --- Procedural Apartment ---
-function Apartment({ stories = 3 }: { stories: number }) {
-  const height = stories * 1.2;
-  const windowRows = [];
-
-  for (let floor = 0; floor < stories; floor++) {
-    const y = 0.8 + floor * 1.2;
-    for (let col = -1; col <= 1; col++) {
-      windowRows.push(
-        <mesh key={`w-${floor}-${col}`} position={[col * 0.7, y, 1.26]}>
-          <planeGeometry args={[0.4, 0.5]} />
-          <meshStandardMaterial
-            color="#FFE566"
-            emissive="#FFD700"
-            emissiveIntensity={0.3 + Math.random() * 0.4}
-            transparent
-            opacity={0.85}
-          />
-        </mesh>
-      );
-    }
-  }
-
-  return (
-    <group>
-      {/* Main building body */}
-      <RoundedBox
-        args={[2.5, height, 2.5]}
-        radius={0.08}
-        position={[0, height / 2, 0]}
-      >
-        <meshStandardMaterial color="#7A8B99" roughness={0.4} metalness={0.2} />
-      </RoundedBox>
-      {/* Roof cap */}
-      <mesh position={[0, height + 0.1, 0]}>
-        <boxGeometry args={[2.6, 0.2, 2.6]} />
-        <meshStandardMaterial color="#556B7A" roughness={0.3} metalness={0.3} />
-      </mesh>
-      {/* Front windows */}
-      {windowRows}
-      {/* Door */}
-      <mesh position={[0, 0.6, 1.26]}>
-        <planeGeometry args={[0.8, 1.0]} />
-        <meshStandardMaterial color="#3A3A3A" metalness={0.4} />
-      </mesh>
-    </group>
-  );
+// --- Dynamic GLTF Apartment Loader ---
+function GLTFApartment({ stories = 3 }: { stories: number }) {
+  const { scene } = useGLTF("/apartment_block.glb");
+  // Automatically scale vertically based on stories
+  const scaleY = Math.max(1, stories * 0.3);
+  return <primitive object={scene.clone()} position={[0, 0, 0]} scale={[1, scaleY, 1]} />;
 }
+
+// Preload the assets
+useGLTF.preload("/base_house.glb");
+useGLTF.preload("/apartment_block.glb");
 
 // --- Floating Island Base ---
 function IslandBase() {
@@ -165,7 +102,7 @@ export default function NeighborhoodAssets({
 
       {/* Central building */}
       <group position={[0, 0, 0]}>
-        {buildingType === "house" ? <House /> : <Apartment stories={stories} />}
+        {buildingType === "house" ? <GLTFHouse /> : <GLTFApartment stories={stories} />}
       </group>
 
       {/* Scattered trees */}
