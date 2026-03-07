@@ -1,0 +1,112 @@
+[
+    {
+        "id": "tor-1",
+        "address": "123 King St W, Toronto",
+        "lat": 43.6488,
+        "lng": -79.3871,
+        "price": 2400,
+        "bedrooms": 2,
+        "bathrooms": 1,
+        "sqft": 850,
+        "type": "Condo"
+    },
+    {
+        "id": "tor-2",
+        "address": "456 Queen St E, Toronto",
+        "lat": 43.6583,
+        "lng": -79.3516,
+        "price": 1800,
+        "bedrooms": 1,
+        "bathrooms": 1,
+        "sqft": 600,
+        "type": "Apartment"
+    },
+    {
+        "id": "tor-3",
+        "address": "789 Bloor St W, Toronto",
+        "lat": 43.6605,
+        "lng": -79.4136,
+        "price": 2100,
+        "bedrooms": 1,
+        "bathrooms": 1,
+        "sqft": 700,
+        "type": "Condo"
+    },
+    {
+        "id": "tor-4",
+        "address": "22 Dundas St E, Toronto",
+        "lat": 43.6561,
+        "lng": -79.3803,
+        "price": 3200,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "sqft": 1200,
+        "type": "Condo"
+    },
+    {
+        "id": "tor-5",
+        "address": "55 Harbord St, Toronto",
+        "lat": 43.6631,
+        "lng": -79.4032,
+        "price": 1950,
+        "bedrooms": 1,
+        "bathrooms": 1,
+        "sqft": 550,
+        "type": "Studio"
+    },
+    {
+        "id": "wat-1",
+        "address": "150 University Ave W, Waterloo",
+        "lat": 43.4723,
+        "lng": -80.5449,
+        "price": 1600,
+        "bedrooms": 2,
+        "bathrooms": 1,
+        "sqft": 900,
+        "type": "Apartment"
+    },
+    {
+        "id": "wat-2",
+        "address": "280 King St N, Waterloo",
+        "lat": 43.4780,
+        "lng": -80.5280,
+        "price": 1400,
+        "bedrooms": 1,
+        "bathrooms": 1,
+        "sqft": 650,
+        "type": "Apartment"
+    },
+    {
+        "id": "wat-3",
+        "address": "325 Lester St, Waterloo",
+        "lat": 43.4714,
+        "lng": -80.5320,
+        "price": 1200,
+        "bedrooms": 2,
+        "bathrooms": 1,
+        "sqft": 800,
+        "type": "Townhouse"
+    },
+    {
+        "id": "wat-4",
+        "address": "88 Albert St, Waterloo",
+        "lat": 43.4740,
+        "lng": -80.5425,
+        "price": 1750,
+        "bedrooms": 2,
+        "bathrooms": 1,
+        "sqft": 950,
+        "type": "Condo"
+    },
+    {
+        "id": "tor-6",
+        "address": "10 Yonge St, Toronto",
+        "lat": 43.6426,
+        "lng": -79.3764,
+        "price": 2800,
+        "bedrooms": 2,
+        "bathrooms": 2,
+        "sqft": 1050,
+        "type": "Condo"
+    }
+]
