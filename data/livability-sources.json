@@ -1,0 +1,83 @@
+{
+  "primaryPlaces": {
+    "provider": "Geoapify Places API",
+    "role": "Primary nearby amenities source",
+    "status": "selected",
+    "endpoint": "https://api.geoapify.com/v2/places",
+    "envVar": "GEOAPIFY_API_KEY",
+    "reason": "Works directly from the existing lat/lng data and can return nearby raw amenities instead of only aggregate scores.",
+    "defaultRadiusMeters": 1500,
+    "defaultLimit": 5,
+    "amenityBuckets": [
+      {
+        "id": "schools",
+        "label": "Schools",
+        "categories": ["education.school"]
+      },
+      {
+        "id": "groceries",
+        "label": "Groceries",
+        "categories": ["commercial.supermarket"]
+      },
+      {
+        "id": "restaurants",
+        "label": "Restaurants",
+        "categories": ["catering.restaurant"]
+      },
+      {
+        "id": "cafes",
+        "label": "Cafes",
+        "categories": ["catering.cafe"]
+      },
+      {
+        "id": "parks",
+        "label": "Parks",
+        "categories": ["leisure.park"]
+      },
+      {
+        "id": "pharmacies",
+        "label": "Pharmacies",
+        "categories": ["healthcare.pharmacy"]
+      },
+      {
+        "id": "transit",
+        "label": "Transit",
+        "categories": ["public_transport"]
+      }
+    ]
+  },
+  "schoolsSource": {
+    "provider": "Geoapify Places API",
+    "role": "Nearby school discovery",
+    "status": "selected",
+    "reason": "Keeps school lookup aligned with the primary places source and avoids adding a second network dependency before the first enrichment pass is working.",
+    "categories": ["education.school"],
+    "fallback": "Ontario and board-level open data can be layered later if school-specific metadata becomes necessary."
+  },
+  "contextLayers": [
+    {
+      "id": "transit",
+      "provider": "TTC Open Data / GTFS",
+      "role": "Transit stops and service context",
+      "status": "selected",
+      "coverage": "Toronto",
+      "reason": "Best source for route, stop, and service-level transit context once the nearby places layer is in place."
+    },
+    {
+      "id": "demographics",
+      "provider": "Statistics Canada Proximity Measures",
+      "role": "Neighborhood access and census context",
+      "status": "selected",
+      "coverage": "Canada",
+      "reason": "Free Canada-wide context for access to groceries, schools, transit, parks, and similar essentials."
+    },
+    {
+      "id": "safety",
+      "provider": "Toronto Police Service Open Data",
+      "role": "Optional safety context",
+      "status": "selected",
+      "coverage": "Toronto",
+      "reason": "Optional municipal safety layer that can be added without changing the primary places enrichment flow."
+    }
+  ]
+}
