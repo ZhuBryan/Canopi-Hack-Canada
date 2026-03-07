@@ -118,23 +118,34 @@ export default function DioramaScene({ listing, vitalityScore, transportMode }: 
         <VitalityDome score={vitalityScore} position={[0, 2, 0]} />
 
         {/* Tethers + Billboards for each amenity using Simulated City Grid Paths */}
-        {amenityPositions.map(({ amenity, pos3D }, i) => (
-          <group key={`amenity-${i}`}>
-            <PathTether
-              path={createCityGridPath([0, 0, 0], pos3D, 4.0)}
-              businessName={amenity.name}
-              category={amenity.type}
-              distance={amenity.distance}
-              isSmallBusiness={amenity.isSmallBusiness}
-              transportMode={transportMode}
-              onClick={() => {
-                if (amenity.isSmallBusiness) {
-                  setSelectedBusiness({ amenity, position: pos3D });
-                }
-              }}
-            />
-          </group>
-        ))}
+        {amenityPositions.map(({ amenity, pos3D }, i) => {
+          const category = amenity.type.toLowerCase();
+          const isVivirionClinic = ["healthcare", "clinic", "pharmacy", "hospital"].includes(
+            category
+          );
+          const isGoldenTether =
+            Boolean(amenity.isSmallBusiness) &&
+            !isVivirionClinic &&
+            transportMode === "walking";
+
+          return (
+            <group key={`amenity-${i}`}>
+              <PathTether
+                path={createCityGridPath([0, 0, 0], pos3D, 4.0)}
+                businessName={amenity.name}
+                category={amenity.type}
+                distance={amenity.distance}
+                isSmallBusiness={amenity.isSmallBusiness}
+                transportMode={transportMode}
+                onClick={() => {
+                  if (isGoldenTether) {
+                    setSelectedBusiness({ amenity, position: pos3D });
+                  }
+                }}
+              />
+            </group>
+          );
+        })}
 
         {/* Sponsored card pop-up */}
         {selectedBusiness && (

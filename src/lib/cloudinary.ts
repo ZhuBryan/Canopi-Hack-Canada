@@ -51,13 +51,16 @@ export function getBusinessTexture(
   isSponsored: boolean = false
 ): string {
   const safeCategory = category.toLowerCase();
+  const isVivirion = ["pharmacy", "hospital", "clinic", "healthcare"].includes(
+    safeCategory
+  );
 
   // Decide border/accent color
   let color = "00D4FF"; // Cyan for regular
-  if (isSponsored) {
-    color = "FFD700"; // Gold for Sponsored
-  } else if (["pharmacy", "hospital", "clinic", "healthcare"].includes(safeCategory)) {
+  if (isVivirion) {
     color = "FF1493"; // Pink for Vivirion
+  } else if (isSponsored) {
+    color = "FFD700"; // Gold for Sponsored
   }
 
   // Build a Cloudinary text-overlay URL that creates a dynamic "logo card"
@@ -65,7 +68,7 @@ export function getBusinessTexture(
 
   // Truncate business name for the texture
   const shortName = businessName.length > 18
-    ? businessName.substring(0, 16) + "…"
+    ? businessName.substring(0, 16) + "..."
     : businessName;
 
   // Cloudinary text overlay URL

@@ -11,23 +11,37 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// @ts-ignore
-import Map, { Marker, Popup } from "react-map-gl";
+import Map, { Marker, Popup } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Building2, ChevronRight, Activity } from "lucide-react";
 
 import listingsData from "../../data/rentfaster-listings.livable-data.json";
+import { inferBuildingProfile } from "@/lib/listingProfile";
 
 // Map the real JSON data into the format our map expects
-const MOCK_PROPERTIES = listingsData.slice(0, 10).map((listing: any, index: number) => ({
-  id: `prop-${listing.listing_id || index}`,
-  address: listing.location,
-  price: parseInt(String(listing.price).replace(/[^0-9]/g, "")) || 0,
-  lat: listing.lat,
-  lng: listing.lng,
-  score: 85, // Vitality Score placeholder
-  type: listing.title?.toLowerCase().includes("apartment") ? "Apartment" : "House",
-}));
+const MOCK_PROPERTIES = listingsData.slice(0, 10).map((listing: any, index: number) => {
+  const price = parseInt(String(listing.price).replace(/[^0-9]/g, ""), 10) || 0;
+  const profile = inferBuildingProfile({
+    title: listing.title,
+    location: listing.location,
+    description: listing.description,
+    price,
+    stories: listing.stories,
+    propertyType: listing.propertyType,
+  });
+
+  return {
+    id: `prop-${listing.listing_id || index}`,
+    address: listing.location,
+    price,
+    lat: listing.lat,
+    lng: listing.lng,
+    score: 85, // Vitality Score placeholder
+    type: profile.propertyType === "apartment" ? "Apartment" : "House",
+    propertyType: profile.propertyType,
+    stories: profile.stories,
+  };
+});
 
 export default function Home() {
   const router = useRouter();
@@ -51,6 +65,8 @@ export default function Home() {
       lng: prop.lng.toString(),
       address: prop.address,
       price: prop.price.toString(),
+      propertyType: prop.propertyType,
+      stories: prop.stories.toString(),
     });
     router.push(`/diorama?${params.toString()}`);
   };

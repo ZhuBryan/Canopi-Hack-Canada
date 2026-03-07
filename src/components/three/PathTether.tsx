@@ -113,7 +113,10 @@ export default function PathTether({
 
   // Setup colours
   const baseHex = getCategoryColor(category);
-  const isVivirionClinic = category === "healthcare" || category === "clinic";
+  const normalizedCategory = category.toLowerCase();
+  const isVivirionClinic = ["healthcare", "clinic", "pharmacy", "hospital"].includes(
+    normalizedCategory
+  );
   
   let displayColor = baseHex;
   if (isVivirionClinic) {

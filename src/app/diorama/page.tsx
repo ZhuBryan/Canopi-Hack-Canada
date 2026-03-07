@@ -19,6 +19,8 @@ export default function DioramaPage() {
   const lngParam = searchParams.get("lng");
   const addressParam = searchParams.get("address") || "Unknown Location";
   const priceParam = searchParams.get("price") || "0";
+  const propertyTypeParam = searchParams.get("propertyType");
+  const storiesParam = searchParams.get("stories");
 
   const [listing, setListing] = useState<RentalListing | null>(null);
   const [vitalityScore, setVitalityScore] = useState<number>(0);
@@ -40,8 +42,11 @@ export default function DioramaPage() {
             address: addressParam,
             coordinates: { lat: parseFloat(latParam), lng: parseFloat(lngParam) },
             price: parseInt(priceParam, 10),
-            stories: 5,
-            propertyType: "apartment",
+            stories: storiesParam ? Math.max(1, parseInt(storiesParam, 10) || 1) : 6,
+            propertyType:
+              propertyTypeParam === "house" || propertyTypeParam === "apartment"
+                ? propertyTypeParam
+                : "apartment",
             amenities: data.amenities.map((a: Amenity) => ({
               ...a,
               // Randomly assign some local places as "small business" for the golden tether effect
@@ -60,7 +65,7 @@ export default function DioramaPage() {
     }
 
     fetchVitality();
-  }, [latParam, lngParam, addressParam, priceParam]);
+  }, [latParam, lngParam, addressParam, priceParam, propertyTypeParam, storiesParam]);
 
   if (!latParam || !lngParam) {
     return (
