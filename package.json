@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "merge:rentfaster": "node scripts/merge-rentfaster-listings.mjs",
+    "geocode:rentfaster": "node scripts/geocode-rentfaster-listings.mjs",
+    "enrich:places": "node scripts/enrich-rentfaster-listings-with-places.mjs"
   },
   "dependencies": {
     "next": "16.1.6",

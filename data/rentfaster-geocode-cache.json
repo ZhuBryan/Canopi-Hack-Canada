@@ -1,0 +1,884 @@
+{
+  "1750 Bloor St., Mississauga": {
+    "lat": 43.6240242,
+    "lng": -79.5861131,
+    "geocode_display_name": "1750, Bloor Street, Applewood, Mississauga, Peel Region, Golden Horseshoe, Ontario, L4X 1S5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1867 Bloor St., Mississauga": {
+    "lat": 43.6274031,
+    "lng": -79.5836981,
+    "geocode_display_name": "1867, Bloor Street, Dixie, Applewood, Mississauga, Peel Region, Golden Horseshoe, Ontario, M9C 1R1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "750 York Mills Rd, Toronto": {
+    "lat": 43.7537825,
+    "lng": -79.3608318,
+    "geocode_display_name": "750, York Mills Road, St.Andrew-Windfields, Don Valley West, North York, Toronto, Golden Horseshoe, Ontario, M3B 1X8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1229 Marlborough Court, Oakville": {
+    "lat": 43.4672299,
+    "lng": -79.6928983,
+    "geocode_display_name": "1229, Marlborough Court, Holton Heights, Oakville, Halton Region, Golden Horseshoe, Ontario, L6H 2R9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "150 Roehampton Avenue, Toronto": {
+    "lat": 43.7105738,
+    "lng": -79.3860066,
+    "geocode_display_name": "Roehampton Avenue, Mount Pleasant East, Don Valley West, Toronto, Golden Horseshoe, Ontario, M4P 2N1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7 & 21 Richgrove Drive, Toronto": {
+    "lat": 43.6762914,
+    "lng": -79.5666193,
+    "geocode_display_name": "Richgrove Drive, Willowridge-Martingrove-Richview, Etobicoke North, Etobicoke, Toronto, Golden Horseshoe, Ontario, M9R 3V7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "177 Jameson Avenue, Toronto": {
+    "lat": 43.6386059,
+    "lng": -79.4361127,
+    "geocode_display_name": "177, Jameson Avenue, South Parkdale, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6K 2Y3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "2911 Bayview Avenue, Toronto": {
+    "lat": 43.7705021,
+    "lng": -79.3878449,
+    "geocode_display_name": "Bayview Mews, 2911, Bayview Avenue, Bayview Village, Don Valley North, North York, Toronto, Golden Horseshoe, Ontario, M2N 3H6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1235 Marlborough Court, Oakville": {
+    "lat": 43.4673263,
+    "lng": -79.6934182,
+    "geocode_display_name": "1235, Marlborough Court, Holton Heights, Oakville, Halton Region, Golden Horseshoe, Ontario, L6H 2R9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "10 Roanoke Road, Beltline, Toronto": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "235 Bloor Street East, Toronto": {
+    "lat": 43.6711146,
+    "lng": -79.3806915,
+    "geocode_display_name": "Residences on Bloor, 235, Bloor Street East, Church-Wellesley, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M4W 3Y3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "44 Jackes Avenue, Toronto": {
+    "lat": 43.6852976,
+    "lng": -79.3916041,
+    "geocode_display_name": "Jackes Avenue, Rosedale-Moore Park, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4T 1X3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "15 Martha Eaton Way, North York": {
+    "lat": 43.6964839,
+    "lng": -79.4898815,
+    "geocode_display_name": "15, Martha Eaton Way, Brookhaven-Amesbury, York South—Weston, North York, Toronto, Golden Horseshoe, Ontario, M6M 5E6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "57 Charles Street West, Toronto": {
+    "lat": 43.6685175,
+    "lng": -79.3872178,
+    "geocode_display_name": "Charles Street West, Bay-Cloverhill, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M4Y 2B7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "39 Niagara Street, Toronto": {
+    "lat": 43.6420336,
+    "lng": -79.4008152,
+    "geocode_display_name": "39, Niagara Street, Wellington Place, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5V 2P1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "291 Avenue Road, Toronto": {
+    "lat": 43.6793681,
+    "lng": -79.3980276,
+    "geocode_display_name": "Cottingham Manor, 291, Avenue Road, Yonge-St.Clair, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4V 2G9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1130 Wilson Avenue, Toronto": {
+    "lat": 43.7264187,
+    "lng": -79.4849775,
+    "geocode_display_name": "Humber River Apartments, 1130, Wilson Avenue, Downsview, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3M 1J8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "45 Dunfield Avenue, Toronto": {
+    "lat": 43.7062732,
+    "lng": -79.3943446,
+    "geocode_display_name": "The Torontonian, 45, Dunfield Avenue, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4S 2H3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "118 Balliol Street, Toronto": {
+    "lat": 43.6985425,
+    "lng": -79.3912453,
+    "geocode_display_name": "118, Balliol Street, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4S 1A1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "44 Lillian Street, Toronto": {
+    "lat": 43.7057307,
+    "lng": -79.3937389,
+    "geocode_display_name": "Lillian Park, 44, Lillian Street, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4S 0B7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "105 Harrison Garden Blvd, North York": {
+    "lat": 43.7574582,
+    "lng": -79.4049311,
+    "geocode_display_name": "Harrison, 105, Harrison Garden Boulevard, Avondale, Willowdale, North York, Toronto, Golden Horseshoe, Ontario, M2N 0C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "18 Erskine Ave, Toronto": {
+    "lat": 43.7112906,
+    "lng": -79.3986979,
+    "geocode_display_name": "18, Erskine Avenue, North Toronto, Don Valley West, Toronto, Golden Horseshoe, Ontario, M4P 1T4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "132 Berkeley Street, Toronto": {
+    "lat": 43.6547898,
+    "lng": -79.3655234,
+    "geocode_display_name": "Berkeley Street, Moss Park, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5A 2X1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "167 Church Street, Toronto": {
+    "lat": 43.6547492,
+    "lng": -79.3761792,
+    "geocode_display_name": "A&W, 167, Church Street, Downtown Yonge East, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 1Y6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "35 David Salomon Dr., Toronto": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "90 Eastdale Avenue, Toronto": {
+    "lat": 43.6945985,
+    "lng": -79.301232,
+    "geocode_display_name": "Preston Group Buildings, 90, Eastdale Avenue, Taylor-Massey, Beaches—East York, East York, Toronto, Golden Horseshoe, Ontario, M4C 5A2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "32 Clayland Dr, Toronto": {
+    "lat": 43.7605575,
+    "lng": -79.3305455,
+    "geocode_display_name": "32, Clayland Drive, Fenside-Parkwoods, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3A 2S3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "40 Gerrard St. E, Toronto": {
+    "lat": 43.6866014,
+    "lng": -79.2880442,
+    "geocode_display_name": "Gerrard Street East, East End-Danforth, Beaches—East York, Toronto, Golden Horseshoe, Ontario, M4E 3W2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "400 Walmer Road, Toronto": {
+    "lat": 43.6849641,
+    "lng": -79.4133864,
+    "geocode_display_name": "West Tower, 400, Walmer Road, Forest Hill South, Toronto—St. Paul's, York, Toronto, Golden Horseshoe, Ontario, M5P 2X7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "130 Cosburn Ave., Toronto": {
+    "lat": 43.6899454,
+    "lng": -79.3476428,
+    "geocode_display_name": "130, Cosburn Avenue, Danforth East York, Toronto—Danforth, East York, Toronto, Golden Horseshoe, Ontario, M4K 3W3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "77 Huntley Street, Toronto": {
+    "lat": 43.6717574,
+    "lng": -79.3789505,
+    "geocode_display_name": "77, Huntley Street, North St.James Town, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4W 3J6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "25 Selby Street, Toronto": {
+    "lat": 43.6711841,
+    "lng": -79.377666,
+    "geocode_display_name": "Selby Street, North St.James Town, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4W 3J4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "39 E Liberty Ave, Toronto": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "87 Jameson Avenue, Toronto": {
+    "lat": 43.6348942,
+    "lng": -79.4346972,
+    "geocode_display_name": "87, Jameson Avenue, Parkdale, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6K 2X5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1100 King Street West, Toronto": {
+    "lat": 43.6399724,
+    "lng": -79.4229226,
+    "geocode_display_name": "1100, King Street West, South Parkdale, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6K 0C7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "200 Redpath Avenue, Toronto": {
+    "lat": 43.7099696,
+    "lng": -79.3936249,
+    "geocode_display_name": "Redpath Avenue, North Toronto, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4P 1V6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "100 Wellesley Street East, Toronto": {
+    "lat": 43.6665405,
+    "lng": -79.3791706,
+    "geocode_display_name": "Plaza 100, 100, Wellesley Street East, Church-Wellesley, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1H2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "18 Tretti Way, Toronto": {
+    "lat": 43.7328186,
+    "lng": -79.4480183,
+    "geocode_display_name": "Tretti Way, Clanton Park, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3H 2Z1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "18 Brownlow Avenue, Toronto": {
+    "lat": 43.7069793,
+    "lng": -79.3910296,
+    "geocode_display_name": "Brownlow Avenue, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4P 1L1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "196 Eglinton Avenue East, Toronto": {
+    "lat": 43.7080303,
+    "lng": -79.3924138,
+    "geocode_display_name": "196, Eglinton Avenue East, North Toronto, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4P 1G4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "57 Spadina Avenue, Toronto": {
+    "lat": 43.6447917,
+    "lng": -79.3945225,
+    "geocode_display_name": "57, Spadina Avenue, Wellington Place, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5V 0S8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "161 St George Street, Toronto": {
+    "lat": 43.6751725,
+    "lng": -79.4034453,
+    "geocode_display_name": "St George Street, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 2E6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "391 Sherbourne Street, Toronto": {
+    "lat": 43.6640911,
+    "lng": -79.373276,
+    "geocode_display_name": "391, Sherbourne Street, Cabbagetown-South St.James Town, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4X 1K6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "450 Front Street West, Toronto": {
+    "lat": 43.6424499,
+    "lng": -79.3955009,
+    "geocode_display_name": "450, Front Street West, Harbourfront-CityPlace, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5V 3N5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "2376 Dundas Street West, Toronto": {
+    "lat": 43.6576874,
+    "lng": -79.4523352,
+    "geocode_display_name": "2376, Dundas Street West, High Park North, High Park, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6P 1W7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "131 Mill Street, Toronto": {
+    "lat": 43.6511634,
+    "lng": -79.3565758,
+    "geocode_display_name": "West Maple House, 131, Mill Street, St Lawrence-East Bayfront-The Islands, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5A 2Z8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "730 St Clarens Avenue, Toronto": {
+    "lat": 43.6671041,
+    "lng": -79.4454848,
+    "geocode_display_name": "730, St. Clarens Avenue, Wallace Emerson, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 3Z6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "798 Richmond Street West, Toronto": {
+    "lat": 43.6451383,
+    "lng": -79.4098141,
+    "geocode_display_name": "798, Richmond Street West, West Queen West, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 3W3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "230 Oak Street, Toronto": {
+    "lat": 43.6636503,
+    "lng": -79.3578871,
+    "geocode_display_name": "Oakheights Apartments, 230, Oak Street, Regent Park, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4M 2B3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7 Grosvenor Street, Toronto": {
+    "lat": 43.6620999,
+    "lng": -79.3881207,
+    "geocode_display_name": "Grosvenor Street, Bay-Cloverhill, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5S 1B2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "8 Gloucester Street, Toronto": {
+    "lat": 43.6667198,
+    "lng": -79.384883,
+    "geocode_display_name": "8, Gloucester Street, Church-Wellesley, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 1M7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "200-222 Elm Street, Toronto": {
+    "lat": 43.6562546,
+    "lng": -79.3893953,
+    "geocode_display_name": "Elm Street, Kensington-Chinatown, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5G 1V7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "31 Phipps Street, Toronto": {
+    "lat": 43.6651943,
+    "lng": -79.3865722,
+    "geocode_display_name": "Phipps Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 2X6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1531 Bathurst Street, Toronto": {
+    "lat": 43.6856317,
+    "lng": -79.4188575,
+    "geocode_display_name": "1531, Bathurst Street, Forest Hill South, Toronto—St. Paul's, York, Toronto, Golden Horseshoe, Ontario, M5P 3L3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "77 & 99 Gerrard Street West, Toronto": {
+    "lat": 43.6590293,
+    "lng": -79.3824273,
+    "geocode_display_name": "Gerrard Street West, Yonge-Bay Corridor, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5B 1S9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "25 Ordnance Street, Toronto": {
+    "lat": 43.6391825,
+    "lng": -79.4103947,
+    "geocode_display_name": "25, Ordnance Street, Fort York-Liberty Village, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6K 0E3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "55 Smooth Rose Court, Toronto": {
+    "lat": 43.7745613,
+    "lng": -79.3331186,
+    "geocode_display_name": "Parkside Square, 55, Smooth Rose Court, Henry Farm, Don Valley North, North York, Toronto, Golden Horseshoe, Ontario, M2J 0G7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "169 St. George Street, Toronto": {
+    "lat": 43.6625236,
+    "lng": -79.3977903,
+    "geocode_display_name": "St George Street, University, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5S 2E5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "44 Charles Street West, Toronto": {
+    "lat": 43.6685175,
+    "lng": -79.3872178,
+    "geocode_display_name": "Charles Street West, Bay-Cloverhill, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M4Y 2B7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "100 Gowan Avenue, Toronto": {
+    "lat": 43.688293,
+    "lng": -79.3508296,
+    "geocode_display_name": "100, Gowan Avenue, Broadview North, Toronto—Danforth, East York, Toronto, Golden Horseshoe, Ontario, M4K 2E4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "650 Parliament Street, Toronto": {
+    "lat": 43.6475477,
+    "lng": -79.3612828,
+    "geocode_display_name": "Parliament Street, St Lawrence-East Bayfront-The Islands, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5A 0L1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "571 Bloor Street, Toronto": {
+    "lat": 43.6687015,
+    "lng": -79.3941295,
+    "geocode_display_name": "Bloor Street Culture Corridor, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5S 1M4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "35 Walmer Road, Toronto": {
+    "lat": 43.669119,
+    "lng": -79.4056073,
+    "geocode_display_name": "The Vincennes, 35, Walmer Road, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 2X3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "30 Mutual Street, Toronto": {
+    "lat": 43.6626241,
+    "lng": -79.3781864,
+    "geocode_display_name": "Mutual Street, Church-Wellesley, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 1M3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "252 Victoria Street, Toronto": {
+    "lat": 43.655538,
+    "lng": -79.3794525,
+    "geocode_display_name": "Twilight Cafe, 252, Victoria Street, Downtown Yonge East, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 1V8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "260 Wellesley Street East, Toronto": {
+    "lat": 43.669121,
+    "lng": -79.3718597,
+    "geocode_display_name": "The Winnipeg, 260, Wellesley Street East, Cabbagetown-South St.James Town, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4X 1X3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "299 Campbell Avenue, Toronto": {
+    "lat": 43.665796,
+    "lng": -79.4494519,
+    "geocode_display_name": "The Campbell, 299, Campbell Avenue, Junction Triangle, Davenport, Toronto, Golden Horseshoe, Ontario, M6P 0C2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "185 Enfield Place, Mississauga": {
+    "lat": 43.591592,
+    "lng": -79.634405,
+    "geocode_display_name": "185, Enfield Place, City Centre, Mississauga, Peel Region, Golden Horseshoe, Ontario, L5B 3C4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "203 Jarvis Street, Toronto": {
+    "lat": 43.6556602,
+    "lng": -79.3735932,
+    "geocode_display_name": "TOOR Hotel - JDV by Hyatt, 203, Jarvis Street, Moss Park, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5B 2B7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "5754 Yonge Street., North York": {
+    "lat": 43.7833072,
+    "lng": -79.4171093,
+    "geocode_display_name": "5754, Yonge Street, Newtonbrook East, Willowdale, North York, Toronto, Golden Horseshoe, Ontario, M2M 4H9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "5-31 York Garden Way, North York": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "225 Davisville Avenue, Toronto": {
+    "lat": 43.6998284,
+    "lng": -79.389348,
+    "geocode_display_name": "Davisville Avenue, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4S 1C2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "45 Balliol Street, Toronto": {
+    "lat": 43.6973555,
+    "lng": -79.3949815,
+    "geocode_display_name": "45, Balliol Street, South Eglinton-Davisville, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M6S 1C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1200 YORK MILLS ROAD, North York": {
+    "lat": 43.759609,
+    "lng": -79.3350545,
+    "geocode_display_name": "1200, York Mills Road, Fenside-Parkwoods, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3A 2S3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "350 & 390 Queens Quay West, Toronto": {
+    "lat": 43.641807,
+    "lng": -79.3750654,
+    "geocode_display_name": "Queens Quay West, St Lawrence-East Bayfront-The Islands, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5E 1E5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "109 Jameson Avenue, Toronto": {
+    "lat": 43.6357871,
+    "lng": -79.4351541,
+    "geocode_display_name": "109, Jameson Avenue, Parkdale, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6K 2V3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "2700 Bathurst Street, North York": {
+    "lat": 43.708989,
+    "lng": -79.4281455,
+    "geocode_display_name": "2700, Bathurst Street, Bedford Park-Nortown, Eglinton—Lawrence, North York, Toronto, Golden Horseshoe, Ontario, M6B 2Y9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "4415 Bathurst Street, North York": {
+    "lat": 43.7568734,
+    "lng": -79.4380154,
+    "geocode_display_name": "Canyon Towers, 4415, Bathurst Street, Bathurst Manor, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3H 3S3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "10 Walmer Road, Toronto": {
+    "lat": 43.6775769,
+    "lng": -79.4105969,
+    "geocode_display_name": "Walmer Road, Casa Loma, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M5R 1X9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1875 Steeles Avenue West, North York": {
+    "lat": 43.7874533,
+    "lng": -79.4684736,
+    "geocode_display_name": "1875, Steeles Avenue West, Bathurst Manor, York Centre, North York, Vaughan, York Region, Golden Horseshoe, Ontario, L4J 4H6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "725 Eglinton Ave W, Toronto": {
+    "lat": 43.701427,
+    "lng": -79.4221965,
+    "geocode_display_name": "725, Eglinton Avenue West, Forest Hill South, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M5N 1B9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "30-50 Hillsboro Avenue, Toronto": {
+    "lat": 43.67532,
+    "lng": -79.3930062,
+    "geocode_display_name": "Hillsboro Avenue, Annex, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5R 1R1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "145 St. George Street, Toronto": {
+    "lat": 43.6657461,
+    "lng": -79.3990988,
+    "geocode_display_name": "St George Street, University, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5S 3E6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "25 St. Mary Street, Toronto": {
+    "lat": 43.6676228,
+    "lng": -79.387632,
+    "geocode_display_name": "St. Mary Street, Bay-Cloverhill, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4Y 2R4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1 Deauville Lane, North York": {
+    "lat": 43.7189051,
+    "lng": -79.3316637,
+    "geocode_display_name": "Deauville Lane, Flemingdon Park, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3C 1C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "18-24-25-27 Seeley Drive, North York": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "2150 Roche Court, Mississauga": {
+    "lat": 43.5280009,
+    "lng": -79.6505047,
+    "geocode_display_name": "Vertical Village, 2150, Roche Court, Sheridan, Mississauga, Peel Region, Golden Horseshoe, Ontario, L5K 0A1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "30-32-34 St. Dennis Drive, North York": {
+    "lat": 43.7175999,
+    "lng": -79.3343022,
+    "geocode_display_name": "St Dennis Drive, Flemingdon Park, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3C 1C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "155 Antibes Drive, North York": {
+    "lat": 43.7818382,
+    "lng": -79.4457993,
+    "geocode_display_name": "155, Antibes Drive, Westminster-Branson, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M2R 1Y8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "35 - 41 Danforth Road, Scarborough": {
+    "lat": 43.7424413,
+    "lng": -79.2452854,
+    "geocode_display_name": "Danforth Road, Eglinton East, Scarborough Centre, Scarborough, Toronto, Golden Horseshoe, Ontario, M1J 3L9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "20 Monte Kwinter Court, Toronto": {
+    "lat": 43.7334555,
+    "lng": -79.4475573,
+    "geocode_display_name": "Monte Kwinter Court, Clanton Park, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3H 2Z1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "4235 Confederation Parkway, Mississauga": {
+    "lat": 43.5897825,
+    "lng": -79.6503031,
+    "geocode_display_name": "4235, Confederation Parkway, City Centre, Mississauga, Peel Region, Golden Horseshoe, Ontario, L5B 0A1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "980 Lansdowne, Toronto": {
+    "lat": 43.6697888,
+    "lng": -79.4478552,
+    "geocode_display_name": "980, Lansdowne Avenue, Wallace Emerson, Davenport, Toronto, Golden Horseshoe, Ontario, M6H 3Z6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "73 Broadway Avenue, Toronto": {
+    "lat": 43.7100222,
+    "lng": -79.3949244,
+    "geocode_display_name": "73, Broadway Avenue, North Toronto, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4P 1T7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "48 Grenoble Drive, North York": {
+    "lat": 43.7160204,
+    "lng": -79.3327289,
+    "geocode_display_name": "Grenoble Drive, Flemingdon Park, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3C 1C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7 & 11 Rochefort Drive, North York": {
+    "lat": 43.7187281,
+    "lng": -79.3349098,
+    "geocode_display_name": "Rochefort Drive, Flemingdon Park, Don Valley East, North York, Toronto, Golden Horseshoe, Ontario, M3C 1C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1154 Wilson Avenue, North York": {
+    "lat": 43.7264644,
+    "lng": -79.4864113,
+    "geocode_display_name": "La Place Victoria, 1154, Wilson Avenue, Oakdale-Beverley Heights, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3M 1J8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "223 Redpath Avenue, Toronto": {
+    "lat": 43.7099696,
+    "lng": -79.3936249,
+    "geocode_display_name": "Redpath Avenue, North Toronto, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4P 1V6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7 Thorburn Avenue, Toronto": {
+    "lat": 43.6352765,
+    "lng": -79.4264246,
+    "geocode_display_name": "7, Thorburn Avenue, Parkdale, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6K 1A9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "225 Adelaide St. West, Toronto": {
+    "lat": 43.6428411,
+    "lng": -79.4148928,
+    "geocode_display_name": "Adelaide Street West, West Queen West, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6K 3M9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "66 Broadway Ave, Toronto": {
+    "lat": 43.7164724,
+    "lng": -79.364689,
+    "geocode_display_name": "Broadway Avenue, Leaside-Bennington, Don Valley West, East York, Toronto, Golden Horseshoe, Ontario, M4G 2M8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "121, 131 Minerva Avenue, 3744 St. Clair Ave. E., Scarborough": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "221 & 265 Balliol Street, Toronto": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "350 Lynnwood Drive and 1230 Whiteoaks Boulevard, Oakville": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "3030 Pharmacy Avenue, Scarborough": {
+    "lat": 43.7150959,
+    "lng": -79.2931354,
+    "geocode_display_name": "Pharmacy Avenue, Clairlea-Birchmount, Scarborough Southwest, Scarborough, Toronto, Golden Horseshoe, Ontario, M1L 2X1, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "25 Stong Court, North York": {
+    "lat": 43.76204,
+    "lng": -79.5178651,
+    "geocode_display_name": "Stong Court, Black Creek, Humber River—Black Creek, North York, Toronto, Golden Horseshoe, Ontario, M3N 2X9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "88 Bathurst Street, Toronto": {
+    "lat": 43.6435691,
+    "lng": -79.4028203,
+    "geocode_display_name": "88, Bathurst Street, Wellington Place, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5V 1M9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "55 Oakmount Rd, Toronto": {
+    "lat": 43.65703,
+    "lng": -79.4630747,
+    "geocode_display_name": "55, Oakmount Road, High Park North, High Park, Parkdale—High Park, Toronto, Golden Horseshoe, Ontario, M6P 2L5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "4365 Bloor Street West, Toronto": {
+    "lat": 43.6667779,
+    "lng": -79.4032758,
+    "geocode_display_name": "Bloor Street West, University, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M5S 1W6, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "370 Queens Quay West, Toronto": {
+    "lat": 43.6387544,
+    "lng": -79.3899132,
+    "geocode_display_name": "370, Queens Quay West, Harbourfront-CityPlace, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5J 3H3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7 Jackes Avenue, Toronto": {
+    "lat": 43.6852976,
+    "lng": -79.3916041,
+    "geocode_display_name": "Jackes Avenue, Rosedale-Moore Park, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4T 1X3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "730 DOVERCOURT ROAD, Toronto": {
+    "lat": 43.6464642,
+    "lng": -79.4235317,
+    "geocode_display_name": "Dovercourt Road, Trinity-Bellwoods, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6J 3A9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1060 Eastern Avenue, Toronto": {
+    "lat": 43.6637586,
+    "lng": -79.3198787,
+    "geocode_display_name": "Eastern Avenue, Greenwood-Coxwell, Toronto—Danforth, Toronto, Golden Horseshoe, Ontario, M4L 1E2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "45 Lisgar Street, Toronto": {
+    "lat": 43.641998,
+    "lng": -79.4228073,
+    "geocode_display_name": "WestQ, 45, Lisgar Street, Little Portugal, Davenport, Toronto, Golden Horseshoe, Ontario, M6J 3P4, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "561 Sherbourne Street, Toronto": {
+    "lat": 43.6694616,
+    "lng": -79.3752219,
+    "geocode_display_name": "561 Sherbourne, 561, Sherbourne Street, North St.James Town, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M4X 1W7, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "15 Venaway & 5 Zappacosta Dr, Toronto": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "70 Ordnance Street, Toronto": {
+    "lat": 43.6394943,
+    "lng": -79.4095555,
+    "geocode_display_name": "Ordnance Street, Fort York-Liberty Village, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M6K 0E3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "191-201 Sherbourne Street, Toronto": {
+    "lat": 43.6622681,
+    "lng": -79.3726638,
+    "geocode_display_name": "Sherbourne Street, Moss Park, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5A 2S5, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "569 Sheppard Avenue West, North York": {
+    "lat": 43.7552737,
+    "lng": -79.4369574,
+    "geocode_display_name": "El Cano Apartments, 569, Sheppard Avenue West, Lansing-Westgate, York Centre, North York, Toronto, Golden Horseshoe, Ontario, M3H 4Y2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "50 Spadina Road, Toronto": {
+    "lat": 43.6834943,
+    "lng": -79.4106242,
+    "geocode_display_name": "Spadina Road, Casa Loma, Toronto—St. Paul's, Toronto, Golden Horseshoe, Ontario, M4V 0A3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "740 Dupont Street, Toronto": {
+    "lat": 43.6715818,
+    "lng": -79.4236803,
+    "geocode_display_name": "Litho., 740, Dupont Street, Dovercourt Village, University—Rosedale, Toronto, Golden Horseshoe, Ontario, M6G 0A9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "7411 & 7433 Yonge St. and 20 & 30 Clarke Ave, Markham": {
+    "lat": null,
+    "lng": null,
+    "geocode_display_name": null,
+    "geocode_source": "nominatim",
+    "geocode_found": false
+  },
+  "31 Farmstead Road, Toronto": {
+    "lat": 43.7546054,
+    "lng": -79.3616657,
+    "geocode_display_name": "31, Farmstead Road, St.Andrew-Windfields, Don Valley West, North York, Toronto, Golden Horseshoe, Ontario, M3B 1X8, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "432 Cherry Street, Toronto": {
+    "lat": 43.652238,
+    "lng": -79.3579848,
+    "geocode_display_name": "432, Cherry Street, St Lawrence-East Bayfront-The Islands, Toronto Centre, Toronto, Golden Horseshoe, Ontario, M5A 0X9, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "570 Bay Street, Toronto": {
+    "lat": 43.6554482,
+    "lng": -79.383782,
+    "geocode_display_name": "570, Bay Street, Yonge-Bay Corridor, Spadina—Fort York, Toronto, Golden Horseshoe, Ontario, M5G 2C3, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  },
+  "1475 Whites Road, Pickering": {
+    "lat": 43.8205964,
+    "lng": -79.1160137,
+    "geocode_display_name": "1475, Whites Road, Pickering, Durham Region, Golden Horseshoe, Ontario, L1V 1G2, Canada",
+    "geocode_source": "nominatim",
+    "geocode_found": true
+  }
+}
