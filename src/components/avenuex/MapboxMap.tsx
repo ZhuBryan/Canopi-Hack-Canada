@@ -97,9 +97,10 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     if (!containerRef.current) return;
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+    const styleFromEnv = process.env.NEXT_PUBLIC_MAPBOX_STYLE;
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/sym7534/cmmgpkjan00a701qsb6jbchc8",
+      style: styleFromEnv || "mapbox://styles/mapbox/standard",
       center: [-79.3832, 43.6532],
       zoom: 14,
       pitch: 45,
@@ -477,6 +478,20 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
 
       for (const listing of listingsRef.current) {
         addMarker(map, listing, listing.id === selectedIdRef.current);
+      }
+    });
+
+    // If a custom style URL fails (common with private/non-shared styles),
+    // fall back to a guaranteed public Mapbox style so the map stays visible.
+    map.on("error", (event) => {
+      const styleError = event.error && String(event.error.message || event.error);
+      if (!styleError) return;
+      if (!styleError.toLowerCase().includes("style")) return;
+      if (map.getStyle()?.sprite?.includes("mapbox/standard")) return;
+      try {
+        map.setStyle("mapbox://styles/mapbox/standard");
+      } catch {
+        // no-op
       }
     });
 
