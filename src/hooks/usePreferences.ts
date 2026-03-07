@@ -16,13 +16,13 @@ export interface UserPreferences {
 }
 
 const DEFAULT_PREFS: UserPreferences = {
-    w_schools: 5,
-    w_groceries: 5,
-    w_restaurants: 5,
-    w_cafes: 5,
-    w_parks: 5,
-    w_pharmacies: 5,
-    w_transit: 5,
+    w_schools: 50,
+    w_groceries: 50,
+    w_restaurants: 50,
+    w_cafes: 50,
+    w_parks: 50,
+    w_pharmacies: 50,
+    w_transit: 50,
     max_rent: 3200,
 };
 

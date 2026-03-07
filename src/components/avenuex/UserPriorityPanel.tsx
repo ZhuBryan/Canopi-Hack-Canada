@@ -25,13 +25,13 @@ export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps)
   const [loading, setLoading] = useState(false);
   const [maxRent, setMaxRent] = useState(3200);
   const [weights, setWeights] = useState<Record<SliderKey, number>>({
-    w_schools: 5,
-    w_groceries: 5,
-    w_restaurants: 5,
-    w_cafes: 5,
-    w_parks: 5,
-    w_pharmacies: 5,
-    w_transit: 5,
+    w_schools: 50,
+    w_groceries: 50,
+    w_restaurants: 50,
+    w_cafes: 50,
+    w_parks: 50,
+    w_pharmacies: 50,
+    w_transit: 50,
   });
 
   const handleSliderChange = (key: SliderKey, value: number) => {
@@ -90,7 +90,7 @@ export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps)
               <input
                 type="range"
                 min={0}
-                max={10}
+                max={100}
                 step={1}
                 value={weights[key]}
                 onChange={(e) => handleSliderChange(key, parseInt(e.target.value, 10))}

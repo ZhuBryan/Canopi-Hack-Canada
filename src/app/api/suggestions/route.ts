@@ -465,10 +465,10 @@ export async function GET(request: Request) {
 // ── Small helpers ────────────────────────────────────────────────────────────
 
 function parseWeight(raw: string | null): number {
-  if (!raw) return 5;
+  if (!raw) return 50;
   const n = parseInt(raw, 10);
-  if (!Number.isFinite(n)) return 5;
-  return Math.max(0, Math.min(10, n));
+  if (!Number.isFinite(n)) return 50;
+  return Math.max(0, Math.min(100, n));
 }
 
 function buildAmenityLabels(
