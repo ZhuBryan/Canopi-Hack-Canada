@@ -80,41 +80,50 @@ export function DesktopNavbar({
   const hasInput = typeof onSearchValueChange === "function";
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-8">
+    <header className="flex h-14 items-center justify-between border-b px-8" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
       <button
         type="button"
         onClick={() => router.push("/")}
-        className="flex items-center gap-2 rounded-lg px-1 py-0.5"
+        className="flex items-center rounded-lg px-1 py-0.5"
       >
         <Image src="/canopi-logo.png" alt="Canopi" width={99} height={99} className="rounded-md" />
-        <span className="font-display text-4xl font-bold text-slate-900">Canopi</span>
+        <span className="font-display text-4xl font-bold" style={{ color: "var(--foreground)" }}>Canopi</span>
       </button>
-      <div className="hidden h-10 w-[400px] items-center gap-2 rounded-xl border border-gray-200 bg-slate-50 px-4 text-sm text-slate-400 md:flex">
-        <span aria-hidden>[ ]</span>
+      <div className="hidden h-9 w-[400px] items-center gap-2 rounded-full border px-4 text-sm md:flex" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface)" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--muted-light)", flexShrink: 0 }}>
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+        </svg>
         {hasInput ? (
           <input
             value={searchValue}
             onChange={(event) => onSearchValueChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            className="w-full bg-transparent text-sm outline-none"
+            style={{ color: "var(--foreground)" }}
           />
         ) : (
-          <span>{searchPlaceholder}</span>
+          <span style={{ color: "var(--muted-light)" }}>{searchPlaceholder}</span>
         )}
       </div>
       <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={() => router.push("/saved")}
-          className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-500 md:flex"
+          className="hidden items-center gap-2 rounded-full px-3 py-1.5 text-sm transition hover:opacity-80 md:flex"
+          style={{ color: "var(--muted)" }}
         >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill={savedCount > 0 ? "var(--brand)" : "none"} stroke={savedCount > 0 ? "var(--brand)" : "currentColor"} strokeWidth="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
           <span>Saved</span>
-          <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">
-            {savedCount}
-          </span>
+          {savedCount > 0 && (
+            <span className="rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ backgroundColor: "var(--brand)" }}>
+              {savedCount}
+            </span>
+          )}
         </button>
         {userMenu ?? (
-          <div className="relative h-8 w-8 rounded-full bg-green-500 text-white">
+          <div className="relative h-8 w-8 rounded-full text-white" style={{ backgroundColor: "var(--brand)" }}>
             <span className="absolute inset-0 grid place-items-center text-xs font-bold">R</span>
           </div>
         )}
@@ -140,9 +149,10 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       className={cx(
-        "rounded-xl bg-green-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-300",
+        "rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
+      style={{ backgroundColor: "var(--brand)" }}
     >
       {children}
     </button>
@@ -166,9 +176,10 @@ export function GhostButton({
       onClick={onClick}
       disabled={disabled}
       className={cx(
-        "rounded-xl px-6 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300",
+        "rounded-full px-6 py-3 text-sm font-semibold transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40",
         className
       )}
+      style={{ color: "var(--muted)", border: "1px solid var(--line)" }}
     >
       {children}
     </button>
@@ -189,9 +200,10 @@ export function IconButton({
       type="button"
       onClick={onClick}
       className={cx(
-        "grid h-10 w-10 place-items-center rounded-xl border border-gray-200 bg-white text-slate-500 transition hover:bg-slate-100",
+        "grid h-9 w-9 place-items-center rounded-full border transition hover:opacity-80",
         className
       )}
+      style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)", color: "var(--muted)" }}
     >
       {children}
     </button>
@@ -208,10 +220,10 @@ export function ScoreBar({
   heightClass?: string;
 }) {
   return (
-    <div className={cx("w-full rounded-full bg-gray-200", heightClass)}>
+    <div className={cx("w-full rounded-full", heightClass)} style={{ backgroundColor: "var(--line)" }}>
       <div
         className={cx("rounded-full", heightClass)}
-        style={{ width: `${Math.max(0, Math.min(100, value))}%`, backgroundColor: color }}
+        style={{ width: `${Math.max(0, Math.min(100, value))}%`, backgroundColor: color, transition: "width 400ms cubic-bezier(0.22, 1, 0.36, 1)" }}
       />
     </div>
   );
@@ -223,7 +235,7 @@ export function ScorePill({ label, band, score }: { label: string; band: ScoreBa
   return (
     <div
       className={cx("inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold", pill)}
-      style={color ? { color } : undefined}
+      style={color ? { color, border: `1px solid ${color}30` } : undefined}
     >
       <span className="h-1.5 w-1.5 rounded-full" style={color ? { backgroundColor: color } : undefined} />
       {label}
@@ -254,7 +266,7 @@ export function PropertyCard({
       : `${listing.beds} bed | ${listing.baths} bath | ${listing.sqft} sqft`;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm fade-pop">
+    <article className="overflow-hidden rounded-2xl border fade-pop card-lift" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
       <div className="relative h-44">
         <Image
           src={listing.image}
