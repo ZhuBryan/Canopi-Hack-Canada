@@ -36,7 +36,7 @@ export type Listing = {
 };
 
 export const avenueNav = {
-  brand: "Avenue-X",
+  brand: "Canopi",
   searchPlaceholder: "Search city, neighborhood, or address...",
   avatarLabel: "R",
 };
@@ -58,9 +58,9 @@ export const landingData = {
 export const listingsCatalog: Listing[] = [
   {
     id: "listing-1",
-    address: "123 University Ave",
-    city: "Waterloo, ON",
-    fullAddress: "123 University Ave, Waterloo, ON N2L 3G1",
+    address: "320 Richmond St W",
+    city: "Toronto, ON",
+    fullAddress: "320 Richmond St W, Toronto, ON M5V 1X2",
     monthlyRent: 2100,
     priceLabel: "$2,100/mo",
     shortPrice: "$2.1K",
@@ -75,12 +75,12 @@ export const listingsCatalog: Listing[] = [
       "https://images.unsplash.com/photo-1771305081139-c2e0747e5f4c?auto=format&fit=crop&w=1000&q=80",
     pinX: "43%",
     pinY: "33%",
-    lat: 43.4723,
-    lng: -80.527,
+    lat: 43.6475,
+    lng: -79.3969,
     availableDate: "May 1, 2026",
     leaseTerm: "12 months",
     about:
-      "Bright 2-bedroom apartment in the heart of uptown Waterloo, steps from Wilfrid Laurier University. Features modern finishes, in-unit laundry, and a private balcony with park views. Walking distance to restaurants, cafes, and transit.",
+      "Bright 2-bedroom in the heart of the Entertainment District. Modern finishes, in-unit laundry, and a private balcony. Walking distance to restaurants, cafes, and Queen West transit.",
     amenities: [
       "In-unit laundry",
       "A/C",
@@ -99,9 +99,9 @@ export const listingsCatalog: Listing[] = [
   },
   {
     id: "listing-2",
-    address: "250 King St W, Unit 1204",
-    city: "Waterloo, ON",
-    fullAddress: "250 King St W, Unit 1204, Waterloo, ON",
+    address: "150 St George St, Unit 804",
+    city: "Toronto, ON",
+    fullAddress: "150 St George St, Unit 804, Toronto, ON M5S 2T9",
     monthlyRent: 1850,
     priceLabel: "$1,850/mo",
     shortPrice: "$1.9K",
@@ -116,12 +116,12 @@ export const listingsCatalog: Listing[] = [
       "https://images.unsplash.com/photo-1666532937489-331f2f8f4668?auto=format&fit=crop&w=1000&q=80",
     pinX: "52%",
     pinY: "40%",
-    lat: 43.4669,
-    lng: -80.5222,
+    lat: 43.6657,
+    lng: -79.3989,
     availableDate: "May 15, 2026",
     leaseTerm: "12 months",
     about:
-      "High-floor condo with skyline views, updated kitchen appliances, and direct transit access. Quiet building with concierge and fitness amenities.",
+      "High-floor Annex condo with skyline views, updated kitchen appliances, and direct subway access. Steps from U of T, Bloor Street, and Kensington Market.",
     amenities: ["In-unit laundry", "Gym", "Concierge", "Balcony", "Dishwasher", "A/C"],
     categoryScores: {
       foodDrink: 88,
@@ -231,40 +231,6 @@ export const listingsCatalog: Listing[] = [
       groceryParks: 90,
       education: 73,
       emergency: 67,
-    },
-  },
-  {
-    id: "listing-6",
-    address: "38 Elm St, Unit 1102",
-    city: "Kitchener, ON",
-    fullAddress: "38 Elm St, Unit 1102, Kitchener, ON",
-    monthlyRent: 2250,
-    priceLabel: "$2,250/mo",
-    shortPrice: "$2.3K",
-    beds: 2,
-    baths: 1,
-    sqft: 820,
-    propertyType: "House",
-    score: 83,
-    scoreStatus: "Great neighborhood access",
-    scoreBand: "great",
-    image:
-      "https://images.unsplash.com/photo-1631049421656-e0b38ea1705a?auto=format&fit=crop&w=1000&q=80",
-    pinX: "79%",
-    pinY: "34%",
-    lat: 43.4516,
-    lng: -80.4925,
-    availableDate: "May 10, 2026",
-    leaseTerm: "10 months",
-    about:
-      "Bright unit with family-friendly layout, updated kitchen, and convenient parking. Located in a calm neighborhood with quick highway access.",
-    amenities: ["Backyard access", "Parking", "Dishwasher", "Storage", "A/C", "Laundry hookups"],
-    categoryScores: {
-      foodDrink: 79,
-      health: 76,
-      groceryParks: 85,
-      education: 72,
-      emergency: 74,
     },
   },
   // ── Extra Toronto listings (varied vitality scores) ──────────────────────

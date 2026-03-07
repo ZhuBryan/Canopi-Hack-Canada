@@ -310,7 +310,7 @@ export default function HeroPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Property Manager</p>
-                    <p className="text-xs text-slate-500">Avenue-X Verified</p>
+                    <p className="text-xs text-slate-500">Canopi Verified</p>
                   </div>
                 </div>
                 <div className="flex gap-2">

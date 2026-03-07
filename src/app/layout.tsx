@@ -19,8 +19,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Avenue-X Frontend",
-  description: "Frontend implementation of the Avenue-X Pencil document",
+  title: "Canopi",
+  description: "Canopi — find your next home",
 };
 
 export default function RootLayout({

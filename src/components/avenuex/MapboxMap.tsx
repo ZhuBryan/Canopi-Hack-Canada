@@ -36,6 +36,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       dragRotate: false,
       antialias: false,
       maxTileCacheSize: 20,
+      maxBounds: [[-79.65, 43.55], [-79.10, 43.85]],
     });
 
     mapRef.current = map;
@@ -59,7 +60,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
         "source-layer": "building",
         filter: ["==", "extrude", "true"],
         type: "fill-extrusion",
-        minzoom: 14,
+        minzoom: 12,
         paint: {
           "fill-extrusion-color": [
             "case",
@@ -143,6 +144,50 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
 
       applyListingHighlights();
       map.on("idle", applyListingHighlights);
+
+      // ── GTA boundary mask ──────────────────────────────────────────────────
+      // Inverted polygon: world outer ring with a GTA-shaped hole cut out.
+      // Everything outside the hole renders as solid gray.
+      map.addSource("gta-mask", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              // Outer ring: entire world (counter-clockwise)
+              [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]],
+              // Inner hole: downtown Toronto teardrop (clockwise)
+              [
+                [-79.4130, 43.6750], // NW  — Bloor/Ossington
+                [-79.3950, 43.6790], // N   — Bloor/Spadina peak
+                [-79.3700, 43.6750], // NE  — Bloor/Yonge
+                [-79.3540, 43.6720], // NE  — Rosedale/DVP
+                [-79.3430, 43.6580], // E   — Don Valley
+                [-79.3480, 43.6450], // SE  — Broadview/Distillery
+                [-79.3580, 43.6320], // SE  — Lower Don
+                [-79.3750, 43.6200], // S   — Harbour
+                [-79.3930, 43.6170], // S   — south tip
+                [-79.4130, 43.6220], // SW  — Exhibition/Humber
+                [-79.4280, 43.6350], // W   — King/Dufferin
+                [-79.4320, 43.6500], // W   — Queen/Dufferin
+                [-79.4240, 43.6640], // NW  — Bloor/Dufferin
+                [-79.4130, 43.6750], // back to NW
+              ],
+            ],
+          },
+        },
+      });
+      map.addLayer({
+        id: "gta-mask",
+        type: "fill",
+        source: "gta-mask",
+        paint: {
+          "fill-color": "#e8e8e8",
+          "fill-opacity": 1,
+        },
+      });
 
       // ── Markers ────────────────────────────────────────────────────────────
       for (const listing of listingsRef.current) {

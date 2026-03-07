@@ -84,8 +84,8 @@ export function DesktopNavbar({
         onClick={() => router.push("/")}
         className="flex items-center gap-2 rounded-lg px-1 py-0.5"
       >
-        <span className="text-xl font-bold text-green-500">*</span>
-        <span className="font-display text-2xl font-bold text-slate-900">Avenue-X</span>
+        <Image src="/canopi-logo.png" alt="Canopi" width={99} height={99} className="rounded-md" />
+        <span className="font-display text-4xl font-bold text-slate-900">Canopi</span>
       </button>
       <div className="hidden h-10 w-[400px] items-center gap-2 rounded-xl border border-gray-200 bg-slate-50 px-4 text-sm text-slate-400 md:flex">
         <span aria-hidden>[ ]</span>
