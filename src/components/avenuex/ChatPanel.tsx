@@ -67,7 +67,8 @@ export default function ChatPanel() {
                 <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="fixed bottom-6 right-16 z-50 grid h-14 w-14 place-items-center rounded-full bg-green-500 text-white shadow-lg transition hover:bg-green-600 hover:scale-105 active:scale-95"
+                    className="fixed bottom-6 right-16 z-50 grid h-12 w-12 place-items-center rounded-full text-white transition hover:opacity-90 hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: "var(--brand)", boxShadow: "0 4px 20px rgba(22,101,52,0.35)" }}
                     aria-label="Open chat"
                 >
                     {/* Chat bubble icon */}
@@ -84,7 +85,7 @@ export default function ChatPanel() {
                     style={{ width: 380, height: 500 }}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between border-b border-gray-200 bg-green-500 px-4 py-3">
+                    <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: "rgba(255,255,255,0.15)", backgroundColor: "var(--brand)" }}>
                         <div className="flex items-center gap-2">
                             <span className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-sm font-bold text-white">
                                 C
@@ -110,10 +111,10 @@ export default function ChatPanel() {
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${msg.role === "user"
-                                        ? "bg-green-500 text-white rounded-br-md"
-                                        : "bg-white border border-gray-200 text-slate-700 rounded-bl-md"
+                                        ? "text-white rounded-br-md"
+                                        : "border rounded-bl-md"
                                         }`}
-                                    style={{ whiteSpace: "pre-wrap" }}
+                                    style={{ whiteSpace: "pre-wrap", backgroundColor: msg.role === "user" ? "var(--brand)" : "var(--surface-raised)", borderColor: msg.role === "user" ? undefined : "var(--line)", color: msg.role === "user" ? "white" : "var(--foreground)" }}
                                 >
                                     {msg.content}
                                 </div>
@@ -123,17 +124,17 @@ export default function ChatPanel() {
                         {/* Typing indicator */}
                         {loading && (
                             <div className="flex justify-start">
-                                <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3">
-                                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
-                                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "150ms" }} />
-                                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "300ms" }} />
+                                <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border px-4 py-3" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
+                                    <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: "var(--muted-light)", animationDelay: "0ms" }} />
+                                    <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: "var(--muted-light)", animationDelay: "150ms" }} />
+                                    <span className="h-2 w-2 animate-bounce rounded-full" style={{ backgroundColor: "var(--muted-light)", animationDelay: "300ms" }} />
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Input */}
-                    <div className="border-t border-gray-200 bg-white p-3">
+                    <div className="border-t p-3" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
@@ -141,13 +142,15 @@ export default function ChatPanel() {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Ask about listings..."
-                                className="flex-1 rounded-xl border border-gray-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-green-400 focus:ring-1 focus:ring-green-400"
+                                className="flex-1 rounded-full border px-3 py-2.5 text-sm outline-none"
+                                style={{ borderColor: "var(--line)", backgroundColor: "var(--surface)", color: "var(--foreground)" }}
                             />
                             <button
                                 type="button"
                                 onClick={handleSend}
                                 disabled={!input.trim() || loading}
-                                className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-green-500 text-white transition hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed"
+                                className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl text-white transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                                style={{ backgroundColor: "var(--brand)" }}
                                 aria-label="Send message"
                             >
                                 <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
