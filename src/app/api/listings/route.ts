@@ -132,7 +132,12 @@ function computeIncomeNeeded(monthlyRent: number): number {
 let cachedListings: Listing[] | null = null;
 
 async function loadListings(): Promise<Listing[]> {
-  if (cachedListings) return cachedListings;
+  console.log("--> API /api/listings CALLED");
+  if (cachedListings) {
+    console.log("--> API /api/listings returning CACHED listings");
+    return cachedListings;
+  }
+  console.log("--> API /api/listings loading from JSON feed");
 
   const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
   const raw = await readFile(filePath, "utf8");

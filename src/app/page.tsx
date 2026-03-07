@@ -97,6 +97,11 @@ export default function HeroPage() {
       return { ...l, score, scoreBand, scoreStatus };
     });
 
+    console.log("Re-calculating scores using weights:", weights);
+    if (items.length > 0) {
+      console.log(`Sample updated score for ${items[0].address}: ${items[0].score}/100`);
+    }
+
     // 2. Filter by max rent from preferences
     items = items.filter((l) => l.monthlyRent <= preferences.max_rent);
 
