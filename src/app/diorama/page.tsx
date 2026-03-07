@@ -36,6 +36,10 @@ export default function DioramaPage() {
         const data = await res.json();
         
         if (data.amenities) {
+          const trimmedAmenities = [...data.amenities]
+            .sort((a: Amenity, b: Amenity) => a.distance - b.distance)
+            .slice(0, 20);
+
           // Construct the listing from URL params + API amenities
           const newListing: RentalListing = {
             id: `listing-${Date.now()}`,
@@ -47,7 +51,7 @@ export default function DioramaPage() {
               propertyTypeParam === "house" || propertyTypeParam === "apartment"
                 ? propertyTypeParam
                 : "apartment",
-            amenities: data.amenities.map((a: Amenity) => ({
+            amenities: trimmedAmenities.map((a: Amenity) => ({
               ...a,
               // Randomly assign some local places as "small business" for the golden tether effect
               isSmallBusiness: a.type === "cafe" || a.type === "restaurant" ? Math.random() > 0.5 : false,

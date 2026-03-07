@@ -7,9 +7,9 @@
  * Always faces the camera using Drei's Billboard component.
  */
 
-import { useRef, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Billboard, useTexture } from "@react-three/drei";
+import { Billboard } from "@react-three/drei";
 import { getBusinessTexture } from "@/lib/cloudinary";
 import * as THREE from "three";
 
@@ -21,9 +21,99 @@ interface BusinessBillboardProps {
   onClick?: () => void;
 }
 
-function TextureCard({ name, category, isSmallBusiness, glowRef }: any) {
-  const textureUrl = getBusinessTexture(name, category, isSmallBusiness);
-  const texture = useTexture(textureUrl);
+function pickBorderColor(category: string, isSmallBusiness: boolean): string {
+  const c = category.toLowerCase();
+  if (["pharmacy", "hospital", "clinic", "healthcare"].includes(c)) return "#FF1493";
+  if (isSmallBusiness) return "#FFD700";
+  return "#00D4FF";
+}
+
+function makeFallbackTexture(
+  name: string,
+  category: string,
+  isSmallBusiness: boolean
+): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    const tiny = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+    tiny.needsUpdate = true;
+    return tiny;
+  }
+
+  const border = pickBorderColor(category, isSmallBusiness);
+  const cx = size / 2;
+  const cy = size / 2;
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 118, 0, Math.PI * 2);
+  ctx.fillStyle = "#1a1a2e";
+  ctx.fill();
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = border;
+  ctx.stroke();
+
+  const short = name.length > 16 ? `${name.slice(0, 16)}...` : name;
+  ctx.fillStyle = border;
+  ctx.font = "700 24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(category.slice(0, 1).toUpperCase(), cx, cy - 16);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 16px Arial";
+  ctx.fillText(short, cx, cy + 28);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+interface TextureCardProps {
+  name: string;
+  category: string;
+  isSmallBusiness: boolean;
+  glowRef: React.RefObject<THREE.Mesh | null>;
+}
+
+function TextureCard({ name, category, isSmallBusiness, glowRef }: TextureCardProps) {
+  const textureUrl = useMemo(
+    () => getBusinessTexture(name, category, isSmallBusiness),
+    [name, category, isSmallBusiness]
+  );
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    const loader = new THREE.TextureLoader();
+    const fallback = makeFallbackTexture(name, category, isSmallBusiness);
+
+    loader.load(
+      textureUrl,
+      (loaded) => {
+        if (disposed) return;
+        loaded.colorSpace = THREE.SRGBColorSpace;
+        setTexture(loaded);
+      },
+      undefined,
+      () => {
+        if (disposed) return;
+        setTexture(fallback);
+      }
+    );
+
+    // Show local fallback first for perceived performance and resilience.
+    setTexture(fallback);
+
+    return () => {
+      disposed = true;
+    };
+  }, [textureUrl, name, category, isSmallBusiness]);
+
   return (
     <group>
       {/* Glow ring behind (visible for small businesses) */}
@@ -44,8 +134,7 @@ function TextureCard({ name, category, isSmallBusiness, glowRef }: any) {
       {/* Cloudinary Texture Icon */}
       <mesh>
         <circleGeometry args={[0.7, 32]} />
-        {/* We use meshBasicMaterial because it's a neon sign, it should be self-illuminating */}
-        <meshBasicMaterial map={texture} transparent />
+        <meshBasicMaterial map={texture ?? undefined} transparent />
       </mesh>
     </group>
   );
@@ -91,9 +180,7 @@ export default function BusinessBillboard({
         onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }}
         onPointerOut={(e) => { e.stopPropagation(); document.body.style.cursor = "auto"; }}
       >
-        <Suspense fallback={<group />}>
-          <TextureCard name={name} category={category} isSmallBusiness={isSmallBusiness} glowRef={glowRef} />
-        </Suspense>
+        <TextureCard name={name} category={category} isSmallBusiness={isSmallBusiness} glowRef={glowRef} />
       </group>
     </Billboard>
   );
