@@ -33,6 +33,7 @@ RENTFASTER_LANDING = "https://www.rentfaster.ca/on/toronto/rentals/"
 RESULTS_PER_PAGE = 50
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data"
 OUTPUT_FILE = OUTPUT_DIR / "rentfaster-listings.scraped.json"
+MERGED_FILE = OUTPUT_DIR / "rentfaster-listings.merged.json"
 COOKIE_FILE = Path(__file__).resolve().parent / ".rf_cookies.txt"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -211,12 +212,48 @@ def scrape_all() -> list[dict[str, Any]]:
     return all_listings
 
 
+def merge_with_existing(new_listings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Merge new scraped listings with the existing merged file, keeping unique entries.
+
+    New scraped data takes priority for duplicates (fresher data).
+    Old listings keep their enriched nearby/vitality data.
+    """
+    existing: list[dict[str, Any]] = []
+    if MERGED_FILE.exists():
+        try:
+            existing = json.loads(MERGED_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            log.warning("Could not read existing merged file, starting fresh.")
+
+    # New listings take priority
+    seen_ids: set[str] = set()
+    merged: list[dict[str, Any]] = []
+
+    for item in new_listings:
+        lid = str(item.get("listing_id") or "")
+        if lid and lid not in seen_ids:
+            seen_ids.add(lid)
+            merged.append(item)
+
+    # Add old listings that aren't in the new scrape
+    added_old = 0
+    for item in existing:
+        lid = str(item.get("listing_id") or "")
+        if lid and lid not in seen_ids:
+            seen_ids.add(lid)
+            merged.append(item)
+            added_old += 1
+
+    log.info("Merged: %d new + %d retained old = %d total", len(new_listings), added_old, len(merged))
+    return merged
+
+
 def run_scrape_and_validate() -> tuple[list[dict[str, Any]], FilterReport]:
-    """Scrape + validate in one call."""
+    """Scrape + validate + merge in one call."""
     raw = scrape_all()
     clean, report = validate_listings(raw)
 
-    # Persist to disk
+    # Persist scrape-only output
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_FILE.write_text(json.dumps(clean, indent=2), encoding="utf-8")
     log.info(
@@ -226,7 +263,12 @@ def run_scrape_and_validate() -> tuple[list[dict[str, Any]], FilterReport]:
         report.total_input - report.total_output,
     )
 
-    return clean, report
+    # Merge with existing data and write merged file (used by the Next.js app)
+    merged = merge_with_existing(clean)
+    MERGED_FILE.write_text(json.dumps(merged, indent=2), encoding="utf-8")
+    log.info("Wrote %d merged listings to %s", len(merged), MERGED_FILE.name)
+
+    return merged, report
 
 
 # ── FastAPI ───────────────────────────────────────────────────────────────────

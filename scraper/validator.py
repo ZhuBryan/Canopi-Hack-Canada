@@ -13,6 +13,22 @@ from typing import Any
 MIN_PRICE = 500
 SUSPICIOUS_APARTMENT_PRICE = 800
 
+# Immediate GTA cities (case-insensitive matching)
+GTA_CITIES = {
+    # City of Toronto (pre-amalgamation municipalities)
+    "toronto", "north york", "scarborough", "etobicoke", "east york", "york",
+    # Peel Region
+    "mississauga", "brampton", "caledon",
+    # York Region
+    "markham", "vaughan", "richmond hill", "newmarket", "aurora",
+    "king", "whitchurch-stouffville", "stouffville", "east gwillimbury",
+    "georgina",
+    # Durham Region
+    "pickering", "ajax", "whitby", "oshawa", "clarington",
+    # Halton Region
+    "oakville", "burlington", "milton", "halton hills",
+}
+
 
 @dataclass
 class FilterReport:
@@ -27,6 +43,7 @@ class FilterReport:
     removed_missing_photo: int = 0
     removed_duplicate_id: int = 0
     removed_duplicate_title_price: int = 0
+    removed_outside_gta: int = 0
 
     def to_dict(self) -> dict[str, int]:
         return {
@@ -42,7 +59,29 @@ class FilterReport:
             "removed_missing_photo": self.removed_missing_photo,
             "removed_duplicate_id": self.removed_duplicate_id,
             "removed_duplicate_title_price": self.removed_duplicate_title_price,
+            "removed_outside_gta": self.removed_outside_gta,
         }
+
+
+def _extract_city(item: dict[str, Any]) -> str:
+    """Extract the city name from a listing for GTA filtering."""
+    city = (item.get("city") or "").strip()
+    if city:
+        return city.lower()
+    # Fall back to parsing the location string (e.g. "123 Main St, Toronto")
+    location = (item.get("location") or "").strip()
+    if not location:
+        return ""
+    parts = [p.strip() for p in location.split(",")]
+    if len(parts) > 1:
+        return parts[-1].lower()
+    return ""
+
+
+def _is_in_gta(item: dict[str, Any]) -> bool:
+    """Check if a listing is in the Greater Toronto Area."""
+    city = _extract_city(item)
+    return city in GTA_CITIES
 
 
 def parse_price(raw: str | None) -> int:
@@ -74,6 +113,11 @@ def validate_listings(
             continue
         if listing_id:
             seen_ids.add(listing_id)
+
+        # --- GTA city filter ---
+        if not _is_in_gta(item):
+            report.removed_outside_gta += 1
+            continue
 
         # --- Missing essential fields ---
         title = (item.get("title") or "").strip()
