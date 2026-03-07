@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         if (!supabase) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSession(null);
             setUser(null);
             setLoading(false);

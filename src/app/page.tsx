@@ -13,6 +13,7 @@ import {
 import { avenueNav } from "@/lib/avenuex-data";
 import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
+import ChatPanel from "@/components/avenuex/ChatPanel";
 import { useSavedListings } from "@/hooks/useSavedListings";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
@@ -457,6 +458,7 @@ export default function HeroPage() {
           </aside>
         )}
       </div>
+      <ChatPanel />
     </div>
   );
 }
