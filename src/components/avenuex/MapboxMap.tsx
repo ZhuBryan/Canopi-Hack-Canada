@@ -40,6 +40,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
   const listingToFeatureIdsRef = useRef<Map<string, Set<BuildingId>>>(new Map());
   const featureToListingIdRef = useRef<Map<BuildingId, string>>(new Map());
   const listingAnchorRef = useRef<Map<string, [number, number]>>(new Map());
+  const listingFootprintRef = useRef<Map<string, GeoJSON.Geometry>>(new Map());
   const activeSelectedBuildingIdsRef = useRef<Set<BuildingId>>(new Set());
   const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
   const highlightDirtyRef = useRef(true);
@@ -121,6 +122,14 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
       const t = Date.now() / 550;
       const radius = 20 + Math.sin(t) * 5;
       map.setPaintProperty("selected-bubble", "circle-radius", radius);
+      if (map.getLayer("selected-footprint-fill")) {
+        const alpha = 0.16 + ((Math.sin(t) + 1) / 2) * 0.12;
+        map.setPaintProperty("selected-footprint-fill", "fill-opacity", alpha);
+      }
+      if (map.getLayer("selected-footprint-line")) {
+        const width = 2.5 + ((Math.sin(t) + 1) / 2) * 2;
+        map.setPaintProperty("selected-footprint-line", "line-width", width);
+      }
     }, 120);
 
     map.on("load", () => {
@@ -233,6 +242,32 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
           "circle-opacity": 0.98,
         },
       });
+      map.addSource("selected-footprint", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      });
+      map.addLayer({
+        id: "selected-footprint-fill",
+        type: "fill",
+        source: "selected-footprint",
+        paint: {
+          "fill-color": "#22c55e",
+          "fill-opacity": 0.24,
+        },
+      });
+      map.addLayer({
+        id: "selected-footprint-line",
+        type: "line",
+        source: "selected-footprint",
+        paint: {
+          "line-color": "#16a34a",
+          "line-width": 3,
+          "line-opacity": 0.95,
+        },
+      });
 
       map.addSource("amenity-paths", {
         type: "geojson",
@@ -305,6 +340,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         listingToFeatureIdsRef.current.clear();
         featureToListingIdRef.current.clear();
         listingAnchorRef.current.clear();
+        listingFootprintRef.current.clear();
 
         const buildingFeatures = map.querySourceFeatures("composite", {
           sourceLayer: "building",
@@ -334,6 +370,10 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
               (nearestBounds.minLat + nearestBounds.maxLat) / 2,
             ]);
           }
+          listingFootprintRef.current.set(
+            listing.id,
+            JSON.parse(JSON.stringify(nearest.geometry)) as GeoJSON.Geometry,
+          );
 
           const anchorKeys = vertexKeySet(nearest.geometry, 5);
           const idsForListing = new Set<BuildingId>();
@@ -466,20 +506,24 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         })
           .setLngLat(lngLat)
           .setHTML(
-            `<div style="font-family:Inter,sans-serif;color:#0f172a;padding:2px 1px">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800;line-height:1.3">${escapeHtml(name)}</div>
-                ${Number.isFinite(rating) && rating > 0 ? `<span style="font-size:11px;font-weight:700;background:#ecfdf5;color:#166534;padding:2px 7px;border-radius:999px;border:1px solid #86efac">${Math.round(rating)}/100</span>` : ""}
+            `<div style="font-family:Inter,sans-serif;color:#0f172a;min-width:240px;max-width:280px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 10px 24px rgba(2,6,23,0.14)">
+              <div style="padding:10px 12px;background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);border-bottom:1px solid #dcfce7">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <div style="font-size:13px;font-weight:800;line-height:1.3">${escapeHtml(name)}</div>
+                  ${Number.isFinite(rating) && rating > 0 ? `<span style="font-size:11px;font-weight:800;background:#166534;color:#ecfdf5;padding:3px 8px;border-radius:999px">${Math.round(rating)}/100</span>` : ""}
+                </div>
+                <div style="font-size:11px;color:#334155;margin-top:4px;font-weight:600">${escapeHtml(formatAmenityType(type))}</div>
               </div>
-              <div style="font-size:12px;color:#475569;margin-bottom:5px">${escapeHtml(formatAmenityType(type))}</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-                <span style="font-size:11px;background:#f1f5f9;color:#334155;padding:2px 7px;border-radius:999px">${Number.isFinite(distance) ? `${Math.round(distance)}m away` : "Distance n/a"}</span>
-                <span style="font-size:11px;background:#eff6ff;color:#1e3a8a;padding:2px 7px;border-radius:999px">${Number.isFinite(walkMinutes) && walkMinutes > 0 ? `${Math.round(walkMinutes)} min walk` : "Walk n/a"}</span>
-                ${isSmallBusiness ? '<span style="font-size:11px;background:#fefce8;color:#854d0e;padding:2px 7px;border-radius:999px">Local small business</span>' : ""}
+              <div style="padding:10px 12px">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+                  <span style="font-size:11px;background:#f1f5f9;color:#334155;padding:3px 8px;border-radius:999px;font-weight:600">${Number.isFinite(distance) ? `${Math.round(distance)}m away` : "Distance n/a"}</span>
+                  <span style="font-size:11px;background:#eff6ff;color:#1e3a8a;padding:3px 8px;border-radius:999px;font-weight:600">${Number.isFinite(walkMinutes) && walkMinutes > 0 ? `${Math.round(walkMinutes)} min walk` : "Walk n/a"}</span>
+                  ${isSmallBusiness ? '<span style="font-size:11px;background:#fefce8;color:#854d0e;padding:3px 8px;border-radius:999px;font-weight:700">Local small business</span>' : ""}
+                </div>
+                ${address ? `<div style="font-size:11px;color:#334155;margin-bottom:6px;line-height:1.35">${escapeHtml(address)}</div>` : ""}
+                ${description ? `<div style="font-size:11px;color:#64748b;margin-bottom:6px;line-height:1.45">${escapeHtml(description)}</div>` : ""}
+                <div style="font-size:10px;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:6px">Source: ${escapeHtml(source)}</div>
               </div>
-              ${address ? `<div style="font-size:11px;color:#334155;margin-bottom:4px">${escapeHtml(address)}</div>` : ""}
-              ${description ? `<div style="font-size:11px;color:#64748b;margin-bottom:4px;line-height:1.4">${escapeHtml(description)}</div>` : ""}
-              <div style="font-size:10px;color:#94a3b8">Source: ${escapeHtml(source)}</div>
             </div>`,
           )
           .addTo(map);
@@ -564,6 +608,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
       ? (listingAnchorRef.current.get(selectedListing.id) ?? [selectedListing.lng, selectedListing.lat])
       : null;
     const selectedSource = map.getSource("selected-listing") as mapboxgl.GeoJSONSource | undefined;
+    const selectedFootprint = map.getSource("selected-footprint") as mapboxgl.GeoJSONSource | undefined;
     if (selectedSource) {
       selectedSource.setData(
         selectedListing && selectedAnchor
@@ -577,6 +622,23 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
                     type: "Point",
                     coordinates: selectedAnchor,
                   },
+                },
+              ],
+            }
+          : { type: "FeatureCollection", features: [] },
+      );
+    }
+    if (selectedFootprint) {
+      const footprint = selectedListing ? listingFootprintRef.current.get(selectedListing.id) : null;
+      selectedFootprint.setData(
+        footprint
+          ? {
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  properties: {},
+                  geometry: footprint,
                 },
               ],
             }
