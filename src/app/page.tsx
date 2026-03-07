@@ -60,7 +60,7 @@ export default function HeroPage() {
       case "score-desc":
         return [...items].sort((a, b) => b.score - a.score);
       default:
-        return items;
+        return [...items].sort((a, b) => b.score - a.score);
     }
   }, [search, filter, sort]);
 
