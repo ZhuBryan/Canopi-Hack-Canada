@@ -21,8 +21,8 @@ export function scoreColor(score: number): string {
 
 // Kept for components that still need a band string.
 const bandStyles: Record<ScoreBand, { pill: string }> = {
-  great:   { pill: "bg-green-50" },
-  medium:  { pill: "bg-orange-50" },
+  great: { pill: "bg-green-50" },
+  medium: { pill: "bg-orange-50" },
   warning: { pill: "bg-red-50" },
 };
 
@@ -68,11 +68,13 @@ export function DesktopNavbar({
   savedCount,
   searchValue,
   onSearchValueChange,
+  userMenu,
 }: {
   searchPlaceholder: string;
   savedCount: number;
   searchValue?: string;
   onSearchValueChange?: (value: string) => void;
+  userMenu?: ReactNode;
 }) {
   const router = useRouter();
   const hasInput = typeof onSearchValueChange === "function";
@@ -111,9 +113,11 @@ export function DesktopNavbar({
             {savedCount}
           </span>
         </button>
-        <div className="relative h-8 w-8 rounded-full bg-green-500 text-white">
-          <span className="absolute inset-0 grid place-items-center text-xs font-bold">R</span>
-        </div>
+        {userMenu ?? (
+          <div className="relative h-8 w-8 rounded-full bg-green-500 text-white">
+            <span className="absolute inset-0 grid place-items-center text-xs font-bold">R</span>
+          </div>
+        )}
       </div>
     </header>
   );

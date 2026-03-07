@@ -20,6 +20,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -448,6 +449,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -884,6 +886,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "St.Andrew-Windfields",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 614.841735839844,
+        "autotheft": 203.165100097656,
+        "biketheft": 10.6928997039795,
+        "breakenter": 384.944396972656,
+        "homicide": 0,
+        "robbery": 106.929000854492,
+        "shooting": 5.34644985198975,
+        "theftfrommv": 219.204452514648,
+        "theftover": 42.771598815918
+      },
+      "composite_rate_per_100k": 1587.896
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -1294,6 +1324,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -1691,6 +1722,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Mount Pleasant East",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 336.545806884766,
+        "autotheft": 224.363876342773,
+        "biketheft": 30.5950736999512,
+        "breakenter": 203.967163085938,
+        "homicide": 0,
+        "robbery": 10.1983585357666,
+        "shooting": 0,
+        "theftfrommv": 107.08275604248,
+        "theftover": 45.8926124572754
+      },
+      "composite_rate_per_100k": 958.646
     },
     "nearby": {
       "schools": {
@@ -2163,6 +2222,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Willowridge-Martingrove-Richview",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 375.419891357422,
+        "autotheft": 324.046630859375,
+        "biketheft": 11.8553647994995,
+        "breakenter": 122.505432128906,
+        "homicide": 0,
+        "robbery": 51.3732452392578,
+        "shooting": 0,
+        "theftfrommv": 138.312591552734,
+        "theftover": 75.0839767456055
+      },
+      "composite_rate_per_100k": 1098.597
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -2466,6 +2553,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Parkdale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1140.30737304688,
+        "autotheft": 72.4610061645508,
+        "biketheft": 110.598373413086,
+        "breakenter": 240.265441894531,
+        "homicide": 3.81373715400696,
+        "robbery": 68.6472702026367,
+        "shooting": 7.62747430801392,
+        "theftfrommv": 205.941802978516,
+        "theftover": 45.7648468017578
+      },
+      "composite_rate_per_100k": 1895.427
     },
     "nearby": {
       "schools": {
@@ -2928,6 +3043,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bayview Village",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 439.4580078125,
+        "autotheft": 139.827545166016,
+        "biketheft": 23.3045902252197,
+        "breakenter": 176.44905090332,
+        "homicide": 0,
+        "robbery": 56.5968627929688,
+        "shooting": 0,
+        "theftfrommv": 169.790588378906,
+        "theftover": 49.9384078979492
+      },
+      "composite_rate_per_100k": 1055.365
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -3362,6 +3505,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -3782,6 +3926,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Church-Wellesley",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1264.64318847656,
+        "autotheft": 46.5921211242676,
+        "biketheft": 222.976577758789,
+        "breakenter": 146.432373046875,
+        "homicide": 3.32800841331482,
+        "robbery": 93.1842422485352,
+        "shooting": 0,
+        "theftfrommv": 206.336532592773,
+        "theftover": 106.496269226074
+      },
+      "composite_rate_per_100k": 2089.989
     },
     "nearby": {
       "schools": {
@@ -4266,6 +4438,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Rosedale-Moore Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1080.44775390625,
+        "autotheft": 199.600799560547,
+        "biketheft": 138.852722167969,
+        "breakenter": 455.610504150391,
+        "homicide": 0,
+        "robbery": 86.782958984375,
+        "shooting": 0,
+        "theftfrommv": 182.244201660156,
+        "theftover": 65.0872192382813
+      },
+      "composite_rate_per_100k": 2208.626
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -4727,6 +4927,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Brookhaven-Amesbury",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 610.870361328125,
+        "autotheft": 193.181228637695,
+        "biketheft": 10.4422283172607,
+        "breakenter": 167.075653076172,
+        "homicide": 5.22111415863037,
+        "robbery": 62.6533699035645,
+        "shooting": 10.4422283172607,
+        "theftfrommv": 182.738998413086,
+        "theftover": 46.9900283813477
+      },
+      "composite_rate_per_100k": 1289.615
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -5184,6 +5412,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Bay-Cloverhill",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 601.934509277344,
+        "autotheft": 16.6050891876221,
+        "biketheft": 236.622528076172,
+        "breakenter": 286.437805175781,
+        "homicide": 0,
+        "robbery": 74.722900390625,
+        "shooting": 0,
+        "theftfrommv": 145.294525146484,
+        "theftover": 87.1767196655273
+      },
+      "composite_rate_per_100k": 1448.794
     },
     "nearby": {
       "schools": {
@@ -5656,6 +5912,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Wellington Place",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1169.62158203125,
+        "autotheft": 97.9095001220703,
+        "biketheft": 243.450653076172,
+        "breakenter": 293.728485107422,
+        "homicide": 5.29240560531616,
+        "robbery": 82.0322799682617,
+        "shooting": 10.5848112106323,
+        "theftfrommv": 211.696212768555,
+        "theftover": 87.3246917724609
+      },
+      "composite_rate_per_100k": 2201.641
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -6118,6 +6402,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Yonge-St.Clair",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 270.845428466797,
+        "autotheft": 64.4870071411133,
+        "biketheft": 64.4870071411133,
+        "breakenter": 374.024627685547,
+        "homicide": 0,
+        "robbery": 25.7948017120361,
+        "shooting": 0,
+        "theftfrommv": 116.076606750488,
+        "theftover": 32.2435035705566
+      },
+      "composite_rate_per_100k": 947.959
     },
     "nearby": {
       "schools": {
@@ -6588,6 +6900,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Downsview",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 811.103881835938,
+        "autotheft": 333.983947753906,
+        "biketheft": 34.6996307373047,
+        "breakenter": 164.8232421875,
+        "homicide": 0,
+        "robbery": 125.786163330078,
+        "shooting": 8.67490768432617,
+        "theftfrommv": 203.860336303711,
+        "theftover": 82.41162109375
+      },
+      "composite_rate_per_100k": 1765.344
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -7049,6 +7389,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
     },
     "nearby": {
       "schools": {
@@ -7539,6 +7907,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -8013,6 +8409,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
     },
     "nearby": {
       "schools": {
@@ -8500,6 +8924,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Avondale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 508.259216308594,
+        "autotheft": 66.5577545166016,
+        "biketheft": 66.5577545166016,
+        "breakenter": 108.912689208984,
+        "homicide": 0,
+        "robbery": 30.2535247802734,
+        "shooting": 0,
+        "theftfrommv": 108.912689208984,
+        "theftover": 18.1521148681641
+      },
+      "composite_rate_per_100k": 907.606
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -8959,6 +9411,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North Toronto",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 626.76123046875,
+        "autotheft": 68.0205993652344,
+        "biketheft": 72.8792114257813,
+        "breakenter": 174.910110473633,
+        "homicide": 0,
+        "robbery": 53.4447593688965,
+        "shooting": 0,
+        "theftfrommv": 63.1619873046875,
+        "theftover": 24.2930717468262
+      },
+      "composite_rate_per_100k": 1083.471
     },
     "nearby": {
       "schools": {
@@ -9438,6 +9918,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Moss Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2226.75512695313,
+        "autotheft": 81.5910263061523,
+        "biketheft": 200.577941894531,
+        "breakenter": 350.161468505859,
+        "homicide": 3.39962601661682,
+        "robbery": 166.581680297852,
+        "shooting": 3.39962601661682,
+        "theftfrommv": 275.369720458984,
+        "theftover": 64.5928955078125
+      },
+      "composite_rate_per_100k": 3372.429
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -9911,6 +10419,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Downtown Yonge East",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2360.7626953125,
+        "autotheft": 75.6399536132813,
+        "biketheft": 433.934478759766,
+        "breakenter": 274.692474365234,
+        "homicide": 0,
+        "robbery": 143.317810058594,
+        "shooting": 11.9431505203247,
+        "theftfrommv": 390.142913818359,
+        "theftover": 99.526252746582
+      },
+      "composite_rate_per_100k": 3789.96
     },
     "nearby": {
       "schools": {
@@ -10393,6 +10929,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Taylor-Massey",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 788.72900390625,
+        "autotheft": 192.666625976563,
+        "biketheft": 24.0833282470703,
+        "breakenter": 144.499969482422,
+        "homicide": 0,
+        "robbery": 78.2708206176758,
+        "shooting": 0,
+        "theftfrommv": 210.729125976563,
+        "theftover": 24.0833282470703
+      },
+      "composite_rate_per_100k": 1463.062
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -10862,6 +11426,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Fenside-Parkwoods",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 553.232849121094,
+        "autotheft": 266.058532714844,
+        "biketheft": 8.44630241394043,
+        "breakenter": 118.248237609863,
+        "homicide": 0,
+        "robbery": 33.7852096557617,
+        "shooting": 8.44630241394043,
+        "theftfrommv": 139.363998413086,
+        "theftover": 29.5620594024658
+      },
+      "composite_rate_per_100k": 1157.143
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -11256,6 +11848,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "East End-Danforth",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 796.241760253906,
+        "autotheft": 147.304718017578,
+        "biketheft": 63.6993408203125,
+        "breakenter": 195.079223632813,
+        "homicide": 0,
+        "robbery": 51.7557144165039,
+        "shooting": 3.98120880126953,
+        "theftfrommv": 195.079223632813,
+        "theftover": 39.8120880126953
+      },
+      "composite_rate_per_100k": 1492.953
     },
     "nearby": {
       "schools": {
@@ -11728,6 +12348,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Forest Hill South",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 196.463653564453,
+        "autotheft": 106.417816162109,
+        "biketheft": 40.9299278259277,
+        "breakenter": 327.439422607422,
+        "homicide": 0,
+        "robbery": 73.6738739013672,
+        "shooting": 0,
+        "theftfrommv": 130.975769042969,
+        "theftover": 73.6738739013672
+      },
+      "composite_rate_per_100k": 949.574
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -12195,6 +12843,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Danforth East York",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 434.546447753906,
+        "autotheft": 184.682235717773,
+        "biketheft": 27.1591529846191,
+        "breakenter": 86.9092864990234,
+        "homicide": 0,
+        "robbery": 10.8636608123779,
+        "shooting": 10.8636608123779,
+        "theftfrommv": 239.000549316406,
+        "theftover": 21.7273216247559
+      },
+      "composite_rate_per_100k": 1015.752
     },
     "nearby": {
       "schools": {
@@ -12665,6 +13341,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North St.James Town",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1281.61315917969,
+        "autotheft": 85.4408721923828,
+        "biketheft": 106.801094055176,
+        "breakenter": 153.793579101563,
+        "homicide": 0,
+        "robbery": 76.8967895507813,
+        "shooting": 4.27204370498657,
+        "theftfrommv": 136.70539855957,
+        "theftover": 38.4483947753906
+      },
+      "composite_rate_per_100k": 1883.971
     },
     "nearby": {
       "schools": {
@@ -13145,6 +13849,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North St.James Town",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1281.61315917969,
+        "autotheft": 85.4408721923828,
+        "biketheft": 106.801094055176,
+        "breakenter": 153.793579101563,
+        "homicide": 0,
+        "robbery": 76.8967895507813,
+        "shooting": 4.27204370498657,
+        "theftfrommv": 136.70539855957,
+        "theftover": 38.4483947753906
+      },
+      "composite_rate_per_100k": 1883.971
     },
     "nearby": {
       "schools": {
@@ -13647,6 +14379,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "South Parkdale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1140.30737304688,
+        "autotheft": 72.4610061645508,
+        "biketheft": 110.598373413086,
+        "breakenter": 240.265441894531,
+        "homicide": 3.81373715400696,
+        "robbery": 68.6472702026367,
+        "shooting": 7.62747430801392,
+        "theftfrommv": 205.941802978516,
+        "theftover": 45.7648468017578
+      },
+      "composite_rate_per_100k": 1895.427
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -14108,6 +14868,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Parkdale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1140.30737304688,
+        "autotheft": 72.4610061645508,
+        "biketheft": 110.598373413086,
+        "breakenter": 240.265441894531,
+        "homicide": 3.81373715400696,
+        "robbery": 68.6472702026367,
+        "shooting": 7.62747430801392,
+        "theftfrommv": 205.941802978516,
+        "theftover": 45.7648468017578
+      },
+      "composite_rate_per_100k": 1895.427
     },
     "nearby": {
       "schools": {
@@ -14579,6 +15367,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North Toronto",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 626.76123046875,
+        "autotheft": 68.0205993652344,
+        "biketheft": 72.8792114257813,
+        "breakenter": 174.910110473633,
+        "homicide": 0,
+        "robbery": 53.4447593688965,
+        "shooting": 0,
+        "theftfrommv": 63.1619873046875,
+        "theftover": 24.2930717468262
+      },
+      "composite_rate_per_100k": 1083.471
     },
     "nearby": {
       "schools": {
@@ -15066,6 +15882,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Church-Wellesley",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1264.64318847656,
+        "autotheft": 46.5921211242676,
+        "biketheft": 222.976577758789,
+        "breakenter": 146.432373046875,
+        "homicide": 3.32800841331482,
+        "robbery": 93.1842422485352,
+        "shooting": 0,
+        "theftfrommv": 206.336532592773,
+        "theftover": 106.496269226074
+      },
+      "composite_rate_per_100k": 2089.989
     },
     "nearby": {
       "schools": {
@@ -15559,6 +16403,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Clanton Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 584.128784179688,
+        "autotheft": 185.211563110352,
+        "biketheft": 85.4822616577148,
+        "breakenter": 132.972412109375,
+        "homicide": 0,
+        "robbery": 94.9802932739258,
+        "shooting": 4.74901437759399,
+        "theftfrommv": 194.709594726563,
+        "theftover": 90.2312774658203
+      },
+      "composite_rate_per_100k": 1372.465
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -16019,6 +16891,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
     },
     "nearby": {
       "schools": {
@@ -16494,6 +17394,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North Toronto",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 626.76123046875,
+        "autotheft": 68.0205993652344,
+        "biketheft": 72.8792114257813,
+        "breakenter": 174.910110473633,
+        "homicide": 0,
+        "robbery": 53.4447593688965,
+        "shooting": 0,
+        "theftfrommv": 63.1619873046875,
+        "theftover": 24.2930717468262
+      },
+      "composite_rate_per_100k": 1083.471
     },
     "nearby": {
       "schools": {
@@ -16976,6 +17904,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Wellington Place",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1169.62158203125,
+        "autotheft": 97.9095001220703,
+        "biketheft": 243.450653076172,
+        "breakenter": 293.728485107422,
+        "homicide": 5.29240560531616,
+        "robbery": 82.0322799682617,
+        "shooting": 10.5848112106323,
+        "theftfrommv": 211.696212768555,
+        "theftover": 87.3246917724609
+      },
+      "composite_rate_per_100k": 2201.641
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -17442,6 +18398,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Annex",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1080.88439941406,
+        "autotheft": 116.92259979248,
+        "biketheft": 210.460678100586,
+        "breakenter": 387.143707275391,
+        "homicide": 5.19655990600586,
+        "robbery": 80.5466766357422,
+        "shooting": 5.19655990600586,
+        "theftfrommv": 220.853790283203,
+        "theftover": 114.324317932129
+      },
+      "composite_rate_per_100k": 2221.529
     },
     "nearby": {
       "schools": {
@@ -17924,6 +18908,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Cabbagetown-South St.James Town",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1078.55883789063,
+        "autotheft": 91.7922439575195,
+        "biketheft": 160.636428833008,
+        "breakenter": 321.272857666016,
+        "homicide": 0,
+        "robbery": 145.33772277832,
+        "shooting": 0,
+        "theftfrommv": 229.480606079102,
+        "theftover": 22.9480609893799
+      },
+      "composite_rate_per_100k": 2050.027
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -18394,6 +19406,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Harbourfront-CityPlace",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 883.327209472656,
+        "autotheft": 56.6235389709473,
+        "biketheft": 138.727676391602,
+        "breakenter": 141.558853149414,
+        "homicide": 2.83117699623108,
+        "robbery": 48.1300086975098,
+        "shooting": 8.49353122711182,
+        "theftfrommv": 121.740608215332,
+        "theftover": 56.6235389709473
+      },
+      "composite_rate_per_100k": 1458.056
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -18862,6 +19902,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "High Park North",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 677.92626953125,
+        "autotheft": 74.4543304443359,
+        "biketheft": 74.4543304443359,
+        "breakenter": 133.23405456543,
+        "homicide": 3.91864895820618,
+        "robbery": 43.1051368713379,
+        "shooting": 3.91864895820618,
+        "theftfrommv": 152.827301025391,
+        "theftover": 27.4305419921875
+      },
+      "composite_rate_per_100k": 1191.269
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -19322,6 +20390,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "St Lawrence-East Bayfront-The Islands",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1059.68273925781,
+        "autotheft": 24.6437854766846,
+        "biketheft": 275.562316894531,
+        "breakenter": 163.545120239258,
+        "homicide": 0,
+        "robbery": 96.3348007202148,
+        "shooting": 4.48068809509277,
+        "theftfrommv": 163.545120239258,
+        "theftover": 78.4120407104492
+      },
+      "composite_rate_per_100k": 1866.207
     },
     "nearby": {
       "schools": {
@@ -19788,6 +20884,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Junction-Wallace Emerson",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 720.020141601563,
+        "autotheft": 108.003021240234,
+        "biketheft": 154.804336547852,
+        "breakenter": 230.406448364258,
+        "homicide": 0,
+        "robbery": 36.0010070800781,
+        "shooting": 3.60010075569153,
+        "theftfrommv": 201.605651855469,
+        "theftover": 32.4009056091309
+      },
+      "composite_rate_per_100k": 1486.842
     },
     "nearby": {
       "schools": {
@@ -20257,6 +21381,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "West Queen West",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 588.730041503906,
+        "autotheft": 84.1042861938477,
+        "biketheft": 122.921653747559,
+        "breakenter": 258.782440185547,
+        "homicide": 0,
+        "robbery": 51.7564849853516,
+        "shooting": 6.46956062316895,
+        "theftfrommv": 181.147705078125,
+        "theftover": 19.4086818695068
+      },
+      "composite_rate_per_100k": 1313.321
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -20719,6 +21871,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Regent Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 947.839050292969,
+        "autotheft": 95.3800277709961,
+        "biketheft": 119.225036621094,
+        "breakenter": 166.915054321289,
+        "homicide": 0,
+        "robbery": 83.4575271606445,
+        "shooting": 5.96125173568726,
+        "theftfrommv": 125.18628692627,
+        "theftover": 11.9225034713745
+      },
+      "composite_rate_per_100k": 1555.887
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -21177,6 +22357,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Bay-Cloverhill",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 601.934509277344,
+        "autotheft": 16.6050891876221,
+        "biketheft": 236.622528076172,
+        "breakenter": 286.437805175781,
+        "homicide": 0,
+        "robbery": 74.722900390625,
+        "shooting": 0,
+        "theftfrommv": 145.294525146484,
+        "theftover": 87.1767196655273
+      },
+      "composite_rate_per_100k": 1448.794
     },
     "nearby": {
       "schools": {
@@ -21654,6 +22862,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Church-Wellesley",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1264.64318847656,
+        "autotheft": 46.5921211242676,
+        "biketheft": 222.976577758789,
+        "breakenter": 146.432373046875,
+        "homicide": 3.32800841331482,
+        "robbery": 93.1842422485352,
+        "shooting": 0,
+        "theftfrommv": 206.336532592773,
+        "theftover": 106.496269226074
+      },
+      "composite_rate_per_100k": 2089.989
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -22123,6 +23359,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Kensington-Chinatown",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2017.45532226563,
+        "autotheft": 118.415855407715,
+        "biketheft": 390.333770751953,
+        "breakenter": 442.963012695313,
+        "homicide": 0,
+        "robbery": 192.973999023438,
+        "shooting": 21.9288635253906,
+        "theftfrommv": 850.839904785156,
+        "theftover": 219.288635253906
+      },
+      "composite_rate_per_100k": 4254.199
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -22590,6 +23854,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Bay-Cloverhill",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 601.934509277344,
+        "autotheft": 16.6050891876221,
+        "biketheft": 236.622528076172,
+        "breakenter": 286.437805175781,
+        "homicide": 0,
+        "robbery": 74.722900390625,
+        "shooting": 0,
+        "theftfrommv": 145.294525146484,
+        "theftover": 87.1767196655273
+      },
+      "composite_rate_per_100k": 1448.794
     },
     "nearby": {
       "schools": {
@@ -23064,6 +24356,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Forest Hill South",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 196.463653564453,
+        "autotheft": 106.417816162109,
+        "biketheft": 40.9299278259277,
+        "breakenter": 327.439422607422,
+        "homicide": 0,
+        "robbery": 73.6738739013672,
+        "shooting": 0,
+        "theftfrommv": 130.975769042969,
+        "theftover": 73.6738739013672
+      },
+      "composite_rate_per_100k": 949.574
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -23524,6 +24844,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Yonge-Bay Corridor",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 3361.14282226563,
+        "autotheft": 162.055099487305,
+        "biketheft": 822.279602050781,
+        "breakenter": 552.187744140625,
+        "homicide": 12.0040817260742,
+        "robbery": 300.102020263672,
+        "shooting": 12.0040817260742,
+        "theftfrommv": 402.13671875,
+        "theftover": 210.071426391602
+      },
+      "composite_rate_per_100k": 5833.984
     },
     "nearby": {
       "schools": {
@@ -23999,6 +25347,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Fort York-Liberty Village",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 730.863403320313,
+        "autotheft": 46.6508560180664,
+        "biketheft": 151.615280151367,
+        "breakenter": 124.402282714844,
+        "homicide": 3.88757133483887,
+        "robbery": 23.3254280090332,
+        "shooting": 0,
+        "theftfrommv": 132.177429199219,
+        "theftover": 77.7514266967773
+      },
+      "composite_rate_per_100k": 1290.674
     },
     "nearby": {
       "schools": {
@@ -24477,6 +25853,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Henry Farm",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 286.848205566406,
+        "autotheft": 192.541946411133,
+        "biketheft": 23.5765647888184,
+        "breakenter": 55.0119857788086,
+        "homicide": 3.9294273853302,
+        "robbery": 51.0825576782227,
+        "shooting": 3.9294273853302,
+        "theftfrommv": 94.3062591552734,
+        "theftover": 27.5059928894043
+      },
+      "composite_rate_per_100k": 738.732
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -24937,6 +26341,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "University",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1740.50634765625,
+        "autotheft": 182.570587158203,
+        "biketheft": 718.111022949219,
+        "breakenter": 730.282348632813,
+        "homicide": 12.1713733673096,
+        "robbery": 133.885101318359,
+        "shooting": 0,
+        "theftfrommv": 352.969818115234,
+        "theftover": 121.713729858398
+      },
+      "composite_rate_per_100k": 3992.21
     },
     "nearby": {
       "schools": {
@@ -25430,6 +26862,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bay-Cloverhill",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 601.934509277344,
+        "autotheft": 16.6050891876221,
+        "biketheft": 236.622528076172,
+        "breakenter": 286.437805175781,
+        "homicide": 0,
+        "robbery": 74.722900390625,
+        "shooting": 0,
+        "theftfrommv": 145.294525146484,
+        "theftover": 87.1767196655273
+      },
+      "composite_rate_per_100k": 1448.794
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -25900,6 +27360,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Broadview North",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 583.232055664063,
+        "autotheft": 194.410690307617,
+        "biketheft": 56.7031173706055,
+        "breakenter": 97.2053451538086,
+        "homicide": 0,
+        "robbery": 8.10044574737549,
+        "shooting": 0,
+        "theftfrommv": 105.305793762207,
+        "theftover": 24.3013362884521
+      },
+      "composite_rate_per_100k": 1069.259
     },
     "nearby": {
       "schools": {
@@ -26377,6 +27865,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "St Lawrence-East Bayfront-The Islands",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1059.68273925781,
+        "autotheft": 24.6437854766846,
+        "biketheft": 275.562316894531,
+        "breakenter": 163.545120239258,
+        "homicide": 0,
+        "robbery": 96.3348007202148,
+        "shooting": 4.48068809509277,
+        "theftfrommv": 163.545120239258,
+        "theftover": 78.4120407104492
+      },
+      "composite_rate_per_100k": 1866.207
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -26853,6 +28369,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "University",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1740.50634765625,
+        "autotheft": 182.570587158203,
+        "biketheft": 718.111022949219,
+        "breakenter": 730.282348632813,
+        "homicide": 12.1713733673096,
+        "robbery": 133.885101318359,
+        "shooting": 0,
+        "theftfrommv": 352.969818115234,
+        "theftover": 121.713729858398
+      },
+      "composite_rate_per_100k": 3992.21
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -27322,6 +28866,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Annex",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1080.88439941406,
+        "autotheft": 116.92259979248,
+        "biketheft": 210.460678100586,
+        "breakenter": 387.143707275391,
+        "homicide": 5.19655990600586,
+        "robbery": 80.5466766357422,
+        "shooting": 5.19655990600586,
+        "theftfrommv": 220.853790283203,
+        "theftover": 114.324317932129
+      },
+      "composite_rate_per_100k": 2221.529
     },
     "nearby": {
       "schools": {
@@ -27812,6 +29384,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Church-Wellesley",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1264.64318847656,
+        "autotheft": 46.5921211242676,
+        "biketheft": 222.976577758789,
+        "breakenter": 146.432373046875,
+        "homicide": 3.32800841331482,
+        "robbery": 93.1842422485352,
+        "shooting": 0,
+        "theftfrommv": 206.336532592773,
+        "theftover": 106.496269226074
+      },
+      "composite_rate_per_100k": 2089.989
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -28278,6 +29878,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Downtown Yonge East",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2360.7626953125,
+        "autotheft": 75.6399536132813,
+        "biketheft": 433.934478759766,
+        "breakenter": 274.692474365234,
+        "homicide": 0,
+        "robbery": 143.317810058594,
+        "shooting": 11.9431505203247,
+        "theftfrommv": 390.142913818359,
+        "theftover": 99.526252746582
+      },
+      "composite_rate_per_100k": 3789.96
     },
     "nearby": {
       "schools": {
@@ -28759,6 +30387,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Cabbagetown-South St.James Town",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1078.55883789063,
+        "autotheft": 91.7922439575195,
+        "biketheft": 160.636428833008,
+        "breakenter": 321.272857666016,
+        "homicide": 0,
+        "robbery": 145.33772277832,
+        "shooting": 0,
+        "theftfrommv": 229.480606079102,
+        "theftover": 22.9480609893799
+      },
+      "composite_rate_per_100k": 2050.027
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -29235,6 +30891,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Corso Italia-Davenport",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 994.98974609375,
+        "autotheft": 197.586624145508,
+        "biketheft": 70.566650390625,
+        "breakenter": 197.586624145508,
+        "homicide": 0,
+        "robbery": 91.7366485595703,
+        "shooting": 7.05666494369507,
+        "theftfrommv": 324.606597900391,
+        "theftover": 35.2833251953125
+      },
+      "composite_rate_per_100k": 1919.413
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -29702,6 +31386,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Etobicoke City Centre",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 844.441589355469,
+        "autotheft": 601.785949707031,
+        "biketheft": 45.2957153320313,
+        "breakenter": 210.301544189453,
+        "homicide": 0,
+        "robbery": 187.653686523438,
+        "shooting": 16.1770420074463,
+        "theftfrommv": 278.2451171875,
+        "theftover": 200.595321655273
+      },
+      "composite_rate_per_100k": 2384.496
     },
     "nearby": {
       "schools": {
@@ -30178,6 +31890,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Moss Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2226.75512695313,
+        "autotheft": 81.5910263061523,
+        "biketheft": 200.577941894531,
+        "breakenter": 350.161468505859,
+        "homicide": 3.39962601661682,
+        "robbery": 166.581680297852,
+        "shooting": 3.39962601661682,
+        "theftfrommv": 275.369720458984,
+        "theftover": 64.5928955078125
+      },
+      "composite_rate_per_100k": 3372.429
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -30631,6 +32371,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Newtonbrook East",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 554.001403808594,
+        "autotheft": 252.317474365234,
+        "biketheft": 5.48516273498535,
+        "breakenter": 170.0400390625,
+        "homicide": 0,
+        "robbery": 60.3367881774902,
+        "shooting": 0,
+        "theftfrommv": 170.0400390625,
+        "theftover": 49.3664627075195
+      },
+      "composite_rate_per_100k": 1261.587
     },
     "nearby": {
       "schools": {
@@ -31123,6 +32891,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -31590,6 +33386,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "South Eglinton-Davisville",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 435.955993652344,
+        "autotheft": 58.8194580078125,
+        "biketheft": 20.7598094940186,
+        "breakenter": 128.018829345703,
+        "homicide": 0,
+        "robbery": 24.2197780609131,
+        "shooting": 0,
+        "theftfrommv": 100.339073181152,
+        "theftover": 20.7598094940186
+      },
+      "composite_rate_per_100k": 788.873
     },
     "nearby": {
       "schools": {
@@ -32062,6 +33886,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Fenside-Parkwoods",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 553.232849121094,
+        "autotheft": 266.058532714844,
+        "biketheft": 8.44630241394043,
+        "breakenter": 118.248237609863,
+        "homicide": 0,
+        "robbery": 33.7852096557617,
+        "shooting": 8.44630241394043,
+        "theftfrommv": 139.363998413086,
+        "theftover": 29.5620594024658
+      },
+      "composite_rate_per_100k": 1157.143
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -32456,6 +34308,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "St Lawrence-East Bayfront-The Islands",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1059.68273925781,
+        "autotheft": 24.6437854766846,
+        "biketheft": 275.562316894531,
+        "breakenter": 163.545120239258,
+        "homicide": 0,
+        "robbery": 96.3348007202148,
+        "shooting": 4.48068809509277,
+        "theftfrommv": 163.545120239258,
+        "theftover": 78.4120407104492
+      },
+      "composite_rate_per_100k": 1866.207
     },
     "nearby": {
       "schools": {
@@ -32940,6 +34820,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "South Parkdale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1140.30737304688,
+        "autotheft": 72.4610061645508,
+        "biketheft": 110.598373413086,
+        "breakenter": 240.265441894531,
+        "homicide": 3.81373715400696,
+        "robbery": 68.6472702026367,
+        "shooting": 7.62747430801392,
+        "theftfrommv": 205.941802978516,
+        "theftover": 45.7648468017578
+      },
+      "composite_rate_per_100k": 1895.427
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -33406,6 +35314,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bedford Park-Nortown",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 230.113067626953,
+        "autotheft": 150.763732910156,
+        "biketheft": 19.8373336791992,
+        "breakenter": 249.950408935547,
+        "homicide": 0,
+        "robbery": 59.5120010375977,
+        "shooting": 0,
+        "theftfrommv": 198.373336791992,
+        "theftover": 67.4469375610352
+      },
+      "composite_rate_per_100k": 975.997
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -33859,6 +35795,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bathurst Manor",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 510.233001708984,
+        "autotheft": 141.731384277344,
+        "biketheft": 22.67702293396,
+        "breakenter": 113.385108947754,
+        "homicide": 0,
+        "robbery": 79.3695755004883,
+        "shooting": 11.33851146698,
+        "theftfrommv": 153.069900512695,
+        "theftover": 56.692554473877
+      },
+      "composite_rate_per_100k": 1088.497
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -34236,6 +36200,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Casa Loma",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 564.888854980469,
+        "autotheft": 73.362190246582,
+        "biketheft": 80.6984100341797,
+        "breakenter": 322.793640136719,
+        "homicide": 0,
+        "robbery": 29.3448753356934,
+        "shooting": 14.6724376678467,
+        "theftfrommv": 102.707061767578,
+        "theftover": 36.681095123291
+      },
+      "composite_rate_per_100k": 1225.149
     },
     "nearby": {
       "schools": {
@@ -34721,6 +36713,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bathurst Manor",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 510.233001708984,
+        "autotheft": 141.731384277344,
+        "biketheft": 22.67702293396,
+        "breakenter": 113.385108947754,
+        "homicide": 0,
+        "robbery": 79.3695755004883,
+        "shooting": 11.33851146698,
+        "theftfrommv": 153.069900512695,
+        "theftover": 56.692554473877
+      },
+      "composite_rate_per_100k": 1088.497
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -35135,6 +37155,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Forest Hill South",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 196.463653564453,
+        "autotheft": 106.417816162109,
+        "biketheft": 40.9299278259277,
+        "breakenter": 327.439422607422,
+        "homicide": 0,
+        "robbery": 73.6738739013672,
+        "shooting": 0,
+        "theftfrommv": 130.975769042969,
+        "theftover": 73.6738739013672
+      },
+      "composite_rate_per_100k": 949.574
     },
     "nearby": {
       "schools": {
@@ -35564,6 +37612,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Annex",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1080.88439941406,
+        "autotheft": 116.92259979248,
+        "biketheft": 210.460678100586,
+        "breakenter": 387.143707275391,
+        "homicide": 5.19655990600586,
+        "robbery": 80.5466766357422,
+        "shooting": 5.19655990600586,
+        "theftfrommv": 220.853790283203,
+        "theftover": 114.324317932129
+      },
+      "composite_rate_per_100k": 2221.529
     },
     "nearby": {
       "schools": {
@@ -36022,6 +38098,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "University",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1740.50634765625,
+        "autotheft": 182.570587158203,
+        "biketheft": 718.111022949219,
+        "breakenter": 730.282348632813,
+        "homicide": 12.1713733673096,
+        "robbery": 133.885101318359,
+        "shooting": 0,
+        "theftfrommv": 352.969818115234,
+        "theftover": 121.713729858398
+      },
+      "composite_rate_per_100k": 3992.21
     },
     "nearby": {
       "schools": {
@@ -36511,6 +38615,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Bay-Cloverhill",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 601.934509277344,
+        "autotheft": 16.6050891876221,
+        "biketheft": 236.622528076172,
+        "breakenter": 286.437805175781,
+        "homicide": 0,
+        "robbery": 74.722900390625,
+        "shooting": 0,
+        "theftfrommv": 145.294525146484,
+        "theftover": 87.1767196655273
+      },
+      "composite_rate_per_100k": 1448.794
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -36981,6 +39113,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Flemingdon Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 596.028991699219,
+        "autotheft": 235.37451171875,
+        "biketheft": 41.7599945068359,
+        "breakenter": 60.7418098449707,
+        "homicide": 0,
+        "robbery": 37.9636306762695,
+        "shooting": 11.3890895843506,
+        "theftfrommv": 201.207244873047,
+        "theftover": 26.5745410919189
+      },
+      "composite_rate_per_100k": 1211.04
     },
     "nearby": {
       "schools": {
@@ -37471,6 +39631,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -37855,6 +40016,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Flemingdon Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 596.028991699219,
+        "autotheft": 235.37451171875,
+        "biketheft": 41.7599945068359,
+        "breakenter": 60.7418098449707,
+        "homicide": 0,
+        "robbery": 37.9636306762695,
+        "shooting": 11.3890895843506,
+        "theftfrommv": 201.207244873047,
+        "theftover": 26.5745410919189
+      },
+      "composite_rate_per_100k": 1211.04
     },
     "nearby": {
       "schools": {
@@ -38315,6 +40504,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Westminster-Branson",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 512.320068359375,
+        "autotheft": 188.19921875,
+        "biketheft": 27.8813648223877,
+        "breakenter": 59.2479019165039,
+        "homicide": 0,
+        "robbery": 31.3665351867676,
+        "shooting": 0,
+        "theftfrommv": 121.980972290039,
+        "theftover": 24.3961944580078
+      },
+      "composite_rate_per_100k": 965.392
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -38732,6 +40949,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Eglinton East",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 825.808471679688,
+        "autotheft": 270.124267578125,
+        "biketheft": 23.153507232666,
+        "breakenter": 150.497802734375,
+        "homicide": 0,
+        "robbery": 65.6016082763672,
+        "shooting": 15.4356718063354,
+        "theftfrommv": 559.543090820313,
+        "theftover": 61.7426872253418
+      },
+      "composite_rate_per_100k": 1971.907
     },
     "nearby": {
       "schools": {
@@ -39178,6 +41423,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Clanton Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 584.128784179688,
+        "autotheft": 185.211563110352,
+        "biketheft": 85.4822616577148,
+        "breakenter": 132.972412109375,
+        "homicide": 0,
+        "robbery": 94.9802932739258,
+        "shooting": 4.74901437759399,
+        "theftfrommv": 194.709594726563,
+        "theftover": 90.2312774658203
+      },
+      "composite_rate_per_100k": 1372.465
     },
     "nearby": {
       "schools": {
@@ -39638,6 +41911,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Etobicoke City Centre",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 844.441589355469,
+        "autotheft": 601.785949707031,
+        "biketheft": 45.2957153320313,
+        "breakenter": 210.301544189453,
+        "homicide": 0,
+        "robbery": 187.653686523438,
+        "shooting": 16.1770420074463,
+        "theftfrommv": 278.2451171875,
+        "theftover": 200.595321655273
+      },
+      "composite_rate_per_100k": 2384.496
     },
     "nearby": {
       "schools": {
@@ -40104,6 +42405,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Junction-Wallace Emerson",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 720.020141601563,
+        "autotheft": 108.003021240234,
+        "biketheft": 154.804336547852,
+        "breakenter": 230.406448364258,
+        "homicide": 0,
+        "robbery": 36.0010070800781,
+        "shooting": 3.60010075569153,
+        "theftfrommv": 201.605651855469,
+        "theftover": 32.4009056091309
+      },
+      "composite_rate_per_100k": 1486.842
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -40569,6 +42898,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North Toronto",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 626.76123046875,
+        "autotheft": 68.0205993652344,
+        "biketheft": 72.8792114257813,
+        "breakenter": 174.910110473633,
+        "homicide": 0,
+        "robbery": 53.4447593688965,
+        "shooting": 0,
+        "theftfrommv": 63.1619873046875,
+        "theftover": 24.2930717468262
+      },
+      "composite_rate_per_100k": 1083.471
     },
     "nearby": {
       "schools": {
@@ -41063,6 +43420,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Flemingdon Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 596.028991699219,
+        "autotheft": 235.37451171875,
+        "biketheft": 41.7599945068359,
+        "breakenter": 60.7418098449707,
+        "homicide": 0,
+        "robbery": 37.9636306762695,
+        "shooting": 11.3890895843506,
+        "theftfrommv": 201.207244873047,
+        "theftover": 26.5745410919189
+      },
+      "composite_rate_per_100k": 1211.04
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -41514,6 +43899,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Flemingdon Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 596.028991699219,
+        "autotheft": 235.37451171875,
+        "biketheft": 41.7599945068359,
+        "breakenter": 60.7418098449707,
+        "homicide": 0,
+        "robbery": 37.9636306762695,
+        "shooting": 11.3890895843506,
+        "theftfrommv": 201.207244873047,
+        "theftover": 26.5745410919189
+      },
+      "composite_rate_per_100k": 1211.04
     },
     "nearby": {
       "schools": {
@@ -41977,6 +44390,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Oakdale-Beverley Heights",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1162.2216796875,
+        "autotheft": 452.654754638672,
+        "biketheft": 24.4678249359131,
+        "breakenter": 154.962890625,
+        "homicide": 4.0779709815979,
+        "robbery": 159.040863037109,
+        "shooting": 16.3118839263916,
+        "theftfrommv": 273.224029541016,
+        "theftover": 77.4814453125
+      },
+      "composite_rate_per_100k": 2324.443
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -42428,6 +44869,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North Toronto",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 626.76123046875,
+        "autotheft": 68.0205993652344,
+        "biketheft": 72.8792114257813,
+        "breakenter": 174.910110473633,
+        "homicide": 0,
+        "robbery": 53.4447593688965,
+        "shooting": 0,
+        "theftfrommv": 63.1619873046875,
+        "theftover": 24.2930717468262
+      },
+      "composite_rate_per_100k": 1083.471
     },
     "nearby": {
       "schools": {
@@ -42916,6 +45385,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "South Parkdale",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1140.30737304688,
+        "autotheft": 72.4610061645508,
+        "biketheft": 110.598373413086,
+        "breakenter": 240.265441894531,
+        "homicide": 3.81373715400696,
+        "robbery": 68.6472702026367,
+        "shooting": 7.62747430801392,
+        "theftfrommv": 205.941802978516,
+        "theftover": 45.7648468017578
+      },
+      "composite_rate_per_100k": 1895.427
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -43380,6 +45877,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "West Queen West",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 588.730041503906,
+        "autotheft": 84.1042861938477,
+        "biketheft": 122.921653747559,
+        "breakenter": 258.782440185547,
+        "homicide": 0,
+        "robbery": 51.7564849853516,
+        "shooting": 6.46956062316895,
+        "theftfrommv": 181.147705078125,
+        "theftover": 19.4086818695068
+      },
+      "composite_rate_per_100k": 1313.321
     },
     "nearby": {
       "schools": {
@@ -43863,6 +46388,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Leaside-Bennington",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 212.924514770508,
+        "autotheft": 298.094329833984,
+        "biketheft": 10.6462259292603,
+        "breakenter": 180.98583984375,
+        "homicide": 0,
+        "robbery": 10.6462259292603,
+        "shooting": 0,
+        "theftfrommv": 234.21696472168,
+        "theftover": 47.908016204834
+      },
+      "composite_rate_per_100k": 995.422
     },
     "nearby": {
       "schools": {
@@ -44409,6 +46962,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Clairlea-Birchmount",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1303.79370117188,
+        "autotheft": 287.553497314453,
+        "biketheft": 6.53530693054199,
+        "breakenter": 189.523895263672,
+        "homicide": 0,
+        "robbery": 49.0148010253906,
+        "shooting": 9.80296039581299,
+        "theftfrommv": 290.821166992188,
+        "theftover": 84.9589920043945
+      },
+      "composite_rate_per_100k": 2222.004
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -44883,6 +47464,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Black Creek",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1204.19750976563,
+        "autotheft": 258.042327880859,
+        "biketheft": 34.4056434631348,
+        "breakenter": 94.6155166625977,
+        "homicide": 0,
+        "robbery": 51.6084632873535,
+        "shooting": 34.4056434631348,
+        "theftfrommv": 167.727508544922,
+        "theftover": 47.3077583312988
+      },
+      "composite_rate_per_100k": 1892.31
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -45324,6 +47933,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Wellington Place",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1169.62158203125,
+        "autotheft": 97.9095001220703,
+        "biketheft": 243.450653076172,
+        "breakenter": 293.728485107422,
+        "homicide": 5.29240560531616,
+        "robbery": 82.0322799682617,
+        "shooting": 10.5848112106323,
+        "theftfrommv": 211.696212768555,
+        "theftover": 87.3246917724609
+      },
+      "composite_rate_per_100k": 2201.641
     },
     "nearby": {
       "schools": {
@@ -45804,6 +48441,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "High Park North",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 677.92626953125,
+        "autotheft": 74.4543304443359,
+        "biketheft": 74.4543304443359,
+        "breakenter": 133.23405456543,
+        "homicide": 3.91864895820618,
+        "robbery": 43.1051368713379,
+        "shooting": 3.91864895820618,
+        "theftfrommv": 152.827301025391,
+        "theftover": 27.4305419921875
+      },
+      "composite_rate_per_100k": 1191.269
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -46272,6 +48937,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "University",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1740.50634765625,
+        "autotheft": 182.570587158203,
+        "biketheft": 718.111022949219,
+        "breakenter": 730.282348632813,
+        "homicide": 12.1713733673096,
+        "robbery": 133.885101318359,
+        "shooting": 0,
+        "theftfrommv": 352.969818115234,
+        "theftover": 121.713729858398
+      },
+      "composite_rate_per_100k": 3992.21
     },
     "nearby": {
       "schools": {
@@ -46758,6 +49451,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Harbourfront-CityPlace",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 883.327209472656,
+        "autotheft": 56.6235389709473,
+        "biketheft": 138.727676391602,
+        "breakenter": 141.558853149414,
+        "homicide": 2.83117699623108,
+        "robbery": 48.1300086975098,
+        "shooting": 8.49353122711182,
+        "theftfrommv": 121.740608215332,
+        "theftover": 56.6235389709473
+      },
+      "composite_rate_per_100k": 1458.056
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -47234,6 +49955,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Rosedale-Moore Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1080.44775390625,
+        "autotheft": 199.600799560547,
+        "biketheft": 138.852722167969,
+        "breakenter": 455.610504150391,
+        "homicide": 0,
+        "robbery": 86.782958984375,
+        "shooting": 0,
+        "theftfrommv": 182.244201660156,
+        "theftover": 65.0872192382813
+      },
+      "composite_rate_per_100k": 2208.626
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -47694,6 +50443,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Trinity-Bellwoods",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 946.704040527344,
+        "autotheft": 75.9700775146484,
+        "biketheft": 187.003265380859,
+        "breakenter": 350.631134033203,
+        "homicide": 0,
+        "robbery": 58.4385223388672,
+        "shooting": 5.84385204315186,
+        "theftfrommv": 280.504913330078,
+        "theftover": 70.1262283325195
+      },
+      "composite_rate_per_100k": 1975.222
     },
     "nearby": {
       "schools": {
@@ -48163,6 +50940,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Greenwood-Coxwell",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 671.140930175781,
+        "autotheft": 148.425399780273,
+        "biketheft": 103.252449035645,
+        "breakenter": 135.518844604492,
+        "homicide": 6.45327806472778,
+        "robbery": 58.0795059204102,
+        "shooting": 6.45327806472778,
+        "theftfrommv": 232.318023681641,
+        "theftover": 25.8131122589111
+      },
+      "composite_rate_per_100k": 1387.455
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -48628,6 +51433,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Little Portugal",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 726.895141601563,
+        "autotheft": 120.238288879395,
+        "biketheft": 153.030548095703,
+        "breakenter": 180.357437133789,
+        "homicide": 0,
+        "robbery": 32.7922592163086,
+        "shooting": 10.9307537078857,
+        "theftfrommv": 191.288192749023,
+        "theftover": 49.1883926391602
+      },
+      "composite_rate_per_100k": 1464.721
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -49089,6 +51922,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "North St.James Town",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1281.61315917969,
+        "autotheft": 85.4408721923828,
+        "biketheft": 106.801094055176,
+        "breakenter": 153.793579101563,
+        "homicide": 0,
+        "robbery": 76.8967895507813,
+        "shooting": 4.27204370498657,
+        "theftfrommv": 136.70539855957,
+        "theftover": 38.4483947753906
+      },
+      "composite_rate_per_100k": 1883.971
     },
     "nearby": {
       "schools": {
@@ -49583,6 +52444,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Fort York-Liberty Village",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 730.863403320313,
+        "autotheft": 46.6508560180664,
+        "biketheft": 151.615280151367,
+        "breakenter": 124.402282714844,
+        "homicide": 3.88757133483887,
+        "robbery": 23.3254280090332,
+        "shooting": 0,
+        "theftfrommv": 132.177429199219,
+        "theftover": 77.7514266967773
+      },
+      "composite_rate_per_100k": 1290.674
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -50056,6 +52945,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Moss Park",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 2226.75512695313,
+        "autotheft": 81.5910263061523,
+        "biketheft": 200.577941894531,
+        "breakenter": 350.161468505859,
+        "homicide": 3.39962601661682,
+        "robbery": 166.581680297852,
+        "shooting": 3.39962601661682,
+        "theftfrommv": 275.369720458984,
+        "theftover": 64.5928955078125
+      },
+      "composite_rate_per_100k": 3372.429
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -50524,6 +53441,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "Lansing-Westgate",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 603.103210449219,
+        "autotheft": 224.793029785156,
+        "biketheft": 43.8620529174805,
+        "breakenter": 104.172378540039,
+        "homicide": 0,
+        "robbery": 49.3448104858398,
+        "shooting": 5.48275661468506,
+        "theftfrommv": 191.896484375,
+        "theftover": 43.8620529174805
+      },
+      "composite_rate_per_100k": 1266.517
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -50901,6 +53846,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Casa Loma",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 564.888854980469,
+        "autotheft": 73.362190246582,
+        "biketheft": 80.6984100341797,
+        "breakenter": 322.793640136719,
+        "homicide": 0,
+        "robbery": 29.3448753356934,
+        "shooting": 14.6724376678467,
+        "theftfrommv": 102.707061767578,
+        "theftover": 36.681095123291
+      },
+      "composite_rate_per_100k": 1225.149
     },
     "nearby": {
       "schools": {
@@ -51369,6 +54342,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Dovercourt Village",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 974.940979003906,
+        "autotheft": 129.484344482422,
+        "biketheft": 175.184707641602,
+        "breakenter": 236.118515014648,
+        "homicide": 0,
+        "robbery": 68.550537109375,
+        "shooting": 0,
+        "theftfrommv": 144.717803955078,
+        "theftover": 22.8501796722412
+      },
+      "composite_rate_per_100k": 1751.847
     },
     "nearby": {
       "schools": {
@@ -51861,6 +54862,34 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": {
+      "neighbourhood_name": "St.Andrew-Windfields",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 614.841735839844,
+        "autotheft": 203.165100097656,
+        "biketheft": 10.6928997039795,
+        "breakenter": 384.944396972656,
+        "homicide": 0,
+        "robbery": 106.929000854492,
+        "shooting": 5.34644985198975,
+        "theftfrommv": 219.204452514648,
+        "theftover": 42.771598815918
+      },
+      "composite_rate_per_100k": 1587.896
+    },
     "nearby": {
       "schools": {
         "label": "Schools",
@@ -52272,6 +55301,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "St Lawrence-East Bayfront-The Islands",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 1059.68273925781,
+        "autotheft": 24.6437854766846,
+        "biketheft": 275.562316894531,
+        "breakenter": 163.545120239258,
+        "homicide": 0,
+        "robbery": 96.3348007202148,
+        "shooting": 4.48068809509277,
+        "theftfrommv": 163.545120239258,
+        "theftover": 78.4120407104492
+      },
+      "composite_rate_per_100k": 1866.207
     },
     "nearby": {
       "schools": {
@@ -52746,6 +55803,34 @@
         "Statistics Canada Proximity Measures",
         "Toronto Police Service Open Data"
       ]
+    },
+    "crime": {
+      "neighbourhood_name": "Yonge-Bay Corridor",
+      "source_file": "Neighbourhood_Crime_Rates_Open_Data_6009069772565146495.csv",
+      "year": 2025,
+      "categories_included": [
+        "assault",
+        "autotheft",
+        "biketheft",
+        "breakenter",
+        "homicide",
+        "robbery",
+        "shooting",
+        "theftfrommv",
+        "theftover"
+      ],
+      "rates_per_100k": {
+        "assault": 3361.14282226563,
+        "autotheft": 162.055099487305,
+        "biketheft": 822.279602050781,
+        "breakenter": 552.187744140625,
+        "homicide": 12.0040817260742,
+        "robbery": 300.102020263672,
+        "shooting": 12.0040817260742,
+        "theftfrommv": 402.13671875,
+        "theftover": 210.071426391602
+      },
+      "composite_rate_per_100k": 5833.984
     },
     "nearby": {
       "schools": {
@@ -53233,6 +56318,7 @@
         "Toronto Police Service Open Data"
       ]
     },
+    "crime": null,
     "nearby": {
       "schools": {
         "label": "Schools",
