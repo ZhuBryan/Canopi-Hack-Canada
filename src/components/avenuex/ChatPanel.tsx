@@ -67,7 +67,7 @@ export default function ChatPanel() {
                 <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-green-500 text-white shadow-lg transition hover:bg-green-600 hover:scale-105 active:scale-95"
+                    className="fixed bottom-6 right-16 z-50 grid h-14 w-14 place-items-center rounded-full bg-green-500 text-white shadow-lg transition hover:bg-green-600 hover:scale-105 active:scale-95"
                     aria-label="Open chat"
                 >
                     {/* Chat bubble icon */}
@@ -80,7 +80,7 @@ export default function ChatPanel() {
             {/* Chat panel */}
             {open && (
                 <div
-                    className="fixed bottom-6 right-6 z-50 flex flex-col overflow-hidden rounded-2xl shadow-2xl glass-panel fade-pop"
+                    className="fixed bottom-6 right-16 z-50 flex flex-col overflow-hidden rounded-2xl shadow-2xl glass-panel fade-pop"
                     style={{ width: 380, height: 500 }}
                 >
                     {/* Header */}
@@ -110,8 +110,8 @@ export default function ChatPanel() {
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${msg.role === "user"
-                                            ? "bg-green-500 text-white rounded-br-md"
-                                            : "bg-white border border-gray-200 text-slate-700 rounded-bl-md"
+                                        ? "bg-green-500 text-white rounded-br-md"
+                                        : "bg-white border border-gray-200 text-slate-700 rounded-bl-md"
                                         }`}
                                     style={{ whiteSpace: "pre-wrap" }}
                                 >
