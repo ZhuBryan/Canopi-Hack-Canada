@@ -363,7 +363,7 @@ async function loadListings(): Promise<Listing[]> {
       };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 50);
+    .slice(0, 200);
 
   return cachedListings;
 }
