@@ -40,4 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-outline.md
+outline.mdscraper/.rf_cookies.txt
+scraper/__pycache__/

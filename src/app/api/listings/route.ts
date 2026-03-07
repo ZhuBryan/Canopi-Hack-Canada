@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Listing, ScoreBand } from "@/lib/avenuex-data";
 
-// ── Types for the raw livable-data JSON ──────────────────────────────────────
+// ── Types for the scraped JSON ──────────────────────────────────────────────
 
 interface NearbyBucket {
   label: string;
@@ -23,12 +23,28 @@ interface RawListing {
   url: string | null;
   title: string | null;
   location: string | null;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  community: string | null;
   price: string | null;
   photo: string | null;
-  lat: number | null;
-  lng: number | null;
-  geocode_display_name: string | null;
-  geocode_found: boolean;
+  photo_large: string | null;
+  beds: string | null;
+  den: string | null;
+  baths: string | null;
+  sqft: string | null;
+  property_type: string | null;
+  lat: string | number | null;
+  lng: string | number | null;
+  availability: string | null;
+  lease_term: string | null;
+  pets: "pets_ok" | "cats_ok" | "dogs_ok" | "no_pets" | null;
+  smoking: string | null;
+  utilities_included: string[];
+  features: string[];
+  date_listed: string | null;
+  // Legacy fields from enriched data (optional)
   nearby?: {
     schools?: NearbyBucket;
     groceries?: NearbyBucket;
@@ -61,17 +77,25 @@ function parsePrice(raw: string | null | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function extractCity(location: string | null | undefined): string {
-  if (!location) return "Toronto, ON";
-  const parts = location.split(",").map((s) => s.trim()).filter(Boolean);
+function parseNum(raw: string | number | null | undefined): number {
+  if (raw == null || raw === "") return 0;
+  const n = typeof raw === "number" ? raw : parseFloat(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function extractCity(item: RawListing): string {
+  if (item.city) return `${item.city}, ON`;
+  if (!item.location) return "Toronto, ON";
+  const parts = item.location.split(",").map((s) => s.trim()).filter(Boolean);
   const city = parts.length > 1 ? parts[parts.length - 1] : parts[0] ?? "Toronto";
   return `${city}, ON`;
 }
 
-function extractAddress(location: string | null | undefined): string {
-  if (!location) return "Unknown address";
-  const parts = location.split(",").map((s) => s.trim()).filter(Boolean);
-  return parts[0] ?? location;
+function extractAddress(item: RawListing): string {
+  if (item.address) return item.address;
+  if (!item.location) return "Unknown address";
+  const parts = item.location.split(",").map((s) => s.trim()).filter(Boolean);
+  return parts[0] ?? item.location;
 }
 
 function countWithinRadius(bucket: NearbyBucket | undefined): number {
@@ -116,6 +140,44 @@ function computeIncomeNeeded(monthlyRent: number): number {
   return Math.round((monthlyRent / 0.3) * 12 / 1000) * 1000;
 }
 
+function mapPropertyType(raw: string | null | undefined): Listing["propertyType"] {
+  const normalized = (raw ?? "").toLowerCase();
+  if (normalized.includes("condo")) return "Condo";
+  if (normalized.includes("house") || normalized.includes("town")) return "House";
+  return "Apartment";
+}
+
+function buildAmenities(item: RawListing, nearbyCounts: Record<string, number>): string[] {
+  const amenities: string[] = [];
+
+  // Building features from the scraper
+  if (item.features && item.features.length > 0) {
+    amenities.push(...item.features);
+  }
+
+  // Pet policy
+  if (item.pets === "pets_ok") amenities.push("Pet-friendly");
+  else if (item.pets === "cats_ok") amenities.push("Cats OK");
+  else if (item.pets === "dogs_ok") amenities.push("Dogs OK");
+  else if (item.pets === "no_pets") amenities.push("No pets");
+
+  // Utilities
+  if (item.utilities_included && item.utilities_included.length > 0) {
+    amenities.push(`Utilities: ${item.utilities_included.join(", ")}`);
+  }
+
+  // Den
+  if (item.den === "Yes") amenities.push("Den");
+
+  // Nearby counts (from enriched data, if available)
+  if (nearbyCounts.schools > 0) amenities.push(`${nearbyCounts.schools} schools nearby (1km)`);
+  if (nearbyCounts.groceries > 0) amenities.push(`${nearbyCounts.groceries} grocery stores (1km)`);
+  if (nearbyCounts.parks > 0) amenities.push(`${nearbyCounts.parks} parks (1km)`);
+  if (nearbyCounts.transit > 0) amenities.push(`${nearbyCounts.transit} transit stops (1km)`);
+
+  return amenities;
+}
+
 // ── Data loading ─────────────────────────────────────────────────────────────
 
 let cachedListings: Listing[] | null = null;
@@ -123,16 +185,24 @@ let cachedListings: Listing[] | null = null;
 async function loadListings(): Promise<Listing[]> {
   if (cachedListings) return cachedListings;
 
-  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.livable-data.json");
+  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.scraped.json");
   const raw = await readFile(filePath, "utf8");
   const items: RawListing[] = JSON.parse(raw);
 
   cachedListings = items
-    .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+    .filter((item) => {
+      const lat = parseNum(item.lat);
+      const lng = parseNum(item.lng);
+      return lat !== 0 && lng !== 0;
+    })
     .map((item): Listing => {
       const monthlyRent = parsePrice(item.price);
-      const city = extractCity(item.location);
-      const address = extractAddress(item.location);
+      const city = extractCity(item);
+      const address = extractAddress(item);
+      const lat = parseNum(item.lat);
+      const lng = parseNum(item.lng);
+
+      // Vitality scoring from nearby data (if enriched data is present)
       const nearby = item.nearby ?? {};
       const schoolsCount = countWithinRadius(nearby.schools);
       const groceriesCount = countWithinRadius(nearby.groceries);
@@ -155,6 +225,16 @@ async function loadListings(): Promise<Listing[]> {
       const score = Math.round((foodDrink + health + groceryParks + education + emergency) / 5);
       const scoreBand = deriveBand(score);
 
+      const nearbyCounts = {
+        schools: schoolsCount,
+        groceries: groceriesCount,
+        restaurants: restaurantsCount,
+        cafes: cafesCount,
+        parks: parksCount,
+        pharmacies: pharmaciesCount,
+        transit: transitCount,
+      };
+
       return {
         id: `rf-${item.listing_id}`,
         address,
@@ -163,50 +243,28 @@ async function loadListings(): Promise<Listing[]> {
         monthlyRent,
         priceLabel: `$${monthlyRent.toLocaleString()}/mo`,
         shortPrice: formatShortPrice(monthlyRent),
-        beds: 1,
-        baths: 1,
-        sqft: 0,
-        propertyType: "Apartment",
+        beds: parseNum(item.beds),
+        baths: parseNum(item.baths),
+        sqft: parseNum(item.sqft),
+        propertyType: mapPropertyType(item.property_type),
         score,
         scoreStatus: deriveStatus(scoreBand),
         scoreBand,
         image: item.photo ?? "",
         pinX: "50%",
         pinY: "50%",
-        lat: item.lat!,
-        lng: item.lng!,
-        availableDate: "Available now",
-        leaseTerm: "12 months",
+        lat,
+        lng,
+        availableDate: item.availability ?? "Available now",
+        leaseTerm: item.lease_term ?? "12 months",
         about: item.title ?? "",
-        amenities: buildAmenityLabels({
-          schools: schoolsCount,
-          groceries: groceriesCount,
-          restaurants: restaurantsCount,
-          cafes: cafesCount,
-          parks: parksCount,
-          pharmacies: pharmaciesCount,
-          transit: transitCount,
-        }),
+        amenities: buildAmenities(item, nearbyCounts),
         categoryScores: { foodDrink, health, groceryParks, education, emergency },
         incomeNeeded: computeIncomeNeeded(monthlyRent),
       };
     });
 
   return cachedListings;
-}
-
-function buildAmenityLabels(
-  counts: Partial<Record<keyof typeof BUCKET_CAPS, number>>,
-): string[] {
-  const labels: string[] = [];
-  if ((counts.schools ?? 0) > 0) labels.push(`${counts.schools} schools nearby (1km)`);
-  if ((counts.groceries ?? 0) > 0) labels.push(`${counts.groceries} grocery stores (1km)`);
-  if ((counts.restaurants ?? 0) > 0) labels.push(`${counts.restaurants} restaurants (1km)`);
-  if ((counts.cafes ?? 0) > 0) labels.push(`${counts.cafes} cafes (1km)`);
-  if ((counts.parks ?? 0) > 0) labels.push(`${counts.parks} parks (1km)`);
-  if ((counts.pharmacies ?? 0) > 0) labels.push(`${counts.pharmacies} pharmacies (1km)`);
-  if ((counts.transit ?? 0) > 0) labels.push(`${counts.transit} transit stops (1km)`);
-  return labels;
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────
