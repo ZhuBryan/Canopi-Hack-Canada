@@ -316,7 +316,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       <button
         type="button"
         onClick={() => setPoisVisible((v) => !v)}
-        className="absolute bottom-[88px] right-3 z-10 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md transition hover:bg-slate-50"
+        className="absolute top-4 right-4 z-10 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md transition hover:bg-slate-50"
       >
         {poisVisible ? "Hide POIs" : "Show POIs"}
       </button>
