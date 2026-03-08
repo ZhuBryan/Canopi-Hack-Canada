@@ -171,6 +171,9 @@ export function MapboxMap({
 
     mapRef.current = map;
     map.touchZoomRotate.disableRotation();
+    map.getCanvas().style.cursor = "move";
+    map.on("dragstart", () => { map.getCanvas().style.cursor = "move"; });
+    map.on("dragend", () => { map.getCanvas().style.cursor = "move"; });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
 
     map.on("load", async () => {
@@ -377,10 +380,10 @@ export function MapboxMap({
         map.getCanvas().style.cursor = "pointer";
       });
       map.on("mouseleave", "amenity-path-points", () => {
-        map.getCanvas().style.cursor = "";
+        map.getCanvas().style.cursor = "move";
       });
       map.on("mouseleave", "amenity-path-symbols", () => {
-        map.getCanvas().style.cursor = "";
+        map.getCanvas().style.cursor = "move";
       });
       const openAmenityPopup = (event: mapboxgl.MapLayerMouseEvent) => {
         const feature = event.features?.[0];
