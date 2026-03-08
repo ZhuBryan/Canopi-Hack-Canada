@@ -22,6 +22,39 @@ interface MapboxMapProps {
   selectedAmenities?: SelectedAmenity[];
 }
 
+const GTA_MASK_CENTER: [number, number] = [-79.3832, 43.6532];
+const GTA_MASK_RADIUS_SCALE = 2;
+const GTA_MASK_INNER_RING: [number, number][] = [
+  [-79.3832, 43.7732],
+  [-79.3181, 43.7641],
+  [-79.2631, 43.7380],
+  [-79.2261, 43.6991],
+  [-79.2132, 43.6532],
+  [-79.2261, 43.6073],
+  [-79.2631, 43.5684],
+  [-79.3181, 43.5423],
+  [-79.3832, 43.5332],
+  [-79.4483, 43.5423],
+  [-79.5033, 43.5684],
+  [-79.5403, 43.6073],
+  [-79.5532, 43.6532],
+  [-79.5403, 43.6991],
+  [-79.5033, 43.7380],
+  [-79.4483, 43.7641],
+  [-79.3832, 43.7732],
+];
+
+function scaleRing(
+  ring: [number, number][],
+  center: [number, number],
+  scale: number
+): [number, number][] {
+  return ring.map(([lng, lat]) => [
+    center[0] + (lng - center[0]) * scale,
+    center[1] + (lat - center[1]) * scale,
+  ]);
+}
+
 export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = [] }: MapboxMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -327,25 +360,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
             type: "Polygon",
             coordinates: [
               [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]],
-              [
-                [-79.3832, 43.7732],
-                [-79.3181, 43.7641],
-                [-79.2631, 43.7380],
-                [-79.2261, 43.6991],
-                [-79.2132, 43.6532],
-                [-79.2261, 43.6073],
-                [-79.2631, 43.5684],
-                [-79.3181, 43.5423],
-                [-79.3832, 43.5332],
-                [-79.4483, 43.5423],
-                [-79.5033, 43.5684],
-                [-79.5403, 43.6073],
-                [-79.5532, 43.6532],
-                [-79.5403, 43.6991],
-                [-79.5033, 43.7380],
-                [-79.4483, 43.7641],
-                [-79.3832, 43.7732],
-              ],
+              scaleRing(GTA_MASK_INNER_RING, GTA_MASK_CENTER, GTA_MASK_RADIUS_SCALE),
             ],
           },
         },
