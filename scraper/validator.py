@@ -13,21 +13,8 @@ from typing import Any
 MIN_PRICE = 500
 SUSPICIOUS_APARTMENT_PRICE = 800
 
-# Immediate GTA cities (case-insensitive matching)
-GTA_CITIES = {
-    # City of Toronto (pre-amalgamation municipalities)
-    "toronto", "north york", "scarborough", "etobicoke", "east york", "york",
-    # Peel Region
-    "mississauga", "brampton", "caledon",
-    # York Region
-    "markham", "vaughan", "richmond hill", "newmarket", "aurora",
-    "king", "whitchurch-stouffville", "stouffville", "east gwillimbury",
-    "georgina",
-    # Durham Region
-    "pickering", "ajax", "whitby", "oshawa", "clarington",
-    # Halton Region
-    "oakville", "burlington", "milton", "halton hills",
-}
+# Toronto only (case-insensitive matching)
+ALLOWED_CITIES = {"toronto"}
 
 
 @dataclass
@@ -79,9 +66,9 @@ def _extract_city(item: dict[str, Any]) -> str:
 
 
 def _is_in_gta(item: dict[str, Any]) -> bool:
-    """Check if a listing is in the Greater Toronto Area."""
+    """Check if a listing is in the allowed city set (Toronto only)."""
     city = _extract_city(item)
-    return city in GTA_CITIES
+    return city in ALLOWED_CITIES
 
 
 def parse_price(raw: str | None) -> int:
