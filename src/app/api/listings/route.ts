@@ -59,6 +59,7 @@ interface RawListing {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const EFFECTIVE_RADIUS_METERS = 1000;
+const MIN_REASONABLE_MONTHLY_RENT = 500;
 
 const BUCKET_CAPS = {
   schools: 5,
@@ -139,22 +140,14 @@ let cachedListings: Listing[] | null = null;
 async function loadListings(): Promise<Listing[]> {
   if (cachedListings) return cachedListings;
 
-  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
+  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.combined.json");
   const raw = await readFile(filePath, "utf8");
   const items: RawListing[] = JSON.parse(raw);
 
-  // Bounds of the downtown Toronto teardrop visible on the map
-  const LAT_MIN = 43.617, LAT_MAX = 43.679;
-  const LNG_MIN = -79.432, LNG_MAX = -79.343;
-
   cachedListings = items
-    .filter(
-      (item) =>
-        Number.isFinite(item.lat) &&
-        Number.isFinite(item.lng) &&
-        item.lat! >= LAT_MIN && item.lat! <= LAT_MAX &&
-        item.lng! >= LNG_MIN && item.lng! <= LNG_MAX
-    )
+    .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+    .filter((item) => Boolean(item.url))
+    .filter((item) => parsePrice(item.price) >= MIN_REASONABLE_MONTHLY_RENT)
     .map((item): Listing => {
       const monthlyRent = parsePrice(item.price);
       const city = extractCity(item.location);
@@ -184,6 +177,7 @@ async function loadListings(): Promise<Listing[]> {
 
       return {
         id: `rf-${item.listing_id}`,
+        url: item.url ?? undefined,
         address,
         city,
         fullAddress: item.location ?? address,
@@ -221,8 +215,7 @@ async function loadListings(): Promise<Listing[]> {
         incomeNeeded: computeIncomeNeeded(monthlyRent),
       };
     })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 50);
+    .sort((a, b) => b.score - a.score);
 
   return cachedListings;
 }
