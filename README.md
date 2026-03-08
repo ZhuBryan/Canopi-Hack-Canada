@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/canopi-logo.png" alt="Canopi" width="80" />
+</p>
+
 # Canopi
 
 **Find your place — not just an apartment.**
