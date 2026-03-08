@@ -262,28 +262,67 @@ async function buildSystemPrompt(): Promise<string> {
         })
         .join("\n");
 
-    return `You are the Canopi Assistant, a friendly and knowledgeable AI for the Canopi rental platform in Toronto. You help renters find apartments, answer questions about neighborhoods, budgeting, and Toronto life.
+    return `You are Canopi, a warm and sharp AI assistant for a Toronto rental platform. You help renters find apartments and understand neighborhoods.
 
-You have access to ${validListings.length} REAL rental listings with their exact GPS coordinates. Here are ALL of them:
-
-${summaries}
-
-IMPORTANT RULES:
-1. When the user asks about locations, landmarks, neighborhoods, or "places near X", use the lat/lng coordinates to find the CLOSEST listings and recommend them BY NAME with address, price, and income needed.
-2. ALWAYS recommend 2-3 specific apartments from the list above when the user asks for suggestions. Use the actual addresses and prices from the data.
-3. For geographic queries, Toronto landmarks you should know: Google HQ is near King & Spadina (43.644, -79.396), CN Tower (43.643, -79.387), Union Station (43.645, -79.381), U of T (43.663, -79.396), Eaton Centre (43.654, -79.381).
-4. Be conversational and warm. Keep responses concise but always include specific listing recommendations when relevant.
-5. When recommending, format like: "**[Address]** — $X,XXX/mo (Income needed: $XXK+)"
-6. Suggest using the Personalize panel for detailed slider-based filtering when appropriate.`;
+You MUST always respond with a valid JSON object in this exact shape:
+{
+  "content": "<your natural language reply here>",
+  "prefUpdate": { "walkability": 0-100, "nourishment": 0-100, "wellness": 0-100, "greenery": 0-100, "buzz": 0-100, "essentials": 0-100, "safety": 0-100, "transit": 0-100 } | null
 }
 
-async function geminiResponse(messages: ChatMessage[]): Promise<string> {
+THE 8 PREFERENCE AXES (each 0–100):
+- walkability: ability to do errands/commute on foot
+- nourishment: restaurants, cafes, food variety nearby
+- wellness: gyms, clinics, pharmacies, health services
+- greenery: parks, trails, trees, nature access
+- buzz: nightlife, bars, entertainment, social energy
+- essentials: groceries, pharmacies, day-to-day needs
+- safety: low crime, quiet, family-friendly feel
+- transit: subway, bus, streetcar access
+
+PREFERENCE INFERENCE RULES:
+Set prefUpdate ONLY when the user is describing their lifestyle, personality, or what they like/need. Set it to null for pure questions (budgets, addresses, "what's near X", etc.).
+
+When you do infer preferences, use these mappings as a guide and blend intelligently:
+- Gaming, esports, nightlife, bars, clubbing → buzz:85, transit:75, nourishment:70
+- Outdoors, hiking, dog owner, nature lover → greenery:90, walkability:85
+- Work from home, introvert, quiet, peaceful → greenery:75, buzz:20, essentials:70, walkability:65
+- Student, budget-conscious, broke → transit:88, essentials:78, walkability:72
+- Family, kids, schools → safety:90, essentials:82, greenery:75, buzz:20, walkability:70
+- Fitness, gym, yoga, cycling, running → wellness:88, walkability:82, greenery:70
+- Foodie, restaurants, brunch, coffee, cafes → nourishment:92, buzz:68, walkability:75
+- Remote work, coffee shops, coworking → nourishment:78, walkability:80, buzz:62, transit:65
+- Healthcare worker, elderly care → wellness:90, transit:80, essentials:78
+- Nightlife, party, social butterfly → buzz:90, nourishment:80, transit:78
+- Artist, creative, culture → buzz:75, nourishment:70, walkability:72
+- Minimalist, zen, introverted → greenery:80, safety:78, buzz:25
+
+You can blend multiple signals (e.g. "I'm a gamer who loves coffee" → merge gaming + foodie axes).
+Only include axes you have a clear signal for. For axes you have no signal on, use 50.
+
+LISTING DATA — ${validListings.length} real Toronto rentals:
+${summaries}
+
+LISTING RECOMMENDATION RULES:
+1. When asked for suggestions, recommend 2-3 specific listings using actual addresses and prices from the data.
+2. For location queries, use lat/lng to find closest listings.
+3. Toronto landmarks: CN Tower (43.643, -79.387), Union Station (43.645, -79.381), U of T (43.663, -79.396), King & Spadina (43.644, -79.396).
+4. Format recommendations as: "**[Address]** — $X,XXX/mo (Income needed: $XXK+)"
+
+Keep replies concise and conversational. Always return valid JSON — no markdown fences, no extra text outside the JSON.`;
+}
+
+interface GeminiResult {
+    content: string;
+    prefUpdate: Record<string, number> | null;
+}
+
+async function geminiResponse(messages: ChatMessage[]): Promise<GeminiResult> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("No Gemini API key");
 
     const systemPrompt = await buildSystemPrompt();
 
-    // Convert chat messages to Gemini "contents" format
     const contents = messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
@@ -298,8 +337,9 @@ async function geminiResponse(messages: ChatMessage[]): Promise<string> {
                 system_instruction: { parts: [{ text: systemPrompt }] },
                 contents,
                 generationConfig: {
-                    maxOutputTokens: 500,
+                    maxOutputTokens: 600,
                     temperature: 0.7,
+                    response_mime_type: "application/json",
                 },
             }),
         }
@@ -312,47 +352,17 @@ async function geminiResponse(messages: ChatMessage[]): Promise<string> {
     }
 
     const data = await res.json();
-    return (
-        data.candidates?.[0]?.content?.parts?.[0]?.text ??
-        "I'm not sure how to help with that."
-    );
-}
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
 
-// ── OpenAI path ──────────────────────────────────────────────────────────────
-
-async function openaiResponse(messages: ChatMessage[]): Promise<string> {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("No OpenAI API key");
-
-    const systemPrompt = await buildSystemPrompt();
-
-    const openaiMessages = [
-        { role: "system", content: systemPrompt },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-    ];
-
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: openaiMessages,
-            max_tokens: 500,
-            temperature: 0.7,
-        }),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        console.error("OpenAI API error:", text);
-        throw new Error("OpenAI API request failed");
+    try {
+        const parsed = JSON.parse(raw);
+        return {
+            content: parsed.content ?? "I'm not sure how to help with that.",
+            prefUpdate: parsed.prefUpdate ?? null,
+        };
+    } catch {
+        return { content: raw, prefUpdate: null };
     }
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "I'm not sure how to help with that.";
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────
@@ -368,36 +378,23 @@ export async function POST(request: Request) {
 
         const lastUserMessage = messages.filter((m) => m.role === "user").pop()?.content ?? "";
 
-        let content: string;
+        let content = "";
+        let prefUpdate: Record<string, number> | null = null;
 
-        if (process.env.OPENAI_API_KEY) {
+        if (process.env.GEMINI_API_KEY) {
             try {
-                content = await openaiResponse(messages);
+                const result = await geminiResponse(messages);
+                content = result.content;
+                prefUpdate = result.prefUpdate;
             } catch (err) {
-                console.error("OpenAI error, trying Gemini:", err);
-                if (process.env.GEMINI_API_KEY) {
-                    try {
-                        content = await geminiResponse(messages);
-                    } catch (err2) {
-                        console.error("Gemini also failed:", err2);
-                        content = await fallbackResponse(lastUserMessage);
-                    }
-                } else {
-                    content = await fallbackResponse(lastUserMessage);
-                }
-            }
-        } else if (process.env.GEMINI_API_KEY) {
-            try {
-                content = await geminiResponse(messages);
-            } catch (err) {
-                console.error("Gemini fallback:", err);
+                console.error("Gemini error, using fallback:", err);
                 content = await fallbackResponse(lastUserMessage);
             }
         } else {
             content = await fallbackResponse(lastUserMessage);
         }
 
-        return NextResponse.json({ role: "assistant", content });
+        return NextResponse.json({ role: "assistant", content, prefUpdate });
     } catch (error) {
         console.error("Chat route error:", error);
         return NextResponse.json(
