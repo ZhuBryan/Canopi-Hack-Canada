@@ -20,6 +20,7 @@ interface MapboxMapProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   selectedAmenities?: SelectedAmenity[];
+  isAmenityLoading?: boolean;
 }
 
 const GTA_MASK_CENTER: [number, number] = [-79.3832, 43.6532];
@@ -54,8 +55,25 @@ function scaleRing(
     center[1] + (lat - center[1]) * scale,
   ]);
 }
+const AMENITY_ICON_ASSET_BY_TYPE: Record<string, string> = {
+  transit: "/bus.svg",
+  school: "/graduation-cap.svg",
+  healthcare: "/scan-heart.svg",
+  medical: "/scan-heart.svg",
+  grocery: "/shopping-cart.svg",
+  park: "/shrub.svg",
+  other: "/pin.svg",
+  cafe: "/coffee.svg",
+  restaurant: "/pin.svg",
+};
 
-export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = [] }: MapboxMapProps) {
+export function MapboxMap({
+  listings,
+  selectedId,
+  onSelect,
+  selectedAmenities = [],
+  isAmenityLoading = false,
+}: MapboxMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
@@ -71,6 +89,9 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
   const triggerHighlightRef = useRef<(() => void) | null>(null);
   const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
   const [poisVisible, setPoisVisible] = useState(false);
+  const [showAmenityLoading, setShowAmenityLoading] = useState(false);
+  const loadingShownAtRef = useRef<number>(0);
+  const loadingHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const renderAmenityPaths = () => {
     const map = mapRef.current;
@@ -112,6 +133,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
           id: amenity.id,
           name: amenity.name,
           type: amenity.type,
+          iconKey: amenityIconKey(amenity.type),
           distance: amenity.distance,
           description: amenity.description ?? "",
           color,
@@ -151,7 +173,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     map.touchZoomRotate.disableRotation();
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
 
-    map.on("load", () => {
+    map.on("load", async () => {
       map.setFog({
         range: [0.5, 6],
         color: "#f5f0e8",
@@ -198,6 +220,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
           features: [],
         },
       });
+      await ensureAmenityIcons(map);
       map.addLayer({
         id: "amenity-path-lines",
         type: "line",
@@ -209,9 +232,9 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         },
         paint: {
           "line-color": ["coalesce", ["get", "color"], "#38bdf8"],
-          "line-width": 2.8,
+          "line-width": 4.4,
           "line-opacity": 0.88,
-          "line-dasharray": [0.6, 1.6],
+          "line-dasharray": [0.8, 1.4],
         },
       });
       map.addLayer({
@@ -220,11 +243,50 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
         source: "amenity-paths",
         filter: ["==", ["geometry-type"], "Point"],
         paint: {
-          "circle-radius": 5,
+          "circle-radius": 10,
           "circle-color": ["coalesce", ["get", "color"], "#38bdf8"],
-          "circle-stroke-width": 1.5,
+          "circle-stroke-width": 2,
           "circle-stroke-color": "#ffffff",
-          "circle-opacity": 0.98,
+          "circle-opacity": 0.25,
+        },
+      });
+      map.addLayer({
+        id: "amenity-path-symbols",
+        type: "symbol",
+        source: "amenity-paths",
+        filter: ["==", ["geometry-type"], "Point"],
+        layout: {
+          "icon-image": ["coalesce", ["get", "iconKey"], "amenity-other"],
+          "icon-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            11,
+            1,
+            16,
+            1.35,
+          ],
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "text-field": ["coalesce", ["get", "name"], ""],
+          "text-size": 11,
+          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+          "text-max-width": 12,
+          "text-line-height": 1.15,
+          "text-variable-anchor": ["top", "bottom", "left", "right"],
+          "text-radial-offset": 1.1,
+          "text-justify": "auto",
+          "text-anchor": "top",
+          "text-allow-overlap": false,
+          "text-ignore-placement": false,
+          "text-optional": true,
+          "symbol-sort-key": ["coalesce", ["get", "distance"], 99999],
+        },
+        paint: {
+          "text-color": "#0f172a",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1.25,
+          "text-halo-blur": 0.4,
         },
       });
 
@@ -311,10 +373,16 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
       map.on("mouseenter", "amenity-path-points", () => {
         map.getCanvas().style.cursor = "pointer";
       });
+      map.on("mouseenter", "amenity-path-symbols", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
       map.on("mouseleave", "amenity-path-points", () => {
         map.getCanvas().style.cursor = "";
       });
-      map.on("click", "amenity-path-points", (event) => {
+      map.on("mouseleave", "amenity-path-symbols", () => {
+        map.getCanvas().style.cursor = "";
+      });
+      const openAmenityPopup = (event: mapboxgl.MapLayerMouseEvent) => {
         const feature = event.features?.[0];
         if (!feature || feature.geometry.type !== "Point") return;
         const props = feature.properties ?? {};
@@ -348,7 +416,9 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
             </div>`,
           )
           .addTo(map);
-      });
+      };
+      map.on("click", "amenity-path-points", openAmenityPopup);
+      map.on("click", "amenity-path-symbols", openAmenityPopup);
 
       // ── GTA boundary mask ──────────────────────────────────────────────────
       map.addSource("gta-mask", {
@@ -468,6 +538,32 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     (map as any).setConfigProperty("basemap", "showTransitLabels", poisVisible);
   }, [poisVisible]);
 
+  useEffect(() => {
+    if (isAmenityLoading) {
+      if (loadingHideTimerRef.current) {
+        clearTimeout(loadingHideTimerRef.current);
+        loadingHideTimerRef.current = null;
+      }
+      loadingShownAtRef.current = Date.now();
+      setShowAmenityLoading(true);
+      return;
+    }
+
+    const elapsed = Date.now() - loadingShownAtRef.current;
+    const minVisibleMs = 650;
+    const remaining = Math.max(0, minVisibleMs - elapsed);
+    loadingHideTimerRef.current = setTimeout(() => {
+      setShowAmenityLoading(false);
+      loadingHideTimerRef.current = null;
+    }, remaining);
+  }, [isAmenityLoading]);
+
+  useEffect(() => {
+    return () => {
+      if (loadingHideTimerRef.current) clearTimeout(loadingHideTimerRef.current);
+    };
+  }, []);
+
   function addMarker(map: mapboxgl.Map, listing: Listing, active: boolean) {
     const el = document.createElement("div");
     el.style.cssText = markerBaseStyle(active, listing.score);
@@ -485,6 +581,37 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
+      {showAmenityLoading && (
+        <div
+          className="absolute left-4 top-1/2 z-20 flex -translate-y-1/2 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-md animate-pulse"
+          style={{
+            backgroundColor: "rgba(250,248,245,0.96)",
+            borderColor: "var(--line)",
+            color: "var(--foreground)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <span className="relative inline-flex h-5 w-5 items-center justify-center">
+            <span
+              className="absolute inset-0 animate-spin rounded-full"
+              style={{ border: "2px solid var(--brand)", borderTopColor: "transparent" }}
+            />
+            <svg
+              viewBox="0 0 24 24"
+              width="10"
+              height="10"
+              aria-hidden="true"
+              style={{ color: "var(--brand)" }}
+            >
+              <path
+                fill="currentColor"
+                d="M12 2a6 6 0 0 0-6 6c0 4.4 6 12 6 12s6-7.6 6-12a6 6 0 0 0-6-6Zm0 8.25A2.25 2.25 0 1 1 12 5.75a2.25 2.25 0 0 1 0 4.5Z"
+              />
+            </svg>
+          </span>
+          Loading tethers...
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setPoisVisible((v) => !v)}
@@ -533,6 +660,39 @@ function colorForAmenityType(type: string): string {
     default:
       return "#38bdf8";
   }
+}
+
+function normalizeAmenityType(type: string): string {
+  return (type || "other").toLowerCase();
+}
+
+function amenityIconKey(type: string): string {
+  const normalized = normalizeAmenityType(type);
+  return `amenity-${AMENITY_ICON_ASSET_BY_TYPE[normalized] ? normalized : "other"}`;
+}
+
+async function ensureAmenityIcons(map: mapboxgl.Map): Promise<void> {
+  const entries = Object.entries(AMENITY_ICON_ASSET_BY_TYPE);
+  await Promise.all(
+    entries.map(async ([type, path]) => {
+      const key = `amenity-${type}`;
+      if (map.hasImage(key)) return;
+      const image = await loadIconImage(path);
+      if (!map.hasImage(key)) {
+        map.addImage(key, image, { pixelRatio: 2 });
+      }
+    })
+  );
+}
+
+function loadIconImage(path: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Unable to load icon at ${path}`));
+    img.src = path;
+  });
 }
 
 function formatAmenityType(type: string): string {

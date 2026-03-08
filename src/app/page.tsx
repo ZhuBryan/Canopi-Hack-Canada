@@ -324,8 +324,11 @@ function HeroPageInner() {
   const [sort, setSort] = useState<SortMode>("recommended");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [liveAmenities, setLiveAmenities] = useState<LiveAmenity[]>([]);
+  const [loadingLiveAmenities, setLoadingLiveAmenities] = useState(false);
   const [liveAmenitiesForListingId, setLiveAmenitiesForListingId] = useState<string | null>(null);
   const selectedIdRef = useRef<string | null>(selectedId);
+  const liveAmenitiesCacheRef = useRef<Map<string, LiveAmenity[]>>(new Map());
+  const prefetchingVitalityRef = useRef<Set<string>>(new Set());
   const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
 
   useEffect(() => {
@@ -396,32 +399,87 @@ function HeroPageInner() {
     if (!selectedListing) {
       setLiveAmenities([]);
       setLiveAmenitiesForListingId(null);
+      setLoadingLiveAmenities(false);
       return;
     }
 
     const listingId = selectedListing.id;
+    const cachedAmenities = liveAmenitiesCacheRef.current.get(listingId);
+    if (cachedAmenities) {
+      setLiveAmenities(cachedAmenities);
+      setLiveAmenitiesForListingId(listingId);
+      setLoadingLiveAmenities(false);
+      return;
+    }
+
+    setLoadingLiveAmenities(true);
     setLiveAmenities([]);
     setLiveAmenitiesForListingId(null);
     const controller = new AbortController();
-    fetch(`/api/vitality?lat=${selectedListing.lat}&lng=${selectedListing.lng}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Failed to load vitality");
-        const payload = (await response.json()) as { amenities?: LiveAmenity[] };
-        if (selectedIdRef.current !== listingId) return;
-        setLiveAmenities(Array.isArray(payload.amenities) ? payload.amenities : []);
-        setLiveAmenitiesForListingId(listingId);
-      })
-      .catch((error) => {
-        if (controller.signal.aborted) return;
-        console.error(error);
-        setLiveAmenities([]);
-        setLiveAmenitiesForListingId(null);
-      });
+    const fetchWithRetry = async () => {
+      let lastError: unknown = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await fetch(`/api/vitality?lat=${selectedListing.lat}&lng=${selectedListing.lng}`, {
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error("Failed to load vitality");
+          const payload = (await response.json()) as { amenities?: LiveAmenity[] };
+          if (selectedIdRef.current !== listingId) return;
+          const amenities = Array.isArray(payload.amenities) ? payload.amenities : [];
+          liveAmenitiesCacheRef.current.set(listingId, amenities);
+          setLiveAmenities(amenities);
+          setLiveAmenitiesForListingId(listingId);
+          setLoadingLiveAmenities(false);
+          return;
+        } catch (error) {
+          lastError = error;
+          if (controller.signal.aborted) return;
+          if (attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 350));
+          }
+        }
+      }
 
-    return () => controller.abort();
+      console.error(lastError);
+      setLiveAmenities([]);
+      setLiveAmenitiesForListingId(null);
+      setLoadingLiveAmenities(false);
+    };
+
+    void fetchWithRetry();
+
+    return () => {
+      controller.abort();
+    };
   }, [selectedListing]);
+
+  useEffect(() => {
+    const candidates = filteredListings.slice(0, 8);
+    candidates.forEach((listing, index) => {
+      if (liveAmenitiesCacheRef.current.has(listing.id)) return;
+      if (prefetchingVitalityRef.current.has(listing.id)) return;
+      prefetchingVitalityRef.current.add(listing.id);
+
+      window.setTimeout(() => {
+        fetch(`/api/vitality?lat=${listing.lat}&lng=${listing.lng}`)
+          .then(async (response) => {
+            if (!response.ok) return;
+            const payload = (await response.json()) as { amenities?: LiveAmenity[] };
+            liveAmenitiesCacheRef.current.set(
+              listing.id,
+              Array.isArray(payload.amenities) ? payload.amenities : []
+            );
+          })
+          .catch(() => {
+            // Ignore background prefetch failures; foreground fetch still handles UX.
+          })
+          .finally(() => {
+            prefetchingVitalityRef.current.delete(listing.id);
+          });
+      }, index * 180);
+    });
+  }, [filteredListings]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
@@ -559,6 +617,7 @@ function HeroPageInner() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             selectedAmenities={selectedId && liveAmenitiesForListingId === selectedId ? liveAmenities : []}
+            isAmenityLoading={loadingLiveAmenities && selectedId != null}
           />
           <PrefsWidget />
           <ChatPanel onSelectListing={setSelectedId} />
