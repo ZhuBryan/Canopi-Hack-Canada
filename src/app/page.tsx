@@ -685,6 +685,24 @@ export default function HeroPage() {
                   </GhostButton>
                 </div>
               </div>
+
+              {/* Listing links */}
+              {selectedListing.url && (
+                <div className="rounded-xl border p-4" style={{ borderColor: "var(--line)" }}>
+                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+                    Listing Links
+                  </h3>
+                  <a
+                    href={selectedListing.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium underline underline-offset-2 hover:opacity-80"
+                    style={{ color: "var(--brand-ink)" }}
+                  >
+                    Open original listing
+                  </a>
+                </div>
+              )}
             </div>
           </aside>
         )}
