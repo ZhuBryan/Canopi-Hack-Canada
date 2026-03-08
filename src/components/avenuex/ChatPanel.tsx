@@ -126,7 +126,12 @@ export default function ChatPanel() {
       const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })) }) });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      append({ id: uid(), role: "assistant", content: data.content });
+      if (data.prefUpdate) {
+        setPrefs(data.prefUpdate as SpiderAxes);
+        append({ id: uid(), role: "assistant", content: data.content, prefUpdate: data.prefUpdate as SpiderAxes });
+      } else {
+        append({ id: uid(), role: "assistant", content: data.content });
+      }
     } catch { append({ id: uid(), role: "assistant", content: "Sorry, something went wrong." }); }
     finally { setLoading(false); }
   };
