@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server";
 import { Amenity } from "@/lib/types";
 
+function describeAmenity(type: Amenity["type"], distance: number): string {
+  const walk = Math.max(1, Math.round(distance / 80));
+  switch (type) {
+    case "grocery":
+      return `Grocery option about ${walk} min away for quick essentials runs.`;
+    case "cafe":
+      return `Cafe about ${walk} min away for coffee, study, or casual meetups.`;
+    case "transit":
+      return `Transit stop around ${walk} min away to support easier commuting.`;
+    case "healthcare":
+      return `Healthcare access roughly ${walk} min away for prescriptions or urgent needs.`;
+    case "park":
+      return `Park around ${walk} min away for walks, exercise, and downtime.`;
+    default:
+      return `Nearby amenity about ${walk} min away.`;
+  }
+}
+
 // The "brain" of Avenue-X: Calculates vitality and grabs real places using Overpass
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -92,6 +110,7 @@ export async function GET(request: Request) {
           type,
           coords: [el.lat, el.lon], // [lat, lng]
           distance,
+          description: describeAmenity(type, distance),
         };
       })
       .filter(Boolean) as Amenity[]; // Filter out nulls (unnamed/unmapped)
@@ -104,8 +123,8 @@ export async function GET(request: Request) {
     const scoreFraction = Math.min(rawScore / maxPossibleScore, 1.0);
     const vitalityScore = Math.round(scoreFraction * 100);
 
-    // Limit to top 15 closest/most relevant (in reality we'd sort by distance, here we just array slice for speed)
-    const topAmenities = uniqueAmenities.slice(0, 15);
+    // Limit to top 15 closest places
+    const topAmenities = uniqueAmenities.sort((a, b) => a.distance - b.distance).slice(0, 15);
 
     return NextResponse.json({
       vitalityScore,

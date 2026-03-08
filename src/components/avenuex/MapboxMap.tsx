@@ -6,23 +6,95 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type { Listing } from "@/lib/avenuex-data";
 import { scoreColor } from "@/components/avenuex/primitives";
 
+interface SelectedAmenity {
+  id: string;
+  name: string;
+  type: string;
+  distance: number;
+  coords: [number, number];
+  description?: string;
+}
+
 interface MapboxMapProps {
   listings: Listing[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  selectedAmenities?: SelectedAmenity[];
 }
 
-export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
+export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = [] }: MapboxMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const listingsRef = useRef(listings);
   listingsRef.current = listings;
+  const selectedIdRef = useRef<string | null>(selectedId);
+  selectedIdRef.current = selectedId;
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const selectedAmenitiesRef = useRef(selectedAmenities);
+  selectedAmenitiesRef.current = selectedAmenities;
   const highlightDirtyRef = useRef(true);
   const triggerHighlightRef = useRef<(() => void) | null>(null);
+  const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
   const [poisVisible, setPoisVisible] = useState(false);
+
+  const renderAmenityPaths = () => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    const source = map.getSource("amenity-paths") as mapboxgl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    const currentSelectedId = selectedIdRef.current;
+    const selectedListing = currentSelectedId
+      ? listingsRef.current.find((l) => l.id === currentSelectedId)
+      : null;
+
+    if (!selectedListing || selectedAmenitiesRef.current.length === 0) {
+      source.setData({ type: "FeatureCollection", features: [] });
+      amenityPopupRef.current?.remove();
+      return;
+    }
+
+    const features: GeoJSON.Feature[] = [];
+    for (const amenity of selectedAmenitiesRef.current) {
+      const [lat, lng] = amenity.coords;
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      const color = colorForAmenityType(amenity.type);
+
+      features.push({
+        type: "Feature",
+        properties: { color },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [selectedListing.lng, selectedListing.lat],
+            [lng, lat],
+          ],
+        },
+      });
+      features.push({
+        type: "Feature",
+        properties: {
+          id: amenity.id,
+          name: amenity.name,
+          type: amenity.type,
+          distance: amenity.distance,
+          description: amenity.description ?? "",
+          color,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [lng, lat],
+        },
+      });
+    }
+
+    source.setData({
+      type: "FeatureCollection",
+      features,
+    });
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -83,6 +155,43 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
           "fill-extrusion-height": ["get", "height"],
           "fill-extrusion-base": ["get", "min_height"],
           "fill-extrusion-opacity": 0.85,
+        },
+      });
+
+      map.addSource("amenity-paths", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      });
+      map.addLayer({
+        id: "amenity-path-lines",
+        type: "line",
+        source: "amenity-paths",
+        filter: ["==", ["geometry-type"], "LineString"],
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": ["coalesce", ["get", "color"], "#38bdf8"],
+          "line-width": 2.8,
+          "line-opacity": 0.88,
+          "line-dasharray": [0.6, 1.6],
+        },
+      });
+      map.addLayer({
+        id: "amenity-path-points",
+        type: "circle",
+        source: "amenity-paths",
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: {
+          "circle-radius": 5,
+          "circle-color": ["coalesce", ["get", "color"], "#38bdf8"],
+          "circle-stroke-width": 1.5,
+          "circle-stroke-color": "#ffffff",
+          "circle-opacity": 0.98,
         },
       });
 
@@ -166,6 +275,48 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       applyListingHighlights();
       map.on("idle", scheduleHighlight);
 
+      map.on("mouseenter", "amenity-path-points", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "amenity-path-points", () => {
+        map.getCanvas().style.cursor = "";
+      });
+      map.on("click", "amenity-path-points", (event) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.geometry.type !== "Point") return;
+        const props = feature.properties ?? {};
+        const title = String(props.name ?? "Nearby Shop");
+        const type = String(props.type ?? "other");
+        const description = String(props.description ?? "Nearby option.");
+        const distance = Number(props.distance ?? 0);
+        const lngLat = feature.geometry.coordinates as [number, number];
+
+        amenityPopupRef.current?.remove();
+        amenityPopupRef.current = new mapboxgl.Popup({
+          closeButton: true,
+          closeOnClick: true,
+          maxWidth: "300px",
+        })
+          .setLngLat(lngLat)
+          .setHTML(
+            `<div style="font-family:Inter,sans-serif;color:#0f172a;min-width:240px;max-width:280px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 10px 24px rgba(2,6,23,0.16)">
+              <div style="padding:10px 12px;background:linear-gradient(135deg,#eff6ff 0%,#ecfdf5 100%);border-bottom:1px solid #dcfce7">
+                <div style="font-size:13px;font-weight:800;line-height:1.35;margin-bottom:3px">${escapeHtml(title)}</div>
+                <div style="font-size:11px;font-weight:700;color:#166534;text-transform:capitalize">${escapeHtml(formatAmenityType(type))}</div>
+              </div>
+              <div style="padding:10px 12px">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:7px">
+                  <span style="display:inline-block;font-size:11px;font-weight:700;background:#f1f5f9;color:#334155;padding:3px 8px;border-radius:999px">
+                    ${Number.isFinite(distance) ? `${Math.round(distance)}m away` : "Distance unavailable"}
+                  </span>
+                </div>
+                <div style="font-size:11px;color:#475569;line-height:1.45">${escapeHtml(description)}</div>
+              </div>
+            </div>`,
+          )
+          .addTo(map);
+      });
+
       // ── GTA boundary mask ──────────────────────────────────────────────────
       map.addSource("gta-mask", {
         type: "geojson",
@@ -228,9 +379,11 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       for (const listing of listingsRef.current) {
         addMarker(map, listing, listing.id === selectedId);
       }
+      renderAmenityPaths();
     });
 
     return () => {
+      amenityPopupRef.current?.remove();
       markersRef.current.forEach((m) => m.remove());
       markersRef.current.clear();
       map.remove();
@@ -285,6 +438,10 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       }
     }
   }, [selectedId, listings]);
+
+  useEffect(() => {
+    renderAmenityPaths();
+  }, [selectedId, listings, selectedAmenities]);
 
   // Toggle POI/transit labels via Mapbox Standard style config
   useEffect(() => {
@@ -344,6 +501,49 @@ function markerBaseStyle(active: boolean, score: number): string {
     "width: max-content",
     "line-height: 1.2",
   ].join("; ");
+}
+
+function colorForAmenityType(type: string): string {
+  switch (type) {
+    case "grocery":
+      return "#22C55E";
+    case "healthcare":
+      return "#EC4899";
+    case "cafe":
+      return "#F97316";
+    case "park":
+      return "#10B981";
+    case "transit":
+      return "#3B82F6";
+    default:
+      return "#38bdf8";
+  }
+}
+
+function formatAmenityType(type: string): string {
+  switch (type) {
+    case "grocery":
+      return "Grocery";
+    case "healthcare":
+      return "Healthcare";
+    case "cafe":
+      return "Cafe";
+    case "park":
+      return "Park";
+    case "transit":
+      return "Transit";
+    default:
+      return "Nearby";
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function applyMarkerStyle(el: HTMLElement, active: boolean) {
