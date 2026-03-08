@@ -86,8 +86,8 @@ export function DesktopNavbar({
         onClick={() => router.push("/")}
         className="flex items-center rounded-lg px-1 py-0.5"
       >
-        <Image src="/canopi-logo.png" alt="Canopi" width={36} height={36} className="rounded-md" />
-        <span className="font-display text-xl font-bold" style={{ color: "var(--foreground)" }}>Canopi</span>
+        <Image src="/canopi-logo.png" alt="Canopi" width={99} height={99} className="rounded-md" />
+        <span className="font-display text-4xl font-bold" style={{ color: "var(--foreground)" }}>Canopi</span>
       </button>
       <div className="hidden h-9 w-[400px] items-center gap-2 rounded-full border px-4 text-sm md:flex" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface)" }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--muted-light)", flexShrink: 0 }}>
