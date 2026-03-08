@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useSpiderPrefs, type SpiderAxes } from "@/lib/spider-prefs-context";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -9,19 +9,24 @@ type ChatMsg = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  pills?: string[];
-  multiPills?: string[];
   prefUpdate?: SpiderAxes;
 };
 
-type OnboardingStep = "greeting" | "priorities" | null;
-
-function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
+function TypewriterText({
+  text,
+  enabled,
+  onProgress,
+}: {
+  text: string;
+  enabled: boolean;
+  onProgress?: () => void;
+}) {
   const [shown, setShown] = useState(enabled ? "" : text);
 
   useEffect(() => {
     if (!enabled) {
       setShown(text);
+      onProgress?.();
       return;
     }
 
@@ -29,6 +34,7 @@ function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReducedMotion) {
         setShown(text);
+        onProgress?.();
         return;
       }
     }
@@ -36,6 +42,7 @@ function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
     const chars = Array.from(text);
     if (chars.length === 0) {
       setShown("");
+      onProgress?.();
       return;
     }
 
@@ -46,6 +53,7 @@ function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
       const chunk = Math.max(1, Math.ceil(chars.length / 36));
       i = Math.min(chars.length, i + chunk);
       setShown(chars.slice(0, i).join(""));
+      onProgress?.();
       if (i < chars.length) {
         timer = setTimeout(step, 18);
       }
@@ -56,7 +64,7 @@ function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [enabled, text]);
+  }, [enabled, text, onProgress]);
 
   return <>{shown}</>;
 }
@@ -65,103 +73,43 @@ function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
-function personaLine(persona: string): string {
-  if (persona === "I'm a student") return "Students usually need solid transit, affordable essentials, and some buzz nearby. Got it!";
-  if (persona === "I'm a young professional") return "Young professionals love walkable, buzzy neighborhoods with great transit and good dining. Perfect.";
-  if (persona === "I have a family") return "Families need safety, green spaces, and everyday essentials close by. Makes sense!";
-  return "Happy exploring! Let's figure out what matters most to you.";
-}
-
-function computeAxes(persona: string, priorities: string[]): SpiderAxes {
-  const base: SpiderAxes = { walkability: 50, nourishment: 50, wellness: 50, greenery: 50, buzz: 50, essentials: 50, safety: 50, transit: 50 };
-  if (persona === "I'm a student") Object.assign(base, { walkability: 72, transit: 80, essentials: 65, buzz: 60, nourishment: 58 });
-  else if (persona === "I'm a young professional") Object.assign(base, { walkability: 78, transit: 80, nourishment: 72, buzz: 68 });
-  else if (persona === "I have a family") Object.assign(base, { safety: 88, essentials: 80, greenery: 80, wellness: 74, buzz: 28 });
-  const boosts: Record<string, Partial<SpiderAxes>> = {
-    "Walkability": { walkability: 90 }, "Green spaces": { greenery: 90 },
-    "Nightlife & dining": { nourishment: 85, buzz: 85 }, "Healthcare": { wellness: 86 },
-    "Safety": { safety: 90 }, "Transit": { transit: 90 },
-  };
-  for (const p of priorities) {
-    const boost = boosts[p];
-    if (!boost) continue;
-    for (const [k, v] of Object.entries(boost)) {
-      const key = k as keyof SpiderAxes;
-      base[key] = Math.max(base[key], v as number);
-    }
-  }
-  return base;
-}
-
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ChatPanel() {
   const { hasProfile, setPrefs, chatOpen, openChat, closeChat } = useSpiderPrefs();
-  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(null);
-  const [persona, setPersona] = useState("");
-  const [pendingPriorities, setPendingPriorities] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+    });
+  }, []);
+
   useEffect(() => {
     if (!chatOpen || initialized) return;
     setInitialized(true);
-    if (!hasProfile) {
-      setOnboardingStep("greeting");
-      setMessages([{ id: uid(), role: "assistant", content: "Hey! I'm Canopi. Tell me about your lifestyle and I'll match you with neighborhoods that fit. 🌿", pills: ["I'm a student", "I'm a young professional", "I have a family", "Just exploring"] }]);
-    } else {
-      setMessages([{ id: uid(), role: "assistant", content: "Welcome back! Ask me about listings, neighborhoods, or budgets." }]);
-    }
+    const greeting = hasProfile
+      ? "Welcome back! Ask me about listings, neighborhoods, or budgets."
+      : "Hey! I'm Canopi. Tell me a bit about your lifestyle and I'll find neighborhoods that fit.";
+    setMessages([{ id: uid(), role: "assistant", content: greeting }]);
   }, [chatOpen, hasProfile, initialized]);
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading]);
+    if (!chatOpen) return;
+    scrollToBottom();
+  }, [messages, loading, chatOpen, scrollToBottom]);
 
   const append = (msg: ChatMsg) => setMessages(prev => [...prev, msg]);
-  const stripPills = () => setMessages(prev => prev.map(m => ({ ...m, pills: undefined, multiPills: undefined })));
-
-  const handlePersonaSelect = (p: string) => {
-    setPersona(p); stripPills();
-    append({ id: uid(), role: "user", content: p });
-    setTimeout(() => {
-      append({ id: uid(), role: "assistant", content: `${personaLine(p)}\n\nWhat matters most to you in a neighborhood?`, multiPills: ["Walkability", "Green spaces", "Nightlife & dining", "Healthcare", "Safety", "Transit"] });
-      setOnboardingStep("priorities");
-    }, 350);
-  };
-
-  const handlePriorityToggle = (p: string) =>
-    setPendingPriorities(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
-
-  const handlePrioritiesDone = () => {
-    const selected = pendingPriorities.length > 0 ? pendingPriorities : ["Walkability"];
-    stripPills();
-    append({ id: uid(), role: "user", content: selected.join(", ") });
-    setPendingPriorities([]); setOnboardingStep(null);
-    const axes = computeAxes(persona, selected);
-    setPrefs(axes);
-    setTimeout(() => {
-      append({ id: uid(), role: "assistant", content: "Here's what I'm setting for you:", prefUpdate: axes });
-      setTimeout(() => append({ id: uid(), role: "assistant", content: "Look right? You can always drag the map widget or use listing sliders to tweak.", pills: ["✓ Looks great", "✏ Adjust manually"] }), 600);
-    }, 450);
-  };
-
-  const handleConfirmPill = (pill: string) => {
-    stripPills(); append({ id: uid(), role: "user", content: pill });
-    if (pill === "✓ Looks great") {
-      setTimeout(() => { append({ id: uid(), role: "assistant", content: "You're all set! Match scores are live now. Happy hunting 🏡" }); setTimeout(() => closeChat(), 1800); }, 350);
-    } else {
-      setTimeout(() => append({ id: uid(), role: "assistant", content: "No problem! Drag the map widget or open any listing to fine-tune sliders." }), 350);
-    }
-  };
 
   const handleSend = async () => {
     const text = input.trim();
     if (!text || loading) return;
-    if (onboardingStep) { setOnboardingStep(null); stripPills(); }
     const userMsg: ChatMsg = { id: uid(), role: "user", content: text };
     const history = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
@@ -172,8 +120,7 @@ export default function ChatPanel() {
       const data = await res.json();
       if (data.prefUpdate) {
         setPrefs(data.prefUpdate as SpiderAxes);
-        append({ id: uid(), role: "assistant", content: data.content });
-        append({ id: uid(), role: "assistant", content: "Refined search.", prefUpdate: data.prefUpdate as SpiderAxes });
+        append({ id: uid(), role: "assistant", content: data.content, prefUpdate: data.prefUpdate as SpiderAxes });
       } else {
         append({ id: uid(), role: "assistant", content: data.content });
       }
@@ -197,9 +144,10 @@ export default function ChatPanel() {
               ref={scrollRef}
               className="pointer-events-auto overflow-y-auto px-1 pb-3 space-y-2"
               style={{
-                maskImage: "linear-gradient(to bottom, transparent 0%, black 30%)",
-                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 30%)",
+                maskImage: "linear-gradient(to bottom, transparent 0px, black 48px)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, black 48px)",
                 scrollbarWidth: "none",
+                paddingTop: 48,
               }}
             >
               {messages.map((msg, idx) => (
@@ -210,7 +158,11 @@ export default function ChatPanel() {
                       style={{ animationDelay: `${Math.min(280, idx * 35)}ms`, whiteSpace: "pre-wrap", backdropFilter: "blur(12px)", backgroundColor: msg.role === "user" ? "var(--brand)" : "rgba(250,248,245,0.82)", border: msg.role === "user" ? undefined : "1px solid rgba(231,227,222,0.6)", color: msg.role === "user" ? "white" : "var(--foreground)" }}
                     >
                       <span className={msg.role === "assistant" ? "chat-text-reveal" : undefined}>
-                        <TypewriterText text={msg.content} enabled={msg.role === "assistant"} />
+                        <TypewriterText
+                          text={msg.content}
+                          enabled={msg.role === "assistant"}
+                          onProgress={msg.role === "assistant" ? scrollToBottom : undefined}
+                        />
                       </span>
                     </div>
                   </div>
@@ -221,45 +173,10 @@ export default function ChatPanel() {
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)", flexShrink: 0 }}>
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      <span className="text-[11px] font-semibold" style={{ color: "var(--brand)" }}>Match scores updated</span>
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--brand)" }}>Refined search.</span>
                     </div>
                   )}
 
-                  {/* Single-select pills */}
-                  {msg.pills && (
-                    <div className="mt-2 flex flex-wrap gap-1.5 ml-0.5">
-                      {msg.pills.map((pill, pillIdx) => (
-                        <button key={pill} type="button"
-                          onClick={() => onboardingStep === "greeting" ? handlePersonaSelect(pill) : handleConfirmPill(pill)}
-                          className="chat-pill-pop rounded-full border px-3 py-1 text-xs font-semibold transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-                          style={{ borderColor: "var(--line)", color: "var(--foreground)", backgroundColor: "var(--surface-raised)", animationDelay: `${Math.min(320, idx * 35 + pillIdx * 45 + 70)}ms` }}
-                        >{pill}</button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Multi-select priority pills */}
-                  {msg.multiPills && (
-                    <div className="mt-2 ml-0.5">
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {msg.multiPills.map((pill, pillIdx) => {
-                          const active = pendingPriorities.includes(pill);
-                          return (
-                            <button key={pill} type="button" onClick={() => handlePriorityToggle(pill)}
-                              className="chat-pill-pop rounded-full border px-3 py-1 text-xs font-semibold transition"
-                              style={active ? { borderColor: "var(--brand)", backgroundColor: "var(--brand-soft)", color: "var(--brand-ink)", animationDelay: `${Math.min(380, idx * 35 + pillIdx * 45 + 70)}ms` } : { borderColor: "var(--line)", color: "var(--foreground)", backgroundColor: "var(--surface-raised)", animationDelay: `${Math.min(380, idx * 35 + pillIdx * 45 + 70)}ms` }}
-                            >{pill}</button>
-                          );
-                        })}
-                      </div>
-                      {pendingPriorities.length > 0 && (
-                        <button type="button" onClick={handlePrioritiesDone}
-                          className="chat-pill-pop rounded-full px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
-                          style={{ backgroundColor: "var(--brand)", animationDelay: "140ms" }}
-                        >Done →</button>
-                      )}
-                    </div>
-                  )}
                 </div>
               ))}
 
@@ -299,7 +216,7 @@ export default function ChatPanel() {
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => !chatOpen && openChat()}
             onKeyDown={handleKeyDown}
-            placeholder={onboardingStep ? "Or type your own response…" : "Ask about listings, neighborhoods, or budget…"}
+            placeholder="Ask about listings, neighborhoods, or budget…"
             className="flex-1 bg-transparent text-sm outline-none"
             style={{ color: "var(--foreground)" }}
           />

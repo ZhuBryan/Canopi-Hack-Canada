@@ -80,7 +80,7 @@ export function DesktopNavbar({
   const hasInput = typeof onSearchValueChange === "function";
 
   return (
-    <header className="flex h-14 items-center justify-between border-b px-8" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
+    <header className="flex h-14 items-center justify-between border-b pl-2 pr-8" style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}>
       <button
         type="button"
         onClick={() => router.push("/")}
