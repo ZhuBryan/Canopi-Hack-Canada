@@ -686,7 +686,7 @@ function HeroPageInner() {
                   <p className="mt-0.5 text-xs" style={{ color: "var(--muted)" }}>{selectedListing.fullAddress}</p>
                   {selectedListing.incomeNeeded != null && (
                     <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: "var(--amber-soft)", color: "var(--amber)" }}>
-                      ${Math.round(selectedListing.incomeNeeded / 1000)}K+ income needed
+                      Suggested Annual Income: ${Math.round(selectedListing.incomeNeeded / 1000)}K+
                     </span>
                   )}
                 </div>
