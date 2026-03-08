@@ -278,6 +278,8 @@ export default function HeroPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
+          <PrefsWidget />
+          <ChatPanel />
         </div>
 
         {/* ── Right Detail Panel ── */}
@@ -462,8 +464,6 @@ export default function HeroPage() {
         )}
       </div>
 
-      {/* Chatbot Panel */}
-      <ChatPanel />
     </div>
   );
 }

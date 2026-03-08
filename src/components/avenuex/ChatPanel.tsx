@@ -137,7 +137,7 @@ export default function ChatPanel() {
     <>
       {/* Message history panel — floats above the bar */}
       {chatOpen && (
-        <div className="fixed inset-x-0 z-40 flex justify-center px-4 pointer-events-none" style={{ bottom: 76 }}>
+        <div className="absolute inset-x-0 z-40 flex justify-center px-4 pointer-events-none" style={{ bottom: 76 }}>
           <div
             className="pointer-events-auto w-full max-w-2xl rounded-2xl border overflow-hidden flex flex-col"
             style={{ backgroundColor: "var(--surface-raised)", borderColor: "var(--line)", boxShadow: "0 -8px 40px rgba(28,25,23,0.12)", maxHeight: 400 }}
@@ -235,7 +235,7 @@ export default function ChatPanel() {
       )}
 
       {/* Persistent bottom chat bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 flex justify-center px-4 pb-3 pointer-events-none">
+      <div className="absolute bottom-0 inset-x-0 z-40 flex justify-center px-4 pb-3 pointer-events-none">
         <div
           className="pointer-events-auto w-full max-w-2xl rounded-2xl border flex items-center gap-3 px-4 py-3 transition-all duration-200"
           style={{

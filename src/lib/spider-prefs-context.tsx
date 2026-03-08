@@ -43,7 +43,7 @@ const SpiderPrefsContext = createContext<Ctx>({
   chatOpen: false,
   openChat: () => {},
   closeChat: () => {},
-  widgetOpen: true,
+  widgetOpen: false,
   openWidget: () => {},
   closeWidget: () => {},
 });
@@ -52,7 +52,7 @@ export function SpiderPrefsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefsRaw] = useState<SpiderAxes>(DEFAULT_AXES);
   const [hasProfile, setHasProfile] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const [widgetOpen, setWidgetOpen] = useState(true);
+  const [widgetOpen, setWidgetOpen] = useState(false);
 
   const setPrefs = (p: SpiderAxes) => {
     setPrefsRaw(p);

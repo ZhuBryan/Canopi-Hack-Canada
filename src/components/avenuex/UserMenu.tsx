@@ -70,25 +70,13 @@ export default function UserMenu() {
                     <div className="py-1">
                         <button className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition hover:opacity-80" style={{ color: "var(--foreground)" }}>
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path
-                                    d="M8 1l2.35 4.76L15.5 6.5l-3.75 3.66.89 5.16L8 12.88l-4.64 2.44.89-5.16L.5 6.5l5.15-.74L8 1z"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinejoin="round"
-                                />
+                                <path d="M8 1l2.35 4.76L15.5 6.5l-3.75 3.66.89 5.16L8 12.88l-4.64 2.44.89-5.16L.5 6.5l5.15-.74L8 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                             </svg>
                             Saved Listings
                         </button>
                         <button className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition hover:opacity-80" style={{ color: "var(--foreground)" }}>
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path
-                                    d="M6 2.5a4 4 0 00-4 4v3l-1 2h10l-1-2v-3a4 4 0 00-4-4zM4.5 12a1.5 1.5 0 003 0"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    transform="translate(2,0)"
-                                />
+                                <path d="M6 2.5a4 4 0 00-4 4v3l-1 2h10l-1-2v-3a4 4 0 00-4-4zM4.5 12a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" transform="translate(2,0)" />
                             </svg>
                             My Preferences
                         </button>
