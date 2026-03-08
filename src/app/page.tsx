@@ -14,7 +14,7 @@ import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
 import { useSavedListings } from "@/hooks/useSavedListings";
 import ChatPanel from "@/components/avenuex/ChatPanel";
-import SpiderChart, { SPIDER_CATEGORIES } from "@/components/avenuex/SpiderChart";
+import SpiderChart, { SPIDER_CATEGORIES, computeMatch } from "@/components/avenuex/SpiderChart";
 import { SpiderPrefsProvider, useSpiderPrefs, type SpiderAxes } from "@/lib/spider-prefs-context";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
@@ -83,7 +83,7 @@ function PrefsWidget() {
         type="button"
         className="absolute top-4 left-4 z-10 rounded-full border px-3 py-1.5 flex items-center gap-1.5 transition hover:opacity-90"
         style={{ backgroundColor: "rgba(250,248,245,0.95)", borderColor: "var(--line)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(28,25,23,0.10)" }}
-        onClick={openWidget}
+        onClick={() => { console.log('OPEN WIDGET CLICKED!'); openWidget(); }}
       >
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} style={{ color: "var(--brand)" }}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -254,12 +254,12 @@ function deriveListingAxes(listing: Listing): SpiderAxes {
   return {
     walkability: Math.round((cs.foodDrink + cs.groceryParks + cs.education) / 3),
     nourishment: cs.foodDrink,
-    wellness:    Math.round((cs.health + (n(ns?.pharmacies, 5) ?? cs.health)) / 2),
-    greenery:    Math.round((cs.groceryParks + (n(ns?.parks, 15) ?? cs.groceryParks)) / 2),
-    buzz:        Math.round(cs.foodDrink * 0.88),
-    essentials:  Math.round((cs.groceryParks + cs.education) / 2),
-    safety:      cs.emergency,
-    transit:     n(ns?.transit, 12) ?? Math.round(listing.score * 0.85),
+    wellness: Math.round((cs.health + (n(ns?.pharmacies, 5) ?? cs.health)) / 2),
+    greenery: Math.round((cs.groceryParks + (n(ns?.parks, 15) ?? cs.groceryParks)) / 2),
+    buzz: Math.round(cs.foodDrink * 0.88),
+    essentials: Math.round((cs.groceryParks + cs.education) / 2),
+    safety: cs.emergency,
+    transit: n(ns?.transit, 12) ?? Math.round(listing.score * 0.85),
   };
 }
 
@@ -289,7 +289,8 @@ function sqftLabel(listing: Listing) {
   return listing.sqft > 0 ? `${listing.sqft} sqft` : null;
 }
 
-export default function HeroPage() {
+function HeroPageInner() {
+  const { prefs } = useSpiderPrefs();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
@@ -336,17 +337,22 @@ export default function HeroPage() {
       items = items.filter((l) => l.propertyType === filter);
     }
 
+    items = items.map((l) => ({
+      ...l,
+      personalScore: computeMatch(prefs, deriveListingAxes(l)),
+    }));
+
     switch (sort) {
       case "price-asc":
         return [...items].sort((a, b) => a.monthlyRent - b.monthlyRent);
       case "price-desc":
         return [...items].sort((a, b) => b.monthlyRent - a.monthlyRent);
       case "score-desc":
-        return [...items].sort((a, b) => b.score - a.score);
+        return [...items].sort((a, b) => (b.personalScore ?? b.score) - (a.personalScore ?? a.score));
       default:
-        return [...items].sort((a, b) => b.score - a.score);
+        return [...items].sort((a, b) => (b.personalScore ?? b.score) - (a.personalScore ?? a.score));
     }
-  }, [listings, search, filter, sort]);
+  }, [listings, search, filter, sort, prefs]);
 
   const selectedListing = useMemo(
     () => (selectedId ? (listings.find((l) => l.id === selectedId) ?? null) : null),
@@ -354,7 +360,6 @@ export default function HeroPage() {
   );
 
   return (
-    <SpiderPrefsProvider>
     <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       {/* Navbar */}
       <DesktopNavbar
@@ -455,7 +460,7 @@ export default function HeroPage() {
                       <span className="font-alt text-sm font-bold" style={{ color: "var(--foreground)" }}>
                         {listing.priceLabel}
                       </span>
-                      <ScorePill label={`${listing.score}`} band={listing.scoreBand} score={listing.score} />
+                      <ScorePill label={`${listing.personalScore ?? listing.score}`} band={listing.scoreBand} score={listing.personalScore ?? listing.score} />
                     </div>
                     <p className="mt-0.5 truncate text-xs font-medium" style={{ color: "var(--foreground)" }}>
                       {listing.address}
@@ -562,9 +567,9 @@ export default function HeroPage() {
                   )}
                 </div>
                 <ScorePill
-                  label={`${selectedListing.score} / 100`}
+                  label={`${selectedListing.personalScore ?? selectedListing.score} / 100`}
                   band={selectedListing.scoreBand}
-                  score={selectedListing.score}
+                  score={selectedListing.personalScore ?? selectedListing.score}
                 />
               </div>
 
@@ -578,14 +583,14 @@ export default function HeroPage() {
                 ]
                   .filter(Boolean)
                   .map((m) => (
-                  <span
-                    key={m}
-                    className="rounded-full px-2.5 py-1 text-xs font-semibold"
-                    style={{ backgroundColor: "var(--background)", color: "var(--muted)", border: "1px solid var(--line)" }}
-                  >
-                    {m}
-                  </span>
-                ))}
+                    <span
+                      key={m}
+                      className="rounded-full px-2.5 py-1 text-xs font-semibold"
+                      style={{ backgroundColor: "var(--background)", color: "var(--muted)", border: "1px solid var(--line)" }}
+                    >
+                      {m}
+                    </span>
+                  ))}
               </div>
 
               {/* About */}
@@ -627,9 +632,9 @@ export default function HeroPage() {
                     <p className="mt-0.5 text-[11px]" style={{ color: "var(--muted)" }}>Actual counts within 1 km</p>
                   </div>
                   <ScorePill
-                    label={`${selectedListing.score} / 100`}
+                    label={`${selectedListing.personalScore ?? selectedListing.score} / 100`}
                     band={selectedListing.scoreBand}
-                    score={selectedListing.score}
+                    score={selectedListing.personalScore ?? selectedListing.score}
                   />
                 </div>
                 <div className="space-y-3">
@@ -672,7 +677,7 @@ export default function HeroPage() {
                     <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Property Manager</p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)" }}>
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
                       </svg>
                       <p className="text-xs" style={{ color: "var(--muted)" }}>Canopi Verified</p>
                     </div>
@@ -709,6 +714,13 @@ export default function HeroPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function HeroPage() {
+  return (
+    <SpiderPrefsProvider>
+      <HeroPageInner />
     </SpiderPrefsProvider>
   );
 }
