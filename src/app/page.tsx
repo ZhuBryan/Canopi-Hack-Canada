@@ -306,6 +306,7 @@ export default function HeroPage() {
   const [sort, setSort] = useState<SortMode>("recommended");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [liveAmenities, setLiveAmenities] = useState<LiveAmenity[]>([]);
+  const [liveAmenitiesForListingId, setLiveAmenitiesForListingId] = useState<string | null>(null);
   const selectedIdRef = useRef<string | null>(selectedId);
   const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
 
@@ -371,10 +372,13 @@ export default function HeroPage() {
   useEffect(() => {
     if (!selectedListing) {
       setLiveAmenities([]);
+      setLiveAmenitiesForListingId(null);
       return;
     }
 
     const listingId = selectedListing.id;
+    setLiveAmenities([]);
+    setLiveAmenitiesForListingId(null);
     const controller = new AbortController();
     fetch(`/api/vitality?lat=${selectedListing.lat}&lng=${selectedListing.lng}`, {
       signal: controller.signal,
@@ -384,11 +388,13 @@ export default function HeroPage() {
         const payload = (await response.json()) as { amenities?: LiveAmenity[] };
         if (selectedIdRef.current !== listingId) return;
         setLiveAmenities(Array.isArray(payload.amenities) ? payload.amenities : []);
+        setLiveAmenitiesForListingId(listingId);
       })
       .catch((error) => {
         if (controller.signal.aborted) return;
         console.error(error);
         setLiveAmenities([]);
+        setLiveAmenitiesForListingId(null);
       });
 
     return () => controller.abort();
@@ -530,7 +536,7 @@ export default function HeroPage() {
             listings={filteredListings}
             selectedId={selectedId}
             onSelect={setSelectedId}
-            selectedAmenities={liveAmenities}
+            selectedAmenities={selectedId && liveAmenitiesForListingId === selectedId ? liveAmenities : []}
           />
           <PrefsWidget />
         </div>

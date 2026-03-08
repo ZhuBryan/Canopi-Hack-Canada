@@ -49,7 +49,7 @@ export function MapboxMap({ listings, selectedId, onSelect, selectedAmenities = 
     const selectedListing = currentSelectedId
       ? listingsRef.current.find((l) => l.id === currentSelectedId)
       : null;
-    if (!selectedListing) {
+    if (!selectedListing || selectedAmenitiesRef.current.length === 0) {
       source.setData({ type: "FeatureCollection", features: [] });
       amenityPopupRef.current?.remove();
       return;
