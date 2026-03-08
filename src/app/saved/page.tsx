@@ -4,12 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSavedListings } from "@/hooks/useSavedListings";
 import { useAuth } from "@/lib/auth-context";
-import { listingsCatalog } from "@/lib/avenuex-data";
+
 import { DesktopNavbar, ScorePill, ScoreBar, scoreColor } from "@/components/avenuex/primitives";
 import { avenueNav } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
 import type { Listing } from "@/lib/avenuex-data";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const CATEGORY_ROWS = [
     { label: "Food & Drink", key: "foodDrink", color: "#F97316" },
@@ -28,17 +28,36 @@ export default function SavedPage() {
     const { user, loading: authLoading } = useAuth();
     const { savedIds, toggleSave, isSaved, loading: savedLoading } = useSavedListings();
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [listings, setListings] = useState<Listing[]>([]);
+    const [fetching, setFetching] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetch("/api/listings")
+            .then(res => res.json())
+            .then(data => {
+                if (!cancelled) {
+                    setListings(data);
+                    setFetching(false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (!cancelled) setFetching(false);
+            });
+        return () => { cancelled = true; };
+    }, []);
 
     const savedListings = useMemo(() => {
-        return listingsCatalog.filter((l) => savedIds.has(l.id));
-    }, [savedIds]);
+        return listings.filter((l) => savedIds.has(l.id));
+    }, [listings, savedIds]);
 
     const selectedListing = useMemo(
         () => (selectedId ? savedListings.find((l) => l.id === selectedId) ?? null : null),
         [selectedId, savedListings]
     );
 
-    const isLoading = authLoading || savedLoading;
+    const isLoading = authLoading || savedLoading || fetching;
 
     return (
         <div className="flex h-screen flex-col overflow-hidden bg-white">
@@ -115,8 +134,8 @@ export default function SavedPage() {
                                     <article
                                         key={listing.id}
                                         className={`cursor-pointer overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md ${selectedId === listing.id
-                                                ? "border-green-500 ring-1 ring-green-500"
-                                                : "border-gray-200"
+                                            ? "border-green-500 ring-1 ring-green-500"
+                                            : "border-gray-200"
                                             }`}
                                         onClick={() => setSelectedId(listing.id)}
                                     >
