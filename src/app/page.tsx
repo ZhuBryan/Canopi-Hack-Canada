@@ -49,6 +49,10 @@ function sqftLabel(listing: Listing) {
   return listing.sqft > 0 ? `${listing.sqft} sqft` : null;
 }
 
+function PrefsWidget() {
+  return null;
+}
+
 export default function HeroPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loadingListings, setLoadingListings] = useState(true);
