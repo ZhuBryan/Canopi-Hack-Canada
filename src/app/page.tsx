@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapboxMap } from "@/components/avenuex/MapboxMap";
 import {
   DesktopNavbar,
@@ -14,254 +14,11 @@ import type { FilterType, Listing } from "@/lib/avenuex-data";
 import UserMenu from "@/components/avenuex/UserMenu";
 import { useSavedListings } from "@/hooks/useSavedListings";
 import ChatPanel from "@/components/avenuex/ChatPanel";
-import SpiderChart, { SPIDER_CATEGORIES } from "@/components/avenuex/SpiderChart";
-import { SpiderPrefsProvider, useSpiderPrefs, type SpiderAxes } from "@/lib/spider-prefs-context";
+import UserPriorityPanel from "@/components/avenuex/UserPriorityPanel";
+import { usePreferences } from "@/hooks/usePreferences";
+import { computePersonalScore, deriveBand, deriveStatus } from "@/lib/score-utils";
 
 type SortMode = "recommended" | "price-asc" | "price-desc" | "score-desc";
-
-// ── Map overlay: My Preferences widget ───────────────────────────────────────
-
-function pxy(angleDeg: number, r: number, cx: number, cy: number) {
-  const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-}
-
-function PrefsWidget() {
-  const { prefs, setPrefs, widgetOpen, openWidget, closeWidget, openChat } = useSpiderPrefs();
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [dragging, setDragging] = useState<{ key: keyof SpiderAxes; i: number } | null>(null);
-  const prefsRef = useRef(prefs);
-  prefsRef.current = prefs;
-
-  const SZ = 220, CX = 110, CY = 110, MR = 78;
-  const STEP = 360 / 8;
-  const RINGS = [25, 50, 75, 100];
-
-  // Global mouseup / touchend to end drag
-  useEffect(() => {
-    const end = () => setDragging(null);
-    window.addEventListener("mouseup", end);
-    window.addEventListener("touchend", end);
-    return () => { window.removeEventListener("mouseup", end); window.removeEventListener("touchend", end); };
-  }, []);
-
-  const getValFromEvent = (clientX: number, clientY: number, i: number) => {
-    if (!svgRef.current) return null;
-    const rect = svgRef.current.getBoundingClientRect();
-    const mx = ((clientX - rect.left) / rect.width) * SZ;
-    const my = ((clientY - rect.top) / rect.height) * SZ;
-    const rad = ((i * STEP - 90) * Math.PI) / 180;
-    const dot = (mx - CX) * Math.cos(rad) + (my - CY) * Math.sin(rad);
-    return Math.max(0, Math.min(100, Math.round((dot / MR) * 100)));
-  };
-
-  const onSvgMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!dragging) return;
-    const val = getValFromEvent(e.clientX, e.clientY, dragging.i);
-    if (val !== null) setPrefs({ ...prefsRef.current, [dragging.key]: val });
-  };
-
-  const onSvgTouchMove = (e: React.TouchEvent<SVGSVGElement>) => {
-    if (!dragging || !e.touches[0]) return;
-    const val = getValFromEvent(e.touches[0].clientX, e.touches[0].clientY, dragging.i);
-    if (val !== null) setPrefs({ ...prefsRef.current, [dragging.key]: val });
-  };
-
-  const startDrag = (key: keyof SpiderAxes, i: number, e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    setDragging({ key, i });
-  };
-
-  const polyPts = SPIDER_CATEGORIES.map(({ key }, i) => {
-    const { x, y } = pxy(i * STEP, ((prefs[key] ?? 0) / 100) * MR, CX, CY);
-    return `${x},${y}`;
-  }).join(" ");
-
-  if (!widgetOpen) {
-    return (
-      <button
-        type="button"
-        className="absolute top-4 left-4 z-10 rounded-full border px-3 py-1.5 flex items-center gap-1.5 transition hover:opacity-90"
-        style={{ backgroundColor: "rgba(250,248,245,0.95)", borderColor: "var(--line)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(28,25,23,0.10)" }}
-        onClick={openWidget}
-      >
-        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} style={{ color: "var(--brand)" }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-        </svg>
-        <span className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>My Preferences</span>
-      </button>
-    );
-  }
-
-  return (
-    <div
-      className="absolute top-4 left-4 z-10 rounded-2xl border overflow-hidden"
-      style={{ backgroundColor: "rgba(250,248,245,0.97)", borderColor: "var(--line)", backdropFilter: "blur(14px)", boxShadow: "0 4px 24px rgba(28,25,23,0.13)", width: 256 }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-2.5 pb-0.5">
-        <span className="label-overline" style={{ whiteSpace: "nowrap" }}>My Preferences</span>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px]" style={{ color: "var(--muted-light)", whiteSpace: "nowrap" }}>drag to adjust</span>
-          <button
-            type="button"
-            onClick={() => setPrefs({ walkability: 50, nourishment: 50, wellness: 50, greenery: 50, buzz: 50, essentials: 50, safety: 50, transit: 50 })}
-            className="text-[10px] transition hover:text-red-400"
-            style={{ color: "var(--muted-light)" }}
-          >
-            Reset
-          </button>
-          <button
-            type="button"
-            onClick={closeWidget}
-            className="text-base leading-none transition hover:opacity-60 ml-0.5"
-            style={{ color: "var(--muted-light)" }}
-          >
-            ×
-          </button>
-        </div>
-      </div>
-
-      {/* Drag tooltip */}
-      {dragging && (
-        <div className="mx-3 mb-0.5 flex items-center justify-between rounded-lg px-2 py-1" style={{ backgroundColor: "var(--brand-soft)" }}>
-          <span className="text-[11px] font-semibold" style={{ color: "var(--brand-ink)" }}>
-            {SPIDER_CATEGORIES.find(c => c.key === dragging.key)?.label}
-          </span>
-          <span className="text-[11px] font-bold font-mono" style={{ color: "var(--brand-ink)" }}>
-            {prefs[dragging.key]}
-          </span>
-        </div>
-      )}
-
-      {/* Interactive spider chart */}
-      <div className="flex justify-center" style={{ paddingBottom: 8 }}>
-        <svg
-          ref={svgRef}
-          width={SZ} height={SZ}
-          viewBox={`0 0 ${SZ} ${SZ}`}
-          style={{ overflow: "visible", cursor: dragging ? "grabbing" : "default", userSelect: "none" }}
-          onMouseMove={onSvgMouseMove}
-          onTouchMove={onSvgTouchMove}
-        >
-          {/* Grid rings */}
-          {RINGS.map((ring) => {
-            const r = (ring / 100) * MR;
-            const pts = SPIDER_CATEGORIES.map((_, i) => {
-              const { x, y } = pxy(i * STEP, r, CX, CY);
-              return `${x},${y}`;
-            }).join(" ");
-            return (
-              <polygon key={ring} points={pts} fill="none"
-                stroke="var(--line)"
-                strokeWidth={ring === 100 ? 1.2 : 0.7}
-                strokeDasharray={ring === 100 ? undefined : "3,3"} />
-            );
-          })}
-
-          {/* Axis lines + wide invisible hit area */}
-          {SPIDER_CATEGORIES.map(({ key }, i) => {
-            const { x, y } = pxy(i * STEP, MR, CX, CY);
-            return (
-              <g key={key}>
-                <line x1={CX} y1={CY} x2={x} y2={y} stroke="var(--line)" strokeWidth={0.7} />
-                {/* Wide transparent hit area for dragging */}
-                <line x1={CX} y1={CY} x2={x} y2={y}
-                  stroke="transparent" strokeWidth={20}
-                  style={{ cursor: "grab" }}
-                  onMouseDown={(e) => startDrag(key as keyof SpiderAxes, i, e)}
-                  onTouchStart={(e) => startDrag(key as keyof SpiderAxes, i, e)}
-                />
-              </g>
-            );
-          })}
-
-          {/* User prefs polygon */}
-          <polygon
-            points={polyPts}
-            fill="rgba(99,102,241,0.10)"
-            stroke="#6366F1"
-            strokeWidth={2}
-            strokeLinejoin="round"
-            style={{ transition: dragging ? undefined : "all 0.25s ease" }}
-          />
-
-          {/* Draggable data points */}
-          {SPIDER_CATEGORIES.map(({ key, color }, i) => {
-            const r = ((prefs[key] ?? 0) / 100) * MR;
-            const { x, y } = pxy(i * STEP, r, CX, CY);
-            const isActive = dragging?.key === key;
-            return (
-              <circle key={key} cx={x} cy={y}
-                r={isActive ? 7 : 5}
-                fill={isActive ? color : "white"}
-                stroke={color}
-                strokeWidth={isActive ? 0 : 2.5}
-                style={{
-                  cursor: "grab",
-                  transition: dragging ? undefined : "all 0.25s ease",
-                  filter: isActive ? `drop-shadow(0 0 4px ${color}88)` : undefined,
-                }}
-                onMouseDown={(e) => startDrag(key as keyof SpiderAxes, i, e)}
-                onTouchStart={(e) => startDrag(key as keyof SpiderAxes, i, e)}
-              />
-            );
-          })}
-
-          {/* Axis labels */}
-          {SPIDER_CATEGORIES.map(({ key, label, color }, i) => {
-            const { x, y } = pxy(i * STEP, MR + 19, CX, CY);
-            const isActive = dragging?.key === key;
-            return (
-              <text key={label} x={x} y={y}
-                textAnchor="middle" dominantBaseline="central"
-                style={{
-                  fontSize: isActive ? 10 : 9,
-                  fontWeight: isActive ? 700 : 500,
-                  fill: isActive ? color : "var(--muted-light)",
-                  fontFamily: "var(--font-dm-sans), system-ui",
-                  transition: "all 0.15s ease",
-                  pointerEvents: "none",
-                }}>
-                {label}
-              </text>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Chat link */}
-      <div className="border-t px-3 py-2 flex justify-end" style={{ borderColor: "var(--line)" }}>
-        <button
-          type="button"
-          onClick={openChat}
-          className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition hover:opacity-80"
-          style={{ backgroundColor: "var(--brand-soft)", color: "var(--brand-ink)" }}
-        >
-          Chat to adjust ›
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function deriveListingAxes(listing: Listing): SpiderAxes {
-  const cs = listing.categoryScores;
-  const ns = listing.nearbyServices;
-  const n = (count: number | undefined, cap: number) =>
-    count !== undefined ? Math.min(100, Math.round((count / cap) * 100)) : null;
-  return {
-    walkability: Math.round((cs.foodDrink + cs.groceryParks + cs.education) / 3),
-    nourishment: cs.foodDrink,
-    wellness:    Math.round((cs.health + (n(ns?.pharmacies, 5) ?? cs.health)) / 2),
-    greenery:    Math.round((cs.groceryParks + (n(ns?.parks, 15) ?? cs.groceryParks)) / 2),
-    buzz:        Math.round(cs.foodDrink * 0.88),
-    essentials:  Math.round((cs.groceryParks + cs.education) / 2),
-    safety:      cs.emergency,
-    transit:     n(ns?.transit, 12) ?? Math.round(listing.score * 0.85),
-  };
-}
 
 const SERVICE_ROWS = [
   { label: "Schools", key: "schools", color: "#3B82F6" },
@@ -297,6 +54,7 @@ export default function HeroPage() {
   const [sort, setSort] = useState<SortMode>("recommended");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
+  const { preferences } = usePreferences();
 
   useEffect(() => {
     let cancelled = false;
@@ -320,8 +78,34 @@ export default function HeroPage() {
   }, []);
 
   const filteredListings = useMemo<Listing[]>(() => {
-    let items = listings;
+    // 1. Recalculate the vitality score based on user preferences
+    const weights = {
+      schools: preferences.w_schools,
+      groceries: preferences.w_groceries,
+      restaurants: preferences.w_restaurants,
+      cafes: preferences.w_cafes,
+      parks: preferences.w_parks,
+      pharmacies: preferences.w_pharmacies,
+      transit: preferences.w_transit,
+    };
 
+    let items = listings.map((l) => {
+      if (!l.nearbyServices) return l;
+      const score = computePersonalScore(l.nearbyServices, weights);
+      const scoreBand = deriveBand(score);
+      const scoreStatus = deriveStatus(scoreBand);
+      return { ...l, score, scoreBand, scoreStatus };
+    });
+
+    console.log("Re-calculating scores using weights:", weights);
+    if (items.length > 0) {
+      console.log(`Sample updated score for ${items[0].address}: ${items[0].score}/100`);
+    }
+
+    // 2. Filter by max rent from preferences
+    items = items.filter((l) => l.monthlyRent <= preferences.max_rent);
+
+    // 3. Search and text filters
     if (search.trim()) {
       const q = search.toLowerCase();
       items = items.filter(
@@ -344,9 +128,10 @@ export default function HeroPage() {
       case "score-desc":
         return [...items].sort((a, b) => b.score - a.score);
       default:
+        // By default, sort by personalized vitality score
         return [...items].sort((a, b) => b.score - a.score);
     }
-  }, [listings, search, filter, sort]);
+  }, [listings, search, filter, sort, preferences]);
 
   const selectedListing = useMemo(
     () => (selectedId ? (listings.find((l) => l.id === selectedId) ?? null) : null),
@@ -354,8 +139,7 @@ export default function HeroPage() {
   );
 
   return (
-    <SpiderPrefsProvider>
-    <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
       {/* Navbar */}
       <DesktopNavbar
         searchPlaceholder={avenueNav.searchPlaceholder}
@@ -367,9 +151,14 @@ export default function HeroPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left Sidebar ── */}
-        <aside className="sidebar-texture flex w-80 flex-shrink-0 flex-col overflow-hidden border-r" style={{ borderColor: "var(--line)" }}>
+        <aside className="flex w-80 flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white">
+          {/* User Priority Panel */}
+          <div className="border-b border-gray-200 p-4 pb-2">
+            <UserPriorityPanel />
+          </div>
+
           {/* Filters */}
-          <div className="space-y-3 border-b p-4" style={{ borderColor: "var(--line)" }}>
+          <div className="space-y-3 border-b border-gray-200 p-4 pt-2">
             <div className="flex flex-wrap gap-1.5">
               {FILTER_OPTIONS.map((f) => (
                 <button
@@ -377,13 +166,9 @@ export default function HeroPage() {
                   type="button"
                   onClick={() => setFilter(f)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f
-                    ? "text-white"
-                    : "hover:opacity-80"
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-slate-500 hover:bg-gray-200 hover:text-slate-700"
                     }`}
-                  style={filter === f
-                    ? { backgroundColor: "var(--brand)" }
-                    : { backgroundColor: "var(--surface-raised)", color: "var(--muted)", border: "1px solid var(--line)" }
-                  }
                 >
                   {f}
                 </button>
@@ -392,15 +177,14 @@ export default function HeroPage() {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortMode)}
-              className="w-full rounded-full border px-3 py-2 text-xs outline-none"
-              style={{ borderColor: "var(--line)", backgroundColor: "var(--surface)", color: "var(--foreground)" }}
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-slate-700 outline-none"
             >
               <option value="recommended">Recommended</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
               <option value="score-desc">Best Vitality Score</option>
             </select>
-            <p className="label-overline">
+            <p className="text-xs text-slate-400">
               {filteredListings.length} listing{filteredListings.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -409,23 +193,29 @@ export default function HeroPage() {
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
             {loadingListings && (
               <div className="flex flex-col items-center justify-center gap-2 py-12">
-                <div className="h-6 w-6 animate-spin rounded-full" style={{ border: "2px solid var(--brand)", borderTopColor: "transparent" }} />
-                <p className="text-xs" style={{ color: "var(--muted-light)" }}>Loading listings…</p>
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-500 border-t-transparent" />
+                <p className="text-xs text-slate-400">Loading listings…</p>
               </div>
             )}
             {!loadingListings && filteredListings.map((listing) => (
-              <button
+              <div
                 key={listing.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(listing.id)}
-                className="w-full rounded-2xl border p-3 text-left transition card-lift"
-                style={selectedId === listing.id
-                  ? { borderColor: "var(--brand)", backgroundColor: "var(--brand-soft)", boxShadow: "0 0 0 1px var(--brand)" }
-                  : { borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }
-                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedId(listing.id);
+                  }
+                }}
+                className={`w-full cursor-pointer flex-col rounded-xl border p-3 text-left outline-none transition focus:ring-2 focus:ring-green-400 focus:ring-offset-1 ${selectedId === listing.id
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex gap-3">
-                  <div className="relative h-[72px] w-[88px] flex-shrink-0 overflow-hidden rounded-xl">
+                  <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
                     <Image
                       src={listing.image}
                       alt={listing.address}
@@ -434,49 +224,47 @@ export default function HeroPage() {
                       className="object-cover"
                     />
                     {/* Bookmark heart */}
-                    <div
-                      role="button"
-                      tabIndex={0}
+                    <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isLoggedIn) toggleSave(listing.id);
                       }}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); if (isLoggedIn) toggleSave(listing.id); } }}
-                      className="absolute right-1 top-1 z-10 grid h-6 w-6 place-items-center rounded-full bg-white/80 backdrop-blur-sm transition hover:bg-white cursor-pointer"
+                      className="absolute right-1 top-1 z-10 grid h-6 w-6 place-items-center rounded-full bg-white/80 backdrop-blur-sm transition hover:bg-white"
                       title={isLoggedIn ? (isSaved(listing.id) ? "Unsave" : "Save") : "Sign in to save"}
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill={isSaved(listing.id) ? "#22c55e" : "none"} stroke={isSaved(listing.id) ? "#22c55e" : "#64748b"} strokeWidth="2">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                       </svg>
-                    </div>
+                    </button>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="font-alt text-sm font-bold" style={{ color: "var(--foreground)" }}>
+                      <span className="font-alt text-sm font-bold text-slate-900">
                         {listing.priceLabel}
                       </span>
                       <ScorePill label={`${listing.score}`} band={listing.scoreBand} score={listing.score} />
                     </div>
-                    <p className="mt-0.5 truncate text-xs font-medium" style={{ color: "var(--foreground)" }}>
+                    <p className="mt-0.5 truncate text-xs font-medium text-slate-700">
                       {listing.address}
                     </p>
-                    <p className="mt-0.5 text-xs" style={{ color: "var(--muted)" }}>
+                    <p className="mt-0.5 text-xs text-slate-500">
                       {[bedLabel(listing), bathLabel(listing), sqftLabel(listing)]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
-                    <p className="mt-0.5 text-[10px] tracking-[0.04em] uppercase" style={{ color: "var(--muted-light)" }}>{listing.city}</p>
+                    <p className="mt-0.5 text-xs text-slate-400">{listing.city}</p>
                     {listing.matchReason && (
-                      <p className="mt-0.5 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold w-fit" style={{ backgroundColor: "var(--brand-soft)", color: "var(--brand-ink)" }}>
+                      <p className="mt-0.5 truncate text-xs font-medium text-green-600">
                         {listing.matchReason}
                       </p>
                     )}
                   </div>
                 </div>
-              </button>
+              </div>
             ))}
             {filteredListings.length === 0 && (
-              <p className="mt-8 text-center text-xs" style={{ color: "var(--muted)" }}>
+              <p className="mt-8 text-center text-xs text-slate-500">
                 No listings match your search.
               </p>
             )}
@@ -498,23 +286,21 @@ export default function HeroPage() {
         {selectedListing && (
           <aside
             key={selectedListing.id}
-            className="panel-slide-in flex w-96 flex-shrink-0 flex-col overflow-y-auto border-l"
-            style={{ borderColor: "var(--line)", backgroundColor: "var(--surface-raised)" }}
+            className="flex w-96 flex-shrink-0 flex-col overflow-y-auto border-l border-slate-800 bg-white"
           >
             {/* Sticky header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 backdrop-blur-sm" style={{ borderColor: "var(--line)", backgroundColor: "rgba(250,248,245,0.95)" }}>
-              <h2 className="mr-2 truncate font-display text-sm font-bold" style={{ color: "var(--foreground)" }}>
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
+              <h2 className="mr-2 truncate font-display text-sm font-bold text-slate-900">
                 {selectedListing.address}
               </h2>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => isLoggedIn && toggleSave(selectedListing.id)}
-                  className="flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition hover:opacity-80"
-                  style={isSaved(selectedListing.id)
-                    ? { borderColor: "var(--brand)", backgroundColor: "var(--brand-soft)", color: "var(--brand-ink)" }
-                    : { borderColor: "var(--line)", backgroundColor: "var(--surface-raised)", color: "var(--muted)" }
-                  }
+                  className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${isSaved(selectedListing.id)
+                    ? "border-green-500 bg-green-50 text-green-700"
+                    : "border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
+                    }`}
                   title={isLoggedIn ? undefined : "Sign in to save"}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill={isSaved(selectedListing.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -525,8 +311,7 @@ export default function HeroPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
-                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-sm transition hover:opacity-80"
-                  style={{ backgroundColor: "var(--line)", color: "var(--muted)" }}
+                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-slate-100 text-sm text-slate-500 transition hover:bg-slate-200"
                   aria-label="Close panel"
                 >
                   ×
@@ -535,15 +320,14 @@ export default function HeroPage() {
             </div>
 
             {/* Hero image */}
-            <div className="relative h-52 w-full flex-shrink-0 overflow-hidden">
+            <div className="relative h-48 w-full flex-shrink-0">
               <Image
                 src={selectedListing.image}
                 alt={selectedListing.address}
                 fill
                 sizes="384px"
-                className="object-cover transition-transform duration-700 hover:scale-105"
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
 
             {/* Content */}
@@ -551,12 +335,12 @@ export default function HeroPage() {
               {/* Price + score */}
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="font-alt text-[1.625rem] font-bold leading-none tracking-[-0.025em]" style={{ color: "var(--foreground)" }}>
+                  <p className="font-alt text-2xl font-bold text-slate-900">
                     {selectedListing.priceLabel}
                   </p>
-                  <p className="mt-0.5 text-xs" style={{ color: "var(--muted)" }}>{selectedListing.fullAddress}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">{selectedListing.fullAddress}</p>
                   {selectedListing.incomeNeeded != null && (
-                    <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: "var(--amber-soft)", color: "var(--amber)" }}>
+                    <span className="mt-1 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                       ${Math.round(selectedListing.incomeNeeded / 1000)}K+ income needed
                     </span>
                   )}
@@ -578,53 +362,48 @@ export default function HeroPage() {
                 ]
                   .filter(Boolean)
                   .map((m) => (
-                  <span
-                    key={m}
-                    className="rounded-full px-2.5 py-1 text-xs font-semibold"
-                    style={{ backgroundColor: "var(--background)", color: "var(--muted)", border: "1px solid var(--line)" }}
-                  >
-                    {m}
-                  </span>
-                ))}
+                    <span
+                      key={m}
+                      className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
+                    >
+                      {m}
+                    </span>
+                  ))}
               </div>
 
               {/* About */}
               <div>
-                <h3 className="section-divider label-overline mb-1.5">About</h3>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{selectedListing.about}</p>
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  About
+                </h3>
+                <p className="text-xs leading-relaxed text-slate-600">{selectedListing.about}</p>
               </div>
 
               {/* Amenities */}
               <div>
-                <h3 className="section-divider label-overline mb-2">Building Amenities</h3>
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Building Amenities
+                </h3>
                 {selectedListing.amenities.length > 0 ? (
                   <div className="grid grid-cols-2 gap-y-1.5">
                     {selectedListing.amenities.map((a) => (
-                      <div key={a} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--foreground)" }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)", flexShrink: 0 }}>
-                          <circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" />
-                        </svg>
+                      <div key={a} className="flex items-center gap-1.5 text-xs text-slate-700">
+                        <span className="text-green-500">✓</span>
                         {a}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs" style={{ color: "var(--muted)" }}>No building amenities scraped yet.</p>
+                  <p className="text-xs text-slate-500">No building amenities scraped yet.</p>
                 )}
               </div>
 
-              {/* Spider Chart — Your Match */}
-              <div>
-                <h3 className="section-divider label-overline mb-3">Your Match</h3>
-                <SpiderChart listingAxes={deriveListingAxes(selectedListing)} />
-              </div>
-
               {/* Nearby Services */}
-              <div className="rounded-xl border p-4" style={{ borderColor: "var(--line)" }}>
+              <div className="rounded-xl border border-gray-200 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Nearby Services</h3>
-                    <p className="mt-0.5 text-[11px]" style={{ color: "var(--muted)" }}>Actual counts within 1 km</p>
+                    <h3 className="text-sm font-bold text-slate-900">Nearby Services</h3>
+                    <p className="mt-0.5 text-[11px] text-slate-500">Actual counts within 1 km</p>
                   </div>
                   <ScorePill
                     label={`${selectedListing.score} / 100`}
@@ -636,12 +415,12 @@ export default function HeroPage() {
                   {SERVICE_ROWS.map(({ label, key, color }) => {
                     const val = selectedListing.nearbyServices?.[key] ?? 0;
                     return (
-                      <div key={key} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ backgroundColor: "var(--background)" }}>
+                      <div key={key} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                         <div className="flex items-center gap-2 text-xs">
                           <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-                          <span style={{ color: "var(--muted)" }}>{label}</span>
+                          <span className="text-slate-600">{label}</span>
                         </div>
-                        <span className="font-semibold" style={{ color: "var(--foreground)" }}>{val}</span>
+                        <span className="font-semibold text-slate-800">{val}</span>
                       </div>
                     );
                   })}
@@ -649,38 +428,33 @@ export default function HeroPage() {
               </div>
 
               {/* Lease info */}
-              <div className="rounded-xl border p-4" style={{ borderColor: "var(--line)" }}>
+              <div className="rounded-xl bg-slate-50 p-4">
                 <div className="flex justify-between text-xs">
-                  <span className="label-overline">Available</span>
-                  <span className="font-semibold" style={{ color: "var(--foreground)" }}>
+                  <span className="text-slate-500">Available</span>
+                  <span className="font-semibold text-slate-800">
                     {selectedListing.availableDate}
                   </span>
                 </div>
-                <div className="mt-3 flex justify-between text-xs">
-                  <span className="label-overline">Lease Term</span>
-                  <span className="font-semibold" style={{ color: "var(--foreground)" }}>{selectedListing.leaseTerm}</span>
+                <div className="mt-2 flex justify-between text-xs">
+                  <span className="text-slate-500">Lease Term</span>
+                  <span className="font-semibold text-slate-800">{selectedListing.leaseTerm}</span>
                 </div>
               </div>
 
               {/* Property manager */}
-              <div className="rounded-xl border p-4" style={{ borderColor: "var(--line)" }}>
+              <div className="rounded-xl border border-gray-200 p-4">
                 <div className="mb-3 flex items-center gap-3">
-                  <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full text-sm font-bold text-white ring-2 ring-[var(--brand-soft)]" style={{ backgroundColor: "var(--brand)" }}>
+                  <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-green-500 text-sm font-bold text-white">
                     PM
                   </div>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Property Manager</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)" }}>
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                      </svg>
-                      <p className="text-xs" style={{ color: "var(--muted)" }}>Canopi Verified</p>
-                    </div>
+                    <p className="text-sm font-semibold text-slate-900">Property Manager</p>
+                    <p className="text-xs text-slate-500">Canopi Verified</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <PrimaryButton className="flex-1 !px-3 !py-2 !text-xs">Book Tour</PrimaryButton>
-                  <GhostButton className="flex-1 !px-3 !py-2 !text-xs">
+                  <GhostButton className="flex-1 !px-3 !py-2 !text-xs border border-gray-200">
                     Contact
                   </GhostButton>
                 </div>
@@ -691,6 +465,5 @@ export default function HeroPage() {
       </div>
 
     </div>
-    </SpiderPrefsProvider>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, DM_Sans, Inter } from "next/font/google";
 import { AvenueXProvider } from "@/lib/avenuex-store";
 import { AuthProvider } from "@/lib/auth-context";
+import { PreferencesProvider } from "@/hooks/usePreferences";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -36,7 +37,9 @@ export default function RootLayout({
         className={`${dmSans.variable} ${bricolageGrotesque.variable} ${inter.variable} antialiased`}
       >
         <AvenueXProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <PreferencesProvider>{children}</PreferencesProvider>
+          </AuthProvider>
         </AvenueXProvider>
       </body>
     </html>

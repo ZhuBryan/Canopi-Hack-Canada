@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import type { Listing, ScoreBand } from "@/lib/avenuex-data";
+import type { Listing } from "@/lib/avenuex-data";
+import {
+  type ScoreBand,
+  deriveBand,
+  deriveStatus,
+  computePersonalScore,
+  BUCKET_CAPS
+} from "@/lib/score-utils";
 
 // ── Types for the raw livable-data JSON ──────────────────────────────────────
 
@@ -60,15 +67,15 @@ interface RawListing {
 
 const EFFECTIVE_RADIUS_METERS = 1000;
 
-const BUCKET_CAPS = {
+const DEFAULT_WEIGHTS = {
   schools: 5,
   groceries: 5,
-  restaurants: 15,
-  cafes: 10,
+  restaurants: 5,
+  cafes: 5,
   parks: 5,
   pharmacies: 5,
-  transit: 10,
-} as const;
+  transit: 5,
+};
 
 function parsePrice(raw: string | null | undefined): number {
   if (!raw) return 0;
@@ -111,18 +118,6 @@ function bucketScore(
   return Math.round((Math.min(count, cap) / cap) * 100);
 }
 
-function deriveBand(score: number): ScoreBand {
-  if (score >= 70) return "great";
-  if (score >= 45) return "medium";
-  return "warning";
-}
-
-function deriveStatus(band: ScoreBand): string {
-  if (band === "great") return "Great neighborhood access";
-  if (band === "medium") return "Moderate neighborhood access";
-  return "Limited neighborhood access";
-}
-
 function formatShortPrice(rent: number): string {
   if (rent >= 1000) return `$${(rent / 1000).toFixed(1)}K`;
   return `$${rent}`;
@@ -137,7 +132,12 @@ function computeIncomeNeeded(monthlyRent: number): number {
 let cachedListings: Listing[] | null = null;
 
 async function loadListings(): Promise<Listing[]> {
-  if (cachedListings) return cachedListings;
+  console.log("--> API /api/listings CALLED");
+  if (cachedListings) {
+    console.log("--> API /api/listings returning CACHED listings");
+    return cachedListings;
+  }
+  console.log("--> API /api/listings loading from JSON feed");
 
   const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
   const raw = await readFile(filePath, "utf8");
@@ -169,6 +169,16 @@ async function loadListings(): Promise<Listing[]> {
       const pharmaciesCount = countWithinRadius(nearby.pharmacies);
       const transitCount = countWithinRadius(nearby.transit);
 
+      const nearbyServices = {
+        schools: schoolsCount,
+        groceries: groceriesCount,
+        restaurants: restaurantsCount,
+        cafes: cafesCount,
+        parks: parksCount,
+        pharmacies: pharmaciesCount,
+        transit: transitCount,
+      };
+
       const foodDrink = Math.round(
         (bucketScore("restaurants", restaurantsCount) + bucketScore("cafes", cafesCount)) / 2
       );
@@ -179,7 +189,7 @@ async function loadListings(): Promise<Listing[]> {
       const education = bucketScore("schools", schoolsCount);
       const emergency = Math.round(health * 0.6 + bucketScore("transit", transitCount) * 0.4);
 
-      const score = Math.round((foodDrink + health + groceryParks + education + emergency) / 5);
+      const score = computePersonalScore(nearbyServices, DEFAULT_WEIGHTS);
       const scoreBand = deriveBand(score);
 
       return {
@@ -206,15 +216,7 @@ async function loadListings(): Promise<Listing[]> {
         leaseTerm: details?.leaseTerm ?? "12 months",
         about: item.title ?? "",
         amenities: buildBuildingAmenities(item.title, details),
-        nearbyServices: {
-          schools: schoolsCount,
-          groceries: groceriesCount,
-          restaurants: restaurantsCount,
-          cafes: cafesCount,
-          parks: parksCount,
-          pharmacies: pharmaciesCount,
-          transit: transitCount,
-        },
+        nearbyServices,
         categoryScores: { foodDrink, health, groceryParks, education, emergency },
         bedsLabel: details?.bedsLabel ?? undefined,
         bathsLabel: details?.bathsLabel ?? buildBathsLabel(details?.bathsMin, details?.bathsMax),

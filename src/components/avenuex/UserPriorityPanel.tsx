@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PrimaryButton } from "@/components/avenuex/primitives";
-import type { Listing } from "@/lib/avenuex-data";
+import { usePreferences } from "@/hooks/usePreferences";
+import type { UserPreferences } from "@/hooks/usePreferences";
 
 const SLIDERS = [
   { key: "w_schools", label: "Schools" },
@@ -14,47 +15,50 @@ const SLIDERS = [
   { key: "w_transit", label: "Transit" },
 ] as const;
 
-type SliderKey = (typeof SLIDERS)[number]["key"];
+export type SliderKey = (typeof SLIDERS)[number]["key"];
 
-interface UserPriorityPanelProps {
-  onResults: (listings: Listing[]) => void;
-}
-
-export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps) {
+export default function UserPriorityPanel() {
+  const { preferences, savePreferences, loading: prefsLoading, isLoggedIn } = usePreferences();
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [maxRent, setMaxRent] = useState(3200);
-  const [weights, setWeights] = useState<Record<SliderKey, number>>({
-    w_schools: 5,
-    w_groceries: 5,
-    w_restaurants: 5,
-    w_cafes: 5,
-    w_parks: 5,
-    w_pharmacies: 5,
-    w_transit: 5,
+  const [saving, setSaving] = useState(false);
+
+  // Local state for the sliders so they drag smoothly
+  const [localWeights, setLocalWeights] = useState<Record<SliderKey, number>>({
+    w_schools: preferences.w_schools,
+    w_groceries: preferences.w_groceries,
+    w_restaurants: preferences.w_restaurants,
+    w_cafes: preferences.w_cafes,
+    w_parks: preferences.w_parks,
+    w_pharmacies: preferences.w_pharmacies,
+    w_transit: preferences.w_transit,
   });
+  const [localMaxRent, setLocalMaxRent] = useState(preferences.max_rent);
+
+  // Sync local state when preferences finish loading from Supabase
+  useEffect(() => {
+    setLocalWeights({
+      w_schools: preferences.w_schools,
+      w_groceries: preferences.w_groceries,
+      w_restaurants: preferences.w_restaurants,
+      w_cafes: preferences.w_cafes,
+      w_parks: preferences.w_parks,
+      w_pharmacies: preferences.w_pharmacies,
+      w_transit: preferences.w_transit,
+    });
+    setLocalMaxRent(preferences.max_rent);
+  }, [preferences]);
 
   const handleSliderChange = (key: SliderKey, value: number) => {
-    setWeights((prev) => ({ ...prev, [key]: value }));
+    setLocalWeights((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("maxRent", String(maxRent));
-      for (const { key } of SLIDERS) {
-        params.set(key, String(weights[key]));
-      }
-      const res = await fetch(`/api/suggestions?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to fetch suggestions");
-      const data: Listing[] = await res.json();
-      onResults(data);
-    } catch (err) {
-      console.error("UserPriorityPanel fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
+  const handleSave = async () => {
+    setSaving(true);
+    await savePreferences({
+      ...localWeights,
+      max_rent: localMaxRent,
+    } as UserPreferences);
+    setSaving(false);
   };
 
   return (
@@ -85,14 +89,14 @@ export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps)
             <div key={key}>
               <div className="mb-1 flex items-center justify-between">
                 <label className="text-xs font-medium text-slate-600">{label}</label>
-                <span className="text-xs font-bold text-slate-800">{weights[key]}</span>
+                <span className="text-xs font-bold text-slate-800">{localWeights[key]}</span>
               </div>
               <input
                 type="range"
                 min={0}
                 max={10}
                 step={1}
-                value={weights[key]}
+                value={localWeights[key]}
                 onChange={(e) => handleSliderChange(key, parseInt(e.target.value, 10))}
                 className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-green-500"
               />
@@ -108,17 +112,22 @@ export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps)
                 type="number"
                 min={0}
                 step={100}
-                value={maxRent}
-                onChange={(e) => setMaxRent(parseInt(e.target.value, 10) || 0)}
+                value={localMaxRent}
+                onChange={(e) => setLocalMaxRent(parseInt(e.target.value, 10) || 0)}
                 className="w-full rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
               />
             </div>
           </div>
 
-          {/* Submit */}
-          <PrimaryButton onClick={handleSubmit} disabled={loading} className="w-full">
-            {loading ? "Searching…" : "Find My Match"}
+          {/* Save & Apply */}
+          <PrimaryButton onClick={handleSave} disabled={saving || prefsLoading} className="w-full">
+            {saving ? "Saving…" : "Apply & Save Preferences"}
           </PrimaryButton>
+          {!isLoggedIn && (
+            <p className="mt-2 text-center text-[10px] text-slate-400">
+              Sign in to save your preferences across devices.
+            </p>
+          )}
         </div>
       )}
     </div>

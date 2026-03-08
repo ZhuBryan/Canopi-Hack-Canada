@@ -116,7 +116,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
             if (feature.id == null) continue;
             const b = geomBounds(feature.geometry);
             if (!b || b.maxLng < listing.lng - pad || b.minLng > listing.lng + pad ||
-                       b.maxLat < listing.lat - pad || b.minLat > listing.lat + pad) continue;
+              b.maxLat < listing.lat - pad || b.minLat > listing.lat + pad) continue;
             const d = minDistToGeom(listing.lng, listing.lat, feature.geometry);
             if (d < nearestDist) { nearestDist = d; nearest = feature; }
           }
@@ -129,7 +129,7 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
             if (feature.id == null) continue;
             const b = geomBounds(feature.geometry);
             if (!b || b.maxLng < listing.lng - pad2 || b.minLng > listing.lng + pad2 ||
-                       b.maxLat < listing.lat - pad2 || b.minLat > listing.lat + pad2) continue;
+              b.maxLat < listing.lat - pad2 || b.minLat > listing.lat + pad2) continue;
             const touches =
               feature.id === nearest.id ||
               vertexKeys(feature.geometry, 5).some((k) => anchorKeys.has(k));
@@ -239,12 +239,14 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-sync markers when listings change (filter/sort)
+  // Re-sync markers when listings change (filter/sort/score updates)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
 
     const currentIds = new Set(listings.map((l) => l.id));
+
+    // 1. Remove markers that are no longer in the list
     markersRef.current.forEach((marker, id) => {
       if (!currentIds.has(id)) {
         marker.remove();
@@ -252,17 +254,23 @@ export function MapboxMap({ listings, selectedId, onSelect }: MapboxMapProps) {
       }
     });
 
+    // 2. Add new markers or update existing markers
     for (const listing of listings) {
-      if (!markersRef.current.has(listing.id)) {
+      let marker = markersRef.current.get(listing.id);
+
+      if (!marker) {
         addMarker(map, listing, listing.id === selectedId);
+      } else {
+        // Update the existing marker's DOM node with the new score colors
+        const el = marker.getElement();
+        el.style.cssText = markerBaseStyle(listing.id === selectedId, listing.score);
+        el.dataset.score = String(listing.score);
+        // The text content is the price, which doesn't change, but keep it in sync anyway
+        el.textContent = listing.shortPrice;
       }
     }
 
-    markersRef.current.forEach((marker, id) => {
-      applyMarkerStyle(marker.getElement(), id === selectedId);
-    });
-
-    // Re-stamp building colors when listings change
+    // Re-stamp 3D building colors when listings change
     triggerHighlightRef.current?.();
   }, [listings, selectedId]);
 
