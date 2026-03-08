@@ -11,21 +11,50 @@ import UserMenu from "@/components/avenuex/UserMenu";
 import type { Listing } from "@/lib/avenuex-data";
 import { useEffect, useMemo, useState } from "react";
 
-const CATEGORY_ROWS = [
-    { label: "Food & Drink", key: "foodDrink", color: "#F97316" },
-    { label: "Health", key: "health", color: "#EC4899" },
-    { label: "Grocery & Parks", key: "groceryParks", color: "#22C55E" },
-    { label: "Education", key: "education", color: "#3B82F6" },
-    { label: "Emergency", key: "emergency", color: "#8B5CF6" },
+import { useSpiderPrefs, SpiderAxes } from "@/lib/spider-prefs-context";
+import SpiderChart, { computeMatch } from "@/components/avenuex/SpiderChart";
+
+const SERVICE_ROWS = [
+    { label: "Schools", key: "schools", color: "#3B82F6" },
+    { label: "Groceries", key: "groceries", color: "#22C55E" },
+    { label: "Restaurants", key: "restaurants", color: "#F97316" },
+    { label: "Cafes", key: "cafes", color: "#F59E0B" },
+    { label: "Parks", key: "parks", color: "#16A34A" },
+    { label: "Pharmacies", key: "pharmacies", color: "#EC4899" },
+    { label: "Transit", key: "transit", color: "#8B5CF6" },
 ] as const;
 
 function bedLabel(listing: Listing) {
     return listing.beds === 0 ? "Studio" : `${listing.beds} Bed${listing.beds > 1 ? "s" : ""}`;
 }
+function bathLabel(listing: Listing) {
+    return listing.bathsLabel ?? `${listing.baths} Bath${listing.baths > 1 ? "s" : ""}`;
+}
+function sqftLabel(listing: Listing) {
+    return listing.sqft ? `${listing.sqft} sqft` : undefined;
+}
+
+function deriveListingAxes(listing: Listing): SpiderAxes {
+    const cs = listing.categoryScores;
+    const ns = listing.nearbyServices;
+    const n = (count: number | undefined, cap: number) =>
+        count !== undefined ? Math.min(100, Math.round((count / cap) * 100)) : null;
+    return {
+        walkability: Math.round((cs.foodDrink + cs.groceryParks + cs.education) / 3),
+        nourishment: cs.foodDrink,
+        wellness: Math.round((cs.health + (n(ns?.pharmacies, 5) ?? cs.health)) / 2),
+        greenery: Math.round((cs.groceryParks + (n(ns?.parks, 15) ?? cs.groceryParks)) / 2),
+        buzz: Math.round(cs.foodDrink * 0.88),
+        essentials: Math.round((cs.groceryParks + cs.education) / 2),
+        safety: cs.emergency,
+        transit: n(ns?.transit, 12) ?? Math.round(listing.score * 0.85),
+    };
+}
 
 export default function SavedPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
+    const { prefs } = useSpiderPrefs();
     const { savedIds, toggleSave, isSaved, loading: savedLoading } = useSavedListings();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
@@ -49,8 +78,14 @@ export default function SavedPage() {
     }, []);
 
     const savedListings = useMemo(() => {
-        return listings.filter((l) => savedIds.has(l.id));
-    }, [listings, savedIds]);
+        return listings
+            .filter((l) => savedIds.has(l.id))
+            .map((l) => ({
+                ...l,
+                personalScore: computeMatch(prefs, deriveListingAxes(l)),
+            }))
+            .sort((a, b) => (b.personalScore ?? b.score) - (a.personalScore ?? a.score));
+    }, [listings, savedIds, prefs]);
 
     const selectedListing = useMemo(
         () => (selectedId ? savedListings.find((l) => l.id === selectedId) ?? null : null),
@@ -63,7 +98,7 @@ export default function SavedPage() {
         <div className="flex h-screen flex-col overflow-hidden bg-white">
             <DesktopNavbar
                 searchPlaceholder={avenueNav.searchPlaceholder}
-                savedCount={savedIds.size}
+                savedCount={savedListings.length}
                 userMenu={<UserMenu />}
             />
 
@@ -163,7 +198,7 @@ export default function SavedPage() {
                                             </button>
                                             {/* Score badge */}
                                             <div className="absolute bottom-2 left-2">
-                                                <ScorePill label={`${listing.score}`} band={listing.scoreBand} score={listing.score} />
+                                                <ScorePill label={`${listing.personalScore ?? listing.score}`} band={listing.scoreBand} score={listing.personalScore ?? listing.score} />
                                             </div>
                                         </div>
                                         <div className="p-4">
@@ -172,7 +207,7 @@ export default function SavedPage() {
                                             </div>
                                             <p className="mt-0.5 text-sm font-medium text-slate-700">{listing.address}</p>
                                             <p className="mt-0.5 text-xs text-slate-500">
-                                                {bedLabel(listing)} · {listing.baths} bath · {listing.sqft} sqft · {listing.propertyType}
+                                                {[bedLabel(listing), bathLabel(listing), sqftLabel(listing), listing.propertyType].filter(Boolean).join(' · ')}
                                             </p>
                                             <p className="mt-1 text-xs text-slate-400">{listing.city}</p>
                                         </div>
@@ -229,13 +264,20 @@ export default function SavedPage() {
                             {/* Price + score */}
                             <div className="flex items-start justify-between gap-2">
                                 <div>
-                                    <p className="font-alt text-2xl font-bold text-slate-900">{selectedListing.priceLabel}</p>
-                                    <p className="mt-0.5 text-xs text-slate-500">{selectedListing.fullAddress}</p>
+                                    <p className="font-alt text-[1.625rem] font-bold leading-none tracking-[-0.025em]" style={{ color: "var(--foreground)" }}>
+                                        {selectedListing.priceLabel}
+                                    </p>
+                                    <p className="mt-0.5 text-xs" style={{ color: "var(--muted)" }}>{selectedListing.fullAddress}</p>
+                                    {selectedListing.incomeNeeded != null && (
+                                        <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: "var(--amber-soft)", color: "var(--amber)" }}>
+                                            Suggested Annual Income: ${Math.round(selectedListing.incomeNeeded / 1000)}K+
+                                        </span>
+                                    )}
                                 </div>
                                 <ScorePill
-                                    label={`${selectedListing.score} / 100`}
+                                    label={`${selectedListing.personalScore ?? selectedListing.score} / 100`}
                                     band={selectedListing.scoreBand}
-                                    score={selectedListing.score}
+                                    score={selectedListing.personalScore ?? selectedListing.score}
                                 />
                             </div>
 
@@ -243,55 +285,76 @@ export default function SavedPage() {
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     bedLabel(selectedListing),
-                                    `${selectedListing.baths} Bath${selectedListing.baths > 1 ? "s" : ""}`,
-                                    `${selectedListing.sqft} sqft`,
+                                    bathLabel(selectedListing),
+                                    sqftLabel(selectedListing),
                                     selectedListing.propertyType,
-                                ].map((m) => (
-                                    <span key={m} className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                        {m}
-                                    </span>
-                                ))}
+                                ]
+                                    .filter(Boolean)
+                                    .map((m) => (
+                                        <span
+                                            key={m}
+                                            className="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                            style={{ backgroundColor: "var(--background)", color: "var(--muted)", border: "1px solid var(--line)" }}
+                                        >
+                                            {m}
+                                        </span>
+                                    ))}
                             </div>
 
                             {/* About */}
                             <div>
-                                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-400">About</h3>
-                                <p className="text-xs leading-relaxed text-slate-600">{selectedListing.about}</p>
+                                <h3 className="section-divider label-overline mb-1.5">About</h3>
+                                <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{selectedListing.about}</p>
                             </div>
 
                             {/* Amenities */}
                             <div>
-                                <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">Amenities</h3>
-                                <div className="grid grid-cols-2 gap-y-1.5">
-                                    {selectedListing.amenities.map((a) => (
-                                        <div key={a} className="flex items-center gap-1.5 text-xs text-slate-700">
-                                            <span className="text-green-500">✓</span>
-                                            {a}
-                                        </div>
-                                    ))}
-                                </div>
+                                <h3 className="section-divider label-overline mb-2">Building Amenities</h3>
+                                {selectedListing.amenities.length > 0 ? (
+                                    <div className="grid grid-cols-2 gap-y-1.5">
+                                        {selectedListing.amenities.map((a) => (
+                                            <div key={a} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--foreground)" }}>
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--brand)", flexShrink: 0 }}>
+                                                    <circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" />
+                                                </svg>
+                                                {a}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs" style={{ color: "var(--muted)" }}>No building amenities scraped yet.</p>
+                                )}
                             </div>
 
-                            {/* Vitality Scorecard */}
-                            <div className="rounded-xl border border-gray-200 p-4">
+                            {/* Spider Chart — Your Match */}
+                            <div>
+                                <h3 className="section-divider label-overline mb-3">Your Match</h3>
+                                <SpiderChart listingAxes={deriveListingAxes(selectedListing)} />
+                            </div>
+
+                            {/* Nearby Services */}
+                            <div className="rounded-xl border p-4" style={{ borderColor: 'var(--line)' }}>
                                 <div className="mb-3 flex items-center justify-between">
-                                    <h3 className="text-sm font-bold text-slate-900">Vitality Score</h3>
+                                    <div>
+                                        <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Nearby Services</h3>
+                                        <p className="mt-0.5 text-[11px]" style={{ color: 'var(--muted)' }}>Actual counts within 1 km</p>
+                                    </div>
                                     <ScorePill
-                                        label={`${selectedListing.score} / 100`}
+                                        label={`${selectedListing.personalScore ?? selectedListing.score} / 100`}
                                         band={selectedListing.scoreBand}
-                                        score={selectedListing.score}
+                                        score={selectedListing.personalScore ?? selectedListing.score}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    {CATEGORY_ROWS.map(({ label, key, color }) => {
-                                        const val = selectedListing.categoryScores[key];
+                                    {SERVICE_ROWS.map(({ label, key, color }) => {
+                                        const val = selectedListing.nearbyServices?.[key] ?? 0;
                                         return (
-                                            <div key={key}>
-                                                <div className="mb-1 flex justify-between text-xs">
-                                                    <span className="text-slate-600">{label}</span>
-                                                    <span className="font-semibold text-slate-800">{val}</span>
+                                            <div key={key} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--background)' }}>
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
+                                                    <span style={{ color: 'var(--muted)' }}>{label}</span>
                                                 </div>
-                                                <ScoreBar value={val} color={color} />
+                                                <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{val}</span>
                                             </div>
                                         );
                                     })}
