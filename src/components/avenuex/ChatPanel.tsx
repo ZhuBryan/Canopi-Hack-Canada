@@ -73,6 +73,17 @@ function TypewriterText({
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
+function extractListingIds(payload: { listingIds?: unknown; content?: unknown }): string[] {
+  const fromPayload = Array.isArray(payload.listingIds)
+    ? payload.listingIds.filter((id): id is string => typeof id === "string")
+    : [];
+  const fromContent =
+    typeof payload.content === "string"
+      ? Array.from(payload.content.matchAll(/\brf-\d+\b/gi)).map((m) => m[0].toLowerCase())
+      : [];
+  return Array.from(new Set([...fromPayload, ...fromContent]));
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: string) => void }) {
@@ -81,6 +92,8 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [suggestedListingIds, setSuggestedListingIds] = useState<string[]>([]);
+  const [suggestedListingIndex, setSuggestedListingIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Voice state
@@ -212,14 +225,25 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
         append({ id: uid(), role: "assistant", content: data.content });
       }
       speakText(data.content);
-      if (data.listingIds?.length) {
-        onSelectListing?.(data.listingIds[0]);
+      const uniqueIds = extractListingIds(data);
+      if (uniqueIds.length > 0) {
+        setSuggestedListingIds(uniqueIds);
+        setSuggestedListingIndex(0);
+        onSelectListing?.(uniqueIds[0]);
       }
     } catch { append({ id: uid(), role: "assistant", content: language === "en" ? "Sorry, something went wrong." : "Désolé, quelque chose s'est mal passé." }); }
     finally { setLoading(false); }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+  const canGoPrevSuggestion = suggestedListingIndex > 0;
+  const canGoNextSuggestion = suggestedListingIndex < suggestedListingIds.length - 1;
+
+  const goToSuggestion = (nextIndex: number) => {
+    if (nextIndex < 0 || nextIndex >= suggestedListingIds.length) return;
+    setSuggestedListingIndex(nextIndex);
+    onSelectListing?.(suggestedListingIds[nextIndex]);
+  };
 
   return (
     <>
@@ -281,6 +305,41 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {suggestedListingIds.length > 0 && (
+        <div className="absolute inset-x-0 z-40 flex justify-center px-4 pb-1 pointer-events-none" style={{ bottom: 76 }}>
+          <div
+            className="pointer-events-auto flex items-center gap-2 rounded-full border px-3 py-1.5"
+            style={{
+              backgroundColor: "rgba(250,248,245,0.96)",
+              borderColor: "var(--line)",
+              boxShadow: "0 2px 16px rgba(28,25,23,0.10)",
+            }}
+          >
+            <span className="text-[11px] font-bold" style={{ color: "var(--foreground)" }}>
+              Suggested homes {suggestedListingIndex + 1}/{suggestedListingIds.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => goToSuggestion(suggestedListingIndex - 1)}
+              disabled={!canGoPrevSuggestion}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ backgroundColor: "var(--line)", color: "var(--muted)" }}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => goToSuggestion(suggestedListingIndex + 1)}
+              disabled={!canGoNextSuggestion}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ backgroundColor: "var(--brand-soft)", color: "var(--brand-ink)" }}
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

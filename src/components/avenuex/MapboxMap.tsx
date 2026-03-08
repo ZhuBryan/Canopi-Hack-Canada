@@ -74,6 +74,10 @@ export function MapboxMap({
   selectedAmenities = [],
   isAmenityLoading = false,
 }: MapboxMapProps) {
+  const preferredStyle =
+    (process.env.NEXT_PUBLIC_MAPBOX_STYLE_URL ?? "").trim() ||
+    "mapbox://styles/mapbox/standard";
+  const fallbackStyle = "mapbox://styles/mapbox/standard";
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
@@ -92,6 +96,7 @@ export function MapboxMap({
   const [showAmenityLoading, setShowAmenityLoading] = useState(false);
   const loadingShownAtRef = useRef<number>(0);
   const loadingHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const styleFallbackAppliedRef = useRef(false);
 
   const renderAmenityPaths = () => {
     const map = mapRef.current;
@@ -158,7 +163,7 @@ export function MapboxMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/sym7534/cmmgpkjan00a701qsb6jbchc8",
+      style: preferredStyle,
       center: [-79.3832, 43.6532],
       zoom: 14,
       pitch: 45,
@@ -172,6 +177,20 @@ export function MapboxMap({
     mapRef.current = map;
     map.touchZoomRotate.disableRotation();
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
+    map.on("error", (event) => {
+      const message = String((event.error as Error | undefined)?.message ?? "");
+      const styleAuthOrMissingFailure =
+        message.includes("404") ||
+        message.includes("401") ||
+        message.includes("403") ||
+        message.toLowerCase().includes("not found") ||
+        message.toLowerCase().includes("not authorized") ||
+        message.toLowerCase().includes("forbidden");
+      if (styleAuthOrMissingFailure && !styleFallbackAppliedRef.current) {
+        styleFallbackAppliedRef.current = true;
+        map.setStyle(fallbackStyle);
+      }
+    });
 
     map.on("load", async () => {
       map.setFog({
@@ -673,7 +692,7 @@ function amenityIconKey(type: string): string {
 
 async function ensureAmenityIcons(map: mapboxgl.Map): Promise<void> {
   const entries = Object.entries(AMENITY_ICON_ASSET_BY_TYPE);
-  await Promise.all(
+  await Promise.allSettled(
     entries.map(async ([type, path]) => {
       const key = `amenity-${type}`;
       if (map.hasImage(key)) return;
