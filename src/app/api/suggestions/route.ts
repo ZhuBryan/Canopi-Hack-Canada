@@ -73,6 +73,7 @@ const BUCKET_LABELS: Record<BucketKey, string> = {
 };
 
 const EFFECTIVE_RADIUS_METERS = 1000;
+const MIN_REASONABLE_MONTHLY_RENT = 500;
 
 const BUCKET_CAPS = {
   schools: 5,
@@ -211,7 +212,7 @@ let cachedRaw: RawListing[] | null = null;
 
 async function loadRaw(): Promise<RawListing[]> {
   if (cachedRaw) return cachedRaw;
-  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.detailed.json");
+  const filePath = path.join(process.cwd(), "data", "rentfaster-listings.combined.json");
   const raw = await readFile(filePath, "utf8");
   cachedRaw = JSON.parse(raw);
   return cachedRaw!;
@@ -241,6 +242,8 @@ export async function GET(request: Request) {
 
     const results: (Listing & { personalScore: number; matchReason: string })[] = rawListings
       .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+      .filter((item) => Boolean(item.url))
+      .filter((item) => parsePrice(item.price) >= MIN_REASONABLE_MONTHLY_RENT)
       .map((item) => {
         const monthlyRent = parsePrice(item.price);
         const city = extractCity(item.location);
@@ -273,6 +276,7 @@ export async function GET(request: Request) {
 
         return {
           id: `rf-${item.listing_id}`,
+          url: item.url ?? undefined,
           address,
           city,
           fullAddress: item.location ?? address,
