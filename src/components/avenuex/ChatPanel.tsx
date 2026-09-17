@@ -85,15 +85,7 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
   const [initialized, setInitialized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Voice state
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
   const [language, setLanguage] = useState<"en" | "fr">("en");
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -119,81 +111,6 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
 
   const append = (msg: ChatMsg) => setMessages(prev => [...prev, msg]);
 
-  // ── TTS ──────────────────────────────────────────────────────────────────
-
-  const speakText = useCallback(async (text: string) => {
-    if (!ttsEnabled) return;
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-    try {
-      setIsSpeaking(true);
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) { setIsSpeaking(false); return; }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      currentAudioRef.current = audio;
-      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); currentAudioRef.current = null; };
-      audio.onerror = () => { setIsSpeaking(false); currentAudioRef.current = null; };
-      await audio.play();
-    } catch {
-      setIsSpeaking(false);
-    }
-  }, [ttsEnabled]);
-
-  const stopSpeaking = () => {
-    if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null; }
-    setIsSpeaking(false);
-  };
-
-  // ── STT ──────────────────────────────────────────────────────────────────
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      audioChunksRef.current = [];
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        setIsTranscribing(true);
-        try {
-          const form = new FormData();
-          form.append("audio", blob, "recording.webm");
-          const res = await fetch("/api/stt", { method: "POST", body: form });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.text) setInput(data.text);
-          }
-        } catch { /* silent */ }
-        finally { setIsTranscribing(false); }
-      };
-      mediaRecorder.start();
-      mediaRecorderRef.current = mediaRecorder;
-      setIsRecording(true);
-      if (!chatOpen) openChat();
-    } catch {
-      console.error("Microphone access denied");
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-      setIsRecording(false);
-    }
-  };
-
-  const handleMicClick = () => { if (isRecording) stopRecording(); else startRecording(); };
-
   // ── Chat ─────────────────────────────────────────────────────────────────
 
   const handleSend = async () => {
@@ -213,7 +130,6 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
       } else {
         append({ id: uid(), role: "assistant", content: data.content });
       }
-      speakText(data.content);
       if (data.listingIds?.length) {
         onSelectListing?.(data.listingIds[0]);
       }
@@ -327,71 +243,10 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => !chatOpen && openChat()}
             onKeyDown={handleKeyDown}
-            placeholder={
-              isRecording ? "Recording… tap mic to stop" :
-              isTranscribing ? "Transcribing…" :
-              "Ask about listings, neighborhoods, or budget…"
-            }
+            placeholder="Ask about listings, neighborhoods, or budget…"
             className="flex-1 bg-transparent text-sm outline-none"
             style={{ color: "var(--foreground)" }}
           />
-
-          {/* TTS toggle — shown when chat is open */}
-          {chatOpen && (
-            <button
-              type="button"
-              aria-label={isSpeaking ? "Stop speaking" : ttsEnabled ? "Mute voice" : "Unmute voice"}
-              title={isSpeaking ? "Stop speaking" : ttsEnabled ? "Mute voice" : "Unmute voice"}
-              onClick={() => { if (isSpeaking) stopSpeaking(); else setTtsEnabled(p => !p); }}
-              className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full transition hover:bg-[var(--line)]"
-              style={{ color: isSpeaking ? "var(--brand)" : "var(--muted-light)", opacity: !isSpeaking && !ttsEnabled ? 0.4 : 1 }}
-            >
-              {isSpeaking ? (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="6" width="12" height="12" rx="1" />
-                </svg>
-              ) : ttsEnabled ? (
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5L6 9H2v6h4l5 4V5z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />
-                </svg>
-              ) : (
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5L6 9H2v6h4l5 4V5z" />
-                  <line x1="23" y1="9" x2="17" y2="15" strokeLinecap="round" />
-                  <line x1="17" y1="9" x2="23" y2="15" strokeLinecap="round" />
-                </svg>
-              )}
-            </button>
-          )}
-
-          {/* Mic button — shown when input is empty */}
-          {!input.trim() && (
-            <button
-              type="button"
-              aria-label={isRecording ? "Stop recording" : isTranscribing ? "Transcribing…" : "Voice input"}
-              title={isRecording ? "Stop recording" : isTranscribing ? "Transcribing…" : "Voice input"}
-              onClick={handleMicClick}
-              disabled={isTranscribing}
-              className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full transition hover:bg-[var(--line)]"
-              style={{
-                color: isRecording ? "var(--brand)" : "var(--muted-light)",
-                backgroundColor: isRecording ? "var(--brand-soft)" : undefined,
-              }}
-            >
-              {isTranscribing ? (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="animate-spin">
-                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
-                  <path d="M12 2a10 10 0 0110 10" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <rect x="9" y="2" width="6" height="11" rx="3" fill={isRecording ? "currentColor" : "none"} />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10a7 7 0 0014 0M12 19v3M8 22h8" />
-                </svg>
-              )}
-            </button>
-          )}
 
           {/* Close button when open + no input */}
           {chatOpen && !input.trim() && (

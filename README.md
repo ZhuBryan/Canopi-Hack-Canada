@@ -26,7 +26,7 @@ An AI assistant asks indirect, personality-driven questions — *"What does a go
 
 ## Features
 
-- **AI chat assistant** — Conversational matching that reads between the lines. Supports English and French. Voice input/output via ElevenLabs STT/TTS.
+- **AI chat assistant** — Conversational matching that reads between the lines. Supports English and French.
 - **Interactive map** — Mapbox GL map showing real rentals in Toronto and San Francisco with price pins, listing cards, and fly-to animations when the AI recommends a property.
 - **8-axis preference radar** — Live spider chart that updates as Canopi learns what matters to you.
 - **Neighborhood scores** — Amenity counts (schools, cafés, parks, groceries, transit, pharmacies, restaurants) within 1 km of every listing.
@@ -61,7 +61,6 @@ Env for the script: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEOAPIFY_API_K
 | 3D | Three.js, @react-three/fiber, @react-three/drei |
 | Auth & DB | Supabase |
 | Styling | Tailwind CSS 4, GSAP |
-| Voice | ElevenLabs STT/TTS |
 | Amenity data | Overpass API (OpenStreetMap) |
 
 ---
@@ -81,8 +80,6 @@ NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
 GEMINI_API_KEY=your_gemini_key
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-ELEVENLABS_API_KEY=your_elevenlabs_key
-ELEVENLABS_VOICE_ID=your_elevenlabs_voice_id
 ```
 
 Run `supabase-schema.sql` in the Supabase SQL editor.
@@ -103,8 +100,6 @@ Open [http://localhost:3000](http://localhost:3000).
 | `GEMINI_API_KEY` | Yes | Google Gemini API key for the chat assistant |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL — `https://<ref>.supabase.co` (not the REST URL ending in `/rest/v1/`) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key |
-| `ELEVENLABS_API_KEY` | No | ElevenLabs key for voice input/output |
-| `ELEVENLABS_VOICE_ID` | No | ElevenLabs voice ID (defaults to a preset voice) |
 
 ---
 
@@ -119,9 +114,7 @@ src/
 │   └── api/
 │       ├── chat/route.ts         # Gemini conversational AI
 │       ├── listings/route.ts     # Rental listing data
-│       ├── vitality/route.ts     # Amenity data via Overpass
-│       ├── tts/route.ts          # ElevenLabs text-to-speech
-│       └── stt/route.ts          # ElevenLabs speech-to-text
+│       └── vitality/route.ts     # Amenity data via Overpass
 ├── components/
 │   ├── avenuex/                  # UI components (map, chat, navbar, spider chart)
 │   └── three/                    # 3D diorama components
