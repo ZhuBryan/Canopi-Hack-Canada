@@ -162,7 +162,8 @@ export function MapboxMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/sym7534/cmmgpkjan00a701qsb6jbchc8",
+      // ponytail: public Standard style; set NEXT_PUBLIC_MAPBOX_STYLE to use a custom one from your own account
+      style: process.env.NEXT_PUBLIC_MAPBOX_STYLE ?? "mapbox://styles/mapbox/standard",
       center: cityRef.current.center,
       zoom: cityRef.current.zoom,
       pitch: 45,
