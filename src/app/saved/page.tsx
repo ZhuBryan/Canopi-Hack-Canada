@@ -354,7 +354,7 @@ export default function SavedPage() {
                                                     <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                                                     <span style={{ color: 'var(--muted)' }}>{label}</span>
                                                 </div>
-                                                <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{val}</span>
+                                                <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{val >= 50 ? '50+' : val}</span>
                                             </div>
                                         );
                                     })}
