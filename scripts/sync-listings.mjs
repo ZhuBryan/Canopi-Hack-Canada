@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Sync one city's rental listings into Supabase.
-//   node scripts/sync-listings.mjs --city toronto|sf [--limit 400] [--dry-run]
+//   node scripts/sync-listings.mjs --city toronto|sf [--limit 200] [--dry-run]
 // Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GEOAPIFY_API_KEY, RENTCAST_API_KEY (sf only)
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
@@ -65,13 +65,14 @@ async function main() {
   const { values: opts } = parseArgs({
     options: {
       city: { type: "string" },
-      limit: { type: "string", default: "400" },
+      limit: { type: "string", default: "200" },
       "dry-run": { type: "boolean", default: false },
     },
   });
   const city = opts.city;
   if (!SOURCES[city]) throw new Error(`--city must be one of: ${Object.keys(SOURCES).join(", ")}`);
   const limit = parseInt(opts.limit, 10);
+  if (!Number.isFinite(limit) || limit < 0) throw new Error("--limit must be a non-negative integer");
   const dry = opts["dry-run"];
 
   const raws = (await SOURCES[city]()).filter((r) => r.monthlyRent >= MIN_RENT);

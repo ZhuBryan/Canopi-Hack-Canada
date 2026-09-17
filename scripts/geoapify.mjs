@@ -1,4 +1,4 @@
-// Same buckets/radii as the old data/livability-sources.json + clean-combined-listings.mjs.
+// Bucket ids/categories/radii match the app's scoring (src/lib/listing-score.ts BUCKET_CAPS).
 export const BUCKETS = [
   { id: "schools", label: "Schools", categories: "education.school", radius: 500 },
   { id: "groceries", label: "Groceries", categories: "commercial.supermarket", radius: 1000 },

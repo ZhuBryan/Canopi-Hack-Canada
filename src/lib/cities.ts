@@ -42,5 +42,5 @@ export const CITIES: Record<CitySlug, CityConfig> = {
 export const DEFAULT_CITY: CitySlug = "toronto";
 
 export function isCitySlug(v: unknown): v is CitySlug {
-  return typeof v === "string" && v in CITIES;
+  return typeof v === "string" && Object.hasOwn(CITIES, v);
 }

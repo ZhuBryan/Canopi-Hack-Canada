@@ -7,7 +7,7 @@ on:
     inputs:
       limit:
         description: "Max new listings to enrich via Geoapify per city"
-        default: "400"
+        default: "200"
 
 jobs:
   sync:
@@ -25,6 +25,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: node scripts/sync-listings.mjs --city toronto --limit ${{ inputs.limit || '400' }}
-      - run: node scripts/sync-listings.mjs --city sf --limit ${{ inputs.limit || '400' }}
+      - run: node scripts/sync-listings.mjs --city toronto --limit ${{ inputs.limit || '200' }}
+      - run: node scripts/sync-listings.mjs --city sf --limit ${{ inputs.limit || '200' }}
         if: always()
