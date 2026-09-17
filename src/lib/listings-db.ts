@@ -23,7 +23,7 @@ async function loadCity(slug: CitySlug): Promise<Listing[]> {
 export async function loadListings(city: CitySlug | "all"): Promise<Listing[]> {
   if (city === "all") {
     const all = await Promise.all((Object.keys(CITIES) as CitySlug[]).map(loadCity));
-    return all.flat();
+    return all.flat().sort((a, b) => b.score - a.score);
   }
   return loadCity(city);
 }
