@@ -96,7 +96,7 @@ test("normalizeRentcast maps a RentCast rental listing to a RawListing", () => {
   assert.deepEqual(row, {
     id: "rc-123-Main-St,-San-Francisco,-CA-94105",
     source: "rentcast",
-    url: "https://www.google.com/maps/search/?api=1&query=123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094105",
+    url: "https://www.google.com/search?q=123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094105%20for%20rent",
     address: "123 Main St",
     fullAddress: "123 Main St, San Francisco, CA 94105",
     lat: 37.7912,

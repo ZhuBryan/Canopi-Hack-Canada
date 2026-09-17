@@ -10,7 +10,8 @@ export function normalizeRentcast(r) {
   return {
     id: `rc-${r.id ?? fullAddress}`,
     source: "rentcast",
-    url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`,
+    // RentCast has no source URL; a web search for the address finds the live listing.
+    url: `https://www.google.com/search?q=${encodeURIComponent(`${fullAddress} for rent`)}`,
     address: r.addressLine1 ?? fullAddress.split(",")[0] ?? "Unknown address",
     fullAddress,
     lat,

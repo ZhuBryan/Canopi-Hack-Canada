@@ -829,7 +829,7 @@ function HeroPageInner() {
                     className="text-sm font-medium underline underline-offset-2 hover:opacity-80"
                     style={{ color: "var(--brand-ink)" }}
                   >
-                    Open original listing
+                    {selectedListing.url.includes("google.com") ? "Find this listing online" : "Open original listing"}
                   </a>
                 </div>
               )}
