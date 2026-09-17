@@ -1,5 +1,7 @@
 // Toronto listings from RentFaster's public map endpoint (verified 2026-09-17:
 // plain HTTPS, 500 per page, no auth). city_id=7 is Toronto.
+import https from "node:https";
+
 const BASE = "https://www.rentfaster.ca";
 const CITY_ID = 7;
 const PAGE_SIZE = 500;
@@ -109,14 +111,52 @@ export function parseRentfasterDetail(html) {
   };
 }
 
-// onStatus (optional) reports the HTTP status so callers can react to e.g. a 403
-// (Cloudflare block) without changing this function's null-on-failure return shape.
-export async function fetchRentfasterDetail(url, { fetchImpl = fetch, onStatus } = {}) {
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const DETAIL_TIMEOUT_MS = 20_000;
+
+// Node's built-in `fetch` (undici) gets Cloudflare-challenged (`cf-mitigated: challenge`)
+// on rentfaster.ca/properties/* almost every time; node:https (HTTP/1.1) gets through
+// much more often from the same IP. status 0 means the request errored/timed out.
+function httpsGet(url) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (result) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+    const req = https.get(url, { headers: { "user-agent": UA, accept: "text/html" } }, (res) => {
+      let body = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => (body += chunk));
+      res.on("end", () => done({ status: res.statusCode, body, location: res.headers.location }));
+    });
+    req.on("error", () => done({ status: 0, body: "" }));
+    // `destroy()` alone doesn't guarantee an `error`/`end` event fires — resolve here too.
+    req.setTimeout(DETAIL_TIMEOUT_MS, () => {
+      req.destroy();
+      done({ status: 0, body: "" });
+    });
+  });
+}
+
+// getImpl (test seam): (url) => Promise<{status, body, location?}>.
+// onStatus (optional) reports each response's HTTP status so callers can react to
+// e.g. a 403 (Cloudflare challenge) without changing this function's return shape.
+export async function fetchRentfasterDetail(url, { getImpl = httpsGet, onStatus } = {}) {
   try {
-    const res = await fetchImpl(url, { headers: { "user-agent": UA } });
-    onStatus?.(res.status);
-    if (!res.ok) return null;
-    return parseRentfasterDetail(await res.text());
+    let current = url;
+    for (let redirects = 0; redirects <= 3; redirects++) {
+      const { status, body, location } = await getImpl(current);
+      onStatus?.(status);
+      if (REDIRECT_STATUSES.has(status) && location && redirects < 3) {
+        current = new URL(location, current).href;
+        continue;
+      }
+      if (status !== 200) return null;
+      return parseRentfasterDetail(body);
+    }
+    return null;
   } catch {
     return null;
   }

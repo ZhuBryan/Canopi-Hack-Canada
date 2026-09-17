@@ -155,27 +155,28 @@ async function main() {
   const details = new Map();
   let fetched = 0;
   let failed = 0;
+  let consecutive403 = 0;
   console.log(`[${city}] fetching ${detailIdsToFetch.length} detail pages…`);
   for (let i = 0; i < detailIdsToFetch.length; i++) {
     const id = detailIdsToFetch[i];
     const url = byId.get(id).url;
     let status = null;
-    let detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
+    const detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
     if (status === 403) {
-      console.log(`[${city}] detail: 403 from RentFaster, backing off 60 s`);
-      await sleep(60_000);
-      status = null;
-      detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
-      if (status === 403) {
-        console.log(`[${city}] detail: still blocked, stopping detail pass for this run (${fetched} fetched)`);
-        break;
-      }
+      consecutive403++;
+      console.log(`[${city}] detail: 403 (challenged); skipping`);
+    } else {
+      consecutive403 = 0;
     }
     details.set(id, detail);
     if (detail) fetched++;
     else failed++;
+    if (consecutive403 >= 10) {
+      console.log(`[${city}] detail: 10 consecutive 403s, stopping detail pass (${fetched} fetched)`);
+      break;
+    }
     if ((fetched + failed) % 50 === 0) console.log(`[${city}] detail pages: ${fetched + failed}/${detailIdsToFetch.length}`);
-    await sleep(2000 + Math.random() * 1000);
+    await sleep(3000 + Math.random() * 1500);
   }
   const skipped = detailIds.length - fetched - failed;
   console.log(`[${city}] detail pages: fetched ${fetched}, failed ${failed}, skipped ${skipped} (limit)`);

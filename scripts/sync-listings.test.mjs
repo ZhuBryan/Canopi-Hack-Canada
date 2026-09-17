@@ -184,8 +184,30 @@ test("parseRentfasterDetail returns null when no embedded object is present", ()
 });
 
 test("fetchRentfasterDetail returns null on a non-200 response", async () => {
-  const fetchImpl = async () => ({ ok: false, status: 403 });
-  assert.equal(await fetchRentfasterDetail("https://x/1", { fetchImpl }), null);
+  const getImpl = async () => ({ status: 403, body: "" });
+  assert.equal(await fetchRentfasterDetail("https://x/1", { getImpl }), null);
+});
+
+test("fetchRentfasterDetail reports each status via onStatus and follows redirects", async () => {
+  const statuses = [];
+  const getImpl = async (url) => {
+    if (url === "https://x/1") return { status: 301, body: "", location: "/moved" };
+    if (url === "https://x/moved") return { status: 200, body: DETAIL_HTML };
+    throw new Error(`unexpected url ${url}`);
+  };
+  const result = await fetchRentfasterDetail("https://x/1", { getImpl, onStatus: (s) => statuses.push(s) });
+  assert.deepEqual(statuses, [301, 200]);
+  assert.equal(result.sqft, 637);
+});
+
+test("fetchRentfasterDetail gives up after 3 redirects", async () => {
+  let calls = 0;
+  const getImpl = async () => {
+    calls++;
+    return { status: 302, body: "", location: "https://x/next" };
+  };
+  assert.equal(await fetchRentfasterDetail("https://x/1", { getImpl }), null);
+  assert.equal(calls, 4); // initial + 3 redirects
 });
 
 test("parseRentfasterDetail parses the saved live sample page", () => {
