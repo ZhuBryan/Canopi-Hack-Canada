@@ -1,5 +1,5 @@
 // San Francisco listings from RentCast (https://developers.rentcast.io). One call per run.
-const ENDPOINT = "https://api.rentcast.io/v1/listings/rental";
+const ENDPOINT = "https://api.rentcast.io/v1/listings/rental/long-term";
 
 export function normalizeRentcast(r) {
   const lat = Number(r.latitude);

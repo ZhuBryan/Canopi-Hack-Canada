@@ -43,3 +43,5 @@ next-env.d.ts
 
 outline.md
 .superpowers/
+.vercel
+.env*
