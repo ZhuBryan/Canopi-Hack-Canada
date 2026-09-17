@@ -86,6 +86,7 @@ create table public.listings (
   photo         text,
   available     text,
   lease_term    text,
+  description   text,
   amenities     text[] not null default '{}',
   nearby        jsonb not null default '{}',   -- Geoapify buckets; doubles as the enrichment cache
   active        boolean not null default true,
@@ -96,3 +97,5 @@ create index listings_city_active_idx on public.listings (city) where active;
 alter table public.listings enable row level security;
 create policy "public read active listings" on public.listings
   for select using (active);
+
+-- Migration (run once on existing projects): alter table public.listings add column description text;
