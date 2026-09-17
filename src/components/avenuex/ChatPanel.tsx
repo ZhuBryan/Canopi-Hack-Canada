@@ -278,7 +278,7 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
               {loading && (
                 <div className="flex justify-start">
                   <div className="chat-bubble-enter flex items-center gap-1.5 rounded-2xl rounded-bl-md px-4 py-3" style={{ animationDelay: "40ms", backgroundColor: "rgba(250,248,245,0.75)", backdropFilter: "blur(8px)" }}>
-                    {[0, 150, 300].map((d) => <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full" style={{ backgroundColor: "var(--muted-light)", animationDelay: `${d}ms` }} />)}
+                    {[0, 150, 300].map((d) => <span key={d} className="typing-dot h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--muted-light)", animationDelay: `${d}ms` }} />)}
                   </div>
                 </div>
               )}

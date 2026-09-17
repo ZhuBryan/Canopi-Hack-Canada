@@ -147,6 +147,15 @@ h4 {
   animation: chat-bubble-in 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+.typing-dot {
+  animation: typing-dot 900ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes typing-dot {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
 .chat-pill-pop {
   opacity: 0;
   transform: translateY(6px) scale(0.96);
@@ -265,6 +274,7 @@ h4 {
 @media (prefers-reduced-motion: reduce) {
   .chat-bubble-enter,
   .chat-pill-pop,
+  .typing-dot,
   .intro-blur-in,
   .intro-pulse,
   .intro-trail-enter {

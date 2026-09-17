@@ -407,7 +407,7 @@ export function MapboxMap({
         })
           .setLngLat(lngLat)
           .setHTML(
-            `<div style="font-family:Inter,sans-serif;color:#0f172a;min-width:240px;max-width:280px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 10px 24px rgba(2,6,23,0.16)">
+            `<div style="font-family:var(--font-dm-sans),sans-serif;color:#0f172a;min-width:240px;max-width:280px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 10px 24px rgba(2,6,23,0.16)">
               <div style="padding:10px 12px;background:linear-gradient(135deg,#eff6ff 0%,#ecfdf5 100%);border-bottom:1px solid #dcfce7">
                 <div style="font-size:13px;font-weight:800;line-height:1.35;margin-bottom:3px">${escapeHtml(title)}</div>
                 <div style="font-size:11px;font-weight:700;color:#166534;text-transform:capitalize">${escapeHtml(formatAmenityType(type))}</div>
@@ -645,7 +645,7 @@ function markerBaseStyle(active: boolean, score: number): string {
     `border: 2px solid ${active ? "#0f172a" : "white"}`,
     "white-space: nowrap",
     "transition: background 0.15s, border-color 0.15s",
-    "font-family: Inter, sans-serif",
+    "font-family: var(--font-dm-sans), sans-serif",
     "letter-spacing: -0.3px",
     `transform: scale(${active ? "1.15" : "1"})`,
     `z-index: ${active ? "10" : "1"}`,
