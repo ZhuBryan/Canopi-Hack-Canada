@@ -81,9 +81,12 @@ async function main() {
   const supabase = dry ? null : createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
   const existing = new Map();
   if (supabase) {
-    const { data, error } = await supabase.from("listings").select("id, lat, lng, nearby").eq("city", city);
-    if (error) throw error;
-    for (const r of data) existing.set(r.id, r);
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase.from("listings").select("id, lat, lng, nearby").eq("city", city).range(from, from + 999);
+      if (error) throw error;
+      for (const r of data) existing.set(r.id, r);
+      if (data.length < 1000) break;
+    }
   }
 
   const { reuse, fresh } = planEnrichment(raws, existing, limit);

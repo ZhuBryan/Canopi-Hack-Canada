@@ -11,11 +11,16 @@ async function loadCity(slug: CitySlug): Promise<Listing[]> {
   if (hit && Date.now() - hit.at < TTL_MS) return hit.listings;
   if (!supabase) throw new Error("Supabase is not configured");
 
-  const { data, error } = await supabase.from("listings").select("*").eq("city", slug).eq("active", true);
-  if (error) throw error;
+  const rows: DbRow[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase.from("listings").select("*").eq("city", slug).eq("active", true).range(from, from + 999);
+    if (error) throw error;
+    rows.push(...(data as DbRow[]));
+    if (data.length < 1000) break;
+  }
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
-  const listings = (data as DbRow[]).map((row) => rowToListing(row, CITIES[slug], token)).sort((a, b) => b.score - a.score);
+  const listings = rows.map((row) => rowToListing(row, CITIES[slug], token)).sort((a, b) => b.score - a.score);
   cache.set(slug, { at: Date.now(), listings });
   return listings;
 }
