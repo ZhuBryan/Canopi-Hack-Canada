@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test scripts/*.test.mjs src/lib/*.test.ts",
     "enrich:places": "node scripts/enrich-rentfaster-listings-with-places.mjs",
     "clean:combined": "node scripts/clean-combined-listings.mjs"
   },
