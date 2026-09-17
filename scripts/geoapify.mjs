@@ -22,21 +22,24 @@ async function getJson(url, fetchImpl) {
 }
 
 export async function fetchNearby(lat, lng, { apiKey, fetchImpl = fetch, delayMs = 250 }) {
-  const nearby = {};
-  for (const b of BUCKETS) {
-    const url =
-      `https://api.geoapify.com/v2/places?categories=${b.categories}` +
-      `&filter=circle:${lng},${lat},${b.radius}&bias=proximity:${lng},${lat}` +
-      `&limit=${LIMIT}&apiKey=${apiKey}`;
-    const data = await getJson(url, fetchImpl);
-    const places = (data.features ?? []).map((f) => ({
-      name: f.properties?.name ?? "Unnamed",
-      address: f.properties?.formatted ?? null,
-      distance_meters: Number.isFinite(f.properties?.distance) ? f.properties.distance : null,
-      categories: f.properties?.categories ?? [],
-    }));
-    nearby[b.id] = { label: b.label, source: "geoapify", radius_meters: b.radius, count: places.length, places };
-    if (delayMs) await sleep(delayMs);
-  }
-  return nearby;
+  // Same 7 calls per listing (same Geoapify quota) — fired concurrently instead of
+  // sequentially, then one pacing sleep for the whole batch.
+  const entries = await Promise.all(
+    BUCKETS.map(async (b) => {
+      const url =
+        `https://api.geoapify.com/v2/places?categories=${b.categories}` +
+        `&filter=circle:${lng},${lat},${b.radius}&bias=proximity:${lng},${lat}` +
+        `&limit=${LIMIT}&apiKey=${apiKey}`;
+      const data = await getJson(url, fetchImpl);
+      const places = (data.features ?? []).map((f) => ({
+        name: f.properties?.name ?? "Unnamed",
+        address: f.properties?.formatted ?? null,
+        distance_meters: Number.isFinite(f.properties?.distance) ? f.properties.distance : null,
+        categories: f.properties?.categories ?? [],
+      }));
+      return [b.id, { label: b.label, source: "geoapify", radius_meters: b.radius, count: places.length, places }];
+    })
+  );
+  if (delayMs) await sleep(delayMs);
+  return Object.fromEntries(entries);
 }

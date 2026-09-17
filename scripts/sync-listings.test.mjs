@@ -68,7 +68,7 @@ test("fetchNearby builds one bucket per category from Geoapify features", async 
   };
   const nearby = await fetchNearby(43.65, -79.38, { apiKey: "k", fetchImpl, delayMs: 0 });
   assert.equal(calls.length, BUCKETS.length);
-  assert.match(calls[0], /filter=circle:-79\.38,43\.65,500/); // schools radius 500
+  assert.ok(calls.some((u) => /filter=circle:-79\.38,43\.65,500/.test(u))); // schools radius 500, fired concurrently
   assert.equal(nearby.cafes.count, 1);
   assert.deepEqual(nearby.cafes.places[0], {
     name: "Cafe A", address: "1 Main St", distance_meters: 120, categories: ["catering.cafe"],

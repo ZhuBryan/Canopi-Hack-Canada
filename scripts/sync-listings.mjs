@@ -126,20 +126,25 @@ async function main() {
 
   const byId = new Map(raws.map((r) => [r.id, r]));
   const enriched = new Map(reuse);
-  for (const id of fresh) {
+  console.log(`[${city}] enriching ${fresh.length} listings via Geoapify…`);
+  for (let i = 0; i < fresh.length; i++) {
+    const id = fresh[i];
     const r = byId.get(id);
     try {
       enriched.set(id, await fetchNearby(r.lat, r.lng, { apiKey: process.env.GEOAPIFY_API_KEY }));
     } catch (err) {
       console.warn(`[${city}] geoapify failed for ${id}: ${err.message}`);
     }
+    if ((i + 1) % 25 === 0) console.log(`[${city}] geoapify ${i + 1}/${fresh.length}`);
   }
+  console.log(`[${city}] geoapify ${fresh.length}/${fresh.length}`);
 
   const details = new Map();
+  console.log(`[${city}] fetching ${detailIds.length} detail pages…`);
   for (let i = 0; i < detailIds.length; i++) {
     const id = detailIds[i];
     details.set(id, await fetchRentfasterDetail(byId.get(id).url));
-    if ((i + 1) % 100 === 0) console.log(`[${city}] detail pages: ${i + 1}/${detailIds.length}`);
+    if ((i + 1) % 50 === 0) console.log(`[${city}] detail pages: ${i + 1}/${detailIds.length}`);
     await new Promise((r) => setTimeout(r, 200));
   }
   console.log(`[${city}] detail pages: ${detailIds.length}`);
