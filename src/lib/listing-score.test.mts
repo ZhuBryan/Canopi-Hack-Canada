@@ -7,7 +7,7 @@ const ROW = {
   id: "rf-1", city: "toronto", source: "rentfaster", url: "https://x/1",
   address: "1 A St", full_address: "1 A St, Toronto", lat: 43.65, lng: -79.38,
   monthly_rent: 2000, beds: 1, baths: 1.5, sqft: null, property_type: "Townhouse",
-  photo: null, available: "Immediate", lease_term: null, amenities: ["Parking"],
+  photo: null, available: "Immediate", lease_term: null, description: null, amenities: ["Parking"],
   cafes: 10, restaurants: 15, transit: 1,
 };
 
@@ -27,4 +27,10 @@ test("rowToListing scores buckets, maps fields, and falls back to a Mapbox stati
   assert.equal(l.categoryScores.education, 0);
   assert.match(l.image, /^https:\/\/api\.mapbox\.com\/styles\/v1\/mapbox\/streets-v12\/static\/.*access_token=tok$/);
   assert.equal(l.incomeNeeded, 80000);
+  assert.equal(l.about, l.address);
+});
+
+test("rowToListing uses the DB description for about when present", () => {
+  const l = rowToListing({ ...ROW, description: "Bright renovated unit near the subway" } as never, CITIES.toronto, "tok");
+  assert.equal(l.about, "Bright renovated unit near the subway");
 });

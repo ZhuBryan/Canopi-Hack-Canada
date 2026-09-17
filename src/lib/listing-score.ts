@@ -18,6 +18,7 @@ export type DbRow = {
   photo: string | null;
   available: string | null;
   lease_term: string | null;
+  description: string | null;
   amenities: string[];
 } & Partial<Record<BucketKey, number | null>>;
 
@@ -100,7 +101,7 @@ export function rowToListing(row: DbRow, city: CityConfig, mapboxToken: string):
     lng: row.lng,
     availableDate: row.available ?? "Available now",
     leaseTerm: row.lease_term ?? "12 months",
-    about: row.address,
+    about: row.description ?? row.address,
     amenities: row.amenities ?? [],
     nearbyServices: counts,
     categoryScores: { foodDrink, health, groceryParks, education, emergency },

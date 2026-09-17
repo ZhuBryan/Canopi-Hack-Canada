@@ -7,7 +7,7 @@ const TTL_MS = 10 * 60 * 1000;
 const cache = new Map<CitySlug, { at: number; listings: Listing[] }>();
 
 const COLUMNS =
-  "id,city,source,url,address,full_address,lat,lng,monthly_rent,beds,baths,sqft,property_type,photo,available,lease_term,amenities," +
+  "id,city,source,url,address,full_address,lat,lng,monthly_rent,beds,baths,sqft,property_type,photo,available,lease_term,description,amenities," +
   BUCKET_KEYS.map((k) => `${k}:nearby->${k}->count`).join(",");
 
 async function loadCity(slug: CitySlug): Promise<Listing[]> {
