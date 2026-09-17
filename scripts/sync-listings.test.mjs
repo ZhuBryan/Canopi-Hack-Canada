@@ -147,3 +147,11 @@ test("planEnrichment reuses a neighbour's nearby and caps fresh fetches", () => 
   assert.deepEqual(plan.fresh, ["rf-2"]);
   assert.equal(plan.reuse.has("rf-old"), false);
 });
+
+test("planEnrichment re-enriches an existing row whose nearby is still empty", () => {
+  // rf-old is already in the DB but was never enriched (nearby: {}); no cell neighbour exists.
+  const existing = new Map([["rf-old", { lat: 43.65321, lng: -79.38329, nearby: {} }]]);
+  const raws = [{ ...RAW, id: "rf-old" }];
+  const plan = planEnrichment(raws, existing, 10);
+  assert.ok(plan.fresh.includes("rf-old"));
+});

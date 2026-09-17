@@ -50,7 +50,8 @@ export function planEnrichment(raws, existing, limit) {
   const reuse = new Map();
   const fresh = [];
   for (const r of raws) {
-    if (existing.has(r.id)) continue;
+    const prev = existing.get(r.id);
+    if (prev && prev.nearby && Object.keys(prev.nearby).length) continue;
     const cached = byCell.get(cellKey(r.lat, r.lng));
     if (cached) reuse.set(r.id, cached);
     else if (fresh.length < limit) fresh.push(r.id);
