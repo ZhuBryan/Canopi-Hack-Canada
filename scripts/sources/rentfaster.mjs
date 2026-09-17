@@ -44,6 +44,81 @@ export function normalizeRentfaster(r) {
   };
 }
 
+function parkingLabel(kind) {
+  const k = String(kind).toLowerCase();
+  if (k === "underground") return "Underground parking";
+  if (k === "garage") return "Garage";
+  if (k === "street") return "Street parking";
+  return `${kind[0].toUpperCase()}${kind.slice(1)} parking`;
+}
+
+function petsLabel(cats, dogs) {
+  if (cats && dogs) return "Pet-friendly";
+  if (cats) return "Cats OK";
+  if (dogs) return "Dogs OK";
+  return "No pets";
+}
+
+// Brace-walk from the first `{"ref_id":` to its matching `}`, tracking quote
+// state so braces inside strings don't throw off the depth count.
+function extractRefIdObject(html) {
+  const start = html.indexOf('{"ref_id":');
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < html.length; i++) {
+    const c = html[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+    } else if (c === '"') {
+      inString = true;
+    } else if (c === "{") {
+      depth++;
+    } else if (c === "}") {
+      depth--;
+      if (depth === 0) return html.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
+export function parseRentfasterDetail(html) {
+  const json = extractRefIdObject(html);
+  if (!json) return null;
+  let d;
+  try {
+    d = JSON.parse(json);
+  } catch {
+    return null;
+  }
+  const sqftMatch = String(d.sq_feet ?? "").match(/\d+/);
+  const amenities = [];
+  for (const f of d.features ?? []) amenities.push(f);
+  for (const p of d.parking ?? []) amenities.push(parkingLabel(p));
+  amenities.push(petsLabel(d.cats, d.dogs));
+  for (const u of d.utilities_included ?? []) amenities.push(`${u} included`);
+  return {
+    sqft: sqftMatch ? parseInt(sqftMatch[0], 10) : null,
+    amenities: [...new Set(amenities)],
+    leaseTerm: d.lease_term || null,
+    photo: d.slide || null,
+    description: d.title || null,
+  };
+}
+
+export async function fetchRentfasterDetail(url, { fetchImpl = fetch } = {}) {
+  try {
+    const res = await fetchImpl(url, { headers: { "user-agent": UA } });
+    if (!res.ok) return null;
+    return parseRentfasterDetail(await res.text());
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchRentfaster() {
   const out = [];
   for (let page = 0; ; page++) {
