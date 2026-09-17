@@ -67,3 +67,32 @@ create policy "Users upsert own chat history" on public.chat_history
   for insert with check (auth.uid() = user_id);
 create policy "Users update own chat history" on public.chat_history
   for update using (auth.uid() = user_id);
+
+-- ── Listings (written by scripts/sync-listings.mjs with the service-role key) ──
+create table public.listings (
+  id            text primary key,              -- 'rf-593209' | 'rc-<rentcast id>'
+  city          text not null,                 -- 'toronto' | 'sf'
+  source        text not null,                 -- 'rentfaster' | 'rentcast'
+  url           text,
+  address       text not null,
+  full_address  text not null,
+  lat           double precision not null,
+  lng           double precision not null,
+  monthly_rent  int not null,
+  beds          int,
+  baths         numeric,
+  sqft          int,
+  property_type text,
+  photo         text,
+  available     text,
+  lease_term    text,
+  amenities     text[] not null default '{}',
+  nearby        jsonb not null default '{}',   -- Geoapify buckets; doubles as the enrichment cache
+  active        boolean not null default true,
+  seen_at       timestamptz not null default now(),
+  created_at    timestamptz not null default now()
+);
+create index listings_city_active_idx on public.listings (city) where active;
+alter table public.listings enable row level security;
+create policy "public read active listings" on public.listings
+  for select using (active);
