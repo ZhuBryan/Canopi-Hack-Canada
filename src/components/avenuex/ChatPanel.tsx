@@ -85,8 +85,6 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
   const [initialized, setInitialized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [language, setLanguage] = useState<"en" | "fr">("en");
-
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -121,7 +119,7 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
     setMessages(prev => [...prev, userMsg]);
     setInput(""); setLoading(true);
     try {
-      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })), language, city }) });
+      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })), city }) });
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.prefUpdate) {
@@ -133,7 +131,7 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
       if (data.listingIds?.length) {
         onSelectListing?.(data.listingIds[0]);
       }
-    } catch { append({ id: uid(), role: "assistant", content: language === "en" ? "Sorry, something went wrong." : "Désolé, quelque chose s'est mal passé." }); }
+    } catch { append({ id: uid(), role: "assistant", content: "Sorry, something went wrong." }); }
     finally { setLoading(false); }
   };
 
@@ -218,22 +216,6 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-base select-none">🌿</span>
             {!hasProfile && <span className="h-2 w-2 rounded-full bg-red-400" />}
-            {chatOpen && (
-              <button
-                type="button"
-                aria-label={language === "en" ? "Switch to French" : "Switch to English"}
-                title={language === "en" ? "French" : "English"}
-                onClick={() => setLanguage(p => p === "en" ? "fr" : "en")}
-                className="text-xs font-semibold px-2 py-1 rounded-full transition border"
-                style={{
-                  borderColor: "var(--line)",
-                  color: "var(--muted-light)",
-                  backgroundColor: language === "en" ? "transparent" : "var(--brand-soft)",
-                }}
-              >
-                {language === "en" ? "EN" : "FR"}
-              </button>
-            )}
           </div>
 
           {/* Input */}

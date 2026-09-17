@@ -26,7 +26,7 @@ An AI assistant asks indirect, personality-driven questions — *"What does a go
 
 ## Features
 
-- **AI chat assistant** — Conversational matching that reads between the lines. Supports English and French.
+- **AI chat assistant** — Conversational matching that reads between the lines. Replies in whatever language you write in.
 - **Interactive map** — Mapbox GL map showing real rentals in Toronto and San Francisco with price pins, listing cards, and fly-to animations when the AI recommends a property.
 - **8-axis preference radar** — Live spider chart that updates as Canopi learns what matters to you.
 - **Neighborhood scores** — Amenity counts (schools, cafés, parks, groceries, transit, pharmacies, restaurants) within 1 km of every listing.

@@ -12,13 +12,12 @@ interface ChatMessage {
 
 interface ChatRequest {
     messages: ChatMessage[];
-    language?: "en" | "fr";
     city?: CitySlug;
 }
 
 // ── Gemini path ──────────────────────────────────────────────────────────────
 
-async function buildSystemPrompt(language: "en" | "fr", city: CitySlug): Promise<string> {
+async function buildSystemPrompt(city: CitySlug): Promise<string> {
     const cfg = CITIES[city];
     const listings = await loadListings(city);
     const summaries = listings
@@ -28,11 +27,7 @@ async function buildSystemPrompt(language: "en" | "fr", city: CitySlug): Promise
         })
         .join("\n");
 
-    const isEnglish = language === "en";
-
-    const greeting = isEnglish
-        ? `You are Canopi, a warm, perceptive AI assistant for ${cfg.promptBlurb}. You help renters find apartments and understand neighborhoods — but more importantly, you understand *people*.`
-        : `Tu es Canopi, un assistant IA chaleureux et perspicace pour une plateforme de location à ${cfg.label}. Tu aides les locataires à trouver des appartements et à comprendre les quartiers — mais plus important encore, tu comprends les *gens*.`;
+    const greeting = `You are Canopi, a warm, perceptive AI assistant for ${cfg.promptBlurb}. You help renters find apartments and understand neighborhoods — but more importantly, you understand *people*.`;
 
     return `${greeting}
 
@@ -145,7 +140,7 @@ LISTING RECOMMENDATION RULES:
 
 TONE: Warm, perceptive, unhurried. You're not selling — you're helping someone figure out where they belong.
 
-LANGUAGE: Respond exclusively in ${isEnglish ? "English" : "French"}. All content, questions, and responses must be in this language only.
+LANGUAGE: Detect the language of the user's most recent message and respond exclusively in that language — every sentence, question, listing recommendation and reason. If the user switches language mid-conversation, switch with them. Keep addresses and place names as written in the listing data.
 
 Always return valid JSON — no markdown fences, no extra text outside the JSON.`;
 }
@@ -225,11 +220,11 @@ function extractCandidateText(data: unknown): { text: string; finishReason: stri
     return { text, finishReason };
 }
 
-async function geminiResponse(messages: ChatMessage[], language: "en" | "fr", city: CitySlug): Promise<GeminiResult> {
+async function geminiResponse(messages: ChatMessage[], city: CitySlug): Promise<GeminiResult> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("No Gemini API key");
 
-    const systemPrompt = await buildSystemPrompt(language, city);
+    const systemPrompt = await buildSystemPrompt(city);
 
     const contents = messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -304,15 +299,13 @@ export async function POST(request: Request) {
     try {
         const body: ChatRequest = await request.json();
         const messages: ChatMessage[] = body.messages ?? [];
-        const language: "en" | "fr" = body.language ?? "en";
 
         if (messages.length === 0) {
-            const emptyMsg = language === "en" ? "Please send a message to get started!" : "Veuillez envoyer un message pour commencer!";
-            return NextResponse.json({ role: "assistant", content: emptyMsg });
+            return NextResponse.json({ role: "assistant", content: "Please send a message to get started!" });
         }
 
         const city: CitySlug = isCitySlug(body.city) ? body.city : DEFAULT_CITY;
-        const result = await geminiResponse(messages, language, city);
+        const result = await geminiResponse(messages, city);
         return NextResponse.json({ role: "assistant", content: result.content, prefUpdate: result.prefUpdate, listingIds: result.listingIds });
     } catch (error) {
         console.error("Chat route error:", error);
