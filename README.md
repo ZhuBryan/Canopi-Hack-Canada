@@ -101,7 +101,7 @@ Open [http://localhost:3000](http://localhost:3000).
 |----------|----------|-------------|
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | Yes | Mapbox GL public token for map rendering |
 | `GEMINI_API_KEY` | Yes | Google Gemini API key for the chat assistant |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL — `https://<ref>.supabase.co` (not the REST URL ending in `/rest/v1/`) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key |
 | `ELEVENLABS_API_KEY` | No | ElevenLabs key for voice input/output |
 | `ELEVENLABS_VOICE_ID` | No | ElevenLabs voice ID (defaults to a preset voice) |
