@@ -5,6 +5,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Listing } from "@/lib/avenuex-data";
 import { scoreColor } from "@/components/avenuex/primitives";
+import { useCity } from "@/lib/city-context";
+import type { CityConfig } from "@/lib/cities";
 
 interface SelectedAmenity {
   id: string;
@@ -23,38 +25,38 @@ interface MapboxMapProps {
   isAmenityLoading?: boolean;
 }
 
-const GTA_MASK_CENTER: [number, number] = [-79.3832, 43.6532];
-const GTA_MASK_RADIUS_SCALE = 2;
-const GTA_MASK_INNER_RING: [number, number][] = [
-  [-79.3832, 43.7732],
-  [-79.3181, 43.7641],
-  [-79.2631, 43.7380],
-  [-79.2261, 43.6991],
-  [-79.2132, 43.6532],
-  [-79.2261, 43.6073],
-  [-79.2631, 43.5684],
-  [-79.3181, 43.5423],
-  [-79.3832, 43.5332],
-  [-79.4483, 43.5423],
-  [-79.5033, 43.5684],
-  [-79.5403, 43.6073],
-  [-79.5532, 43.6532],
-  [-79.5403, 43.6991],
-  [-79.5033, 43.7380],
-  [-79.4483, 43.7641],
-  [-79.3832, 43.7732],
-];
-
-function scaleRing(
-  ring: [number, number][],
-  center: [number, number],
-  scale: number
-): [number, number][] {
-  return ring.map(([lng, lat]) => [
-    center[0] + (lng - center[0]) * scale,
-    center[1] + (lat - center[1]) * scale,
-  ]);
+// Approximate circle in lng/lat degrees; good enough for a viewport mask.
+function circleRing(center: [number, number], radiusKm: number, steps = 48): [number, number][] {
+  const [lng, lat] = center;
+  const dLat = radiusKm / 110.574;
+  const dLng = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180));
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const t = (i / steps) * 2 * Math.PI;
+    return [lng + dLng * Math.cos(t), lat + dLat * Math.sin(t)] as [number, number];
+  });
 }
+
+function maskGeoJson(cfg: CityConfig): GeoJSON.Feature {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]],
+        circleRing(cfg.center, cfg.maskRadiusKm),
+      ],
+    },
+  };
+}
+
+function maxBounds(cfg: CityConfig): [[number, number], [number, number]] {
+  const ring = circleRing(cfg.center, cfg.maskRadiusKm * 1.2, 4);
+  const lngs = ring.map((p) => p[0]);
+  const lats = ring.map((p) => p[1]);
+  return [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
+}
+
 const AMENITY_ICON_ASSET_BY_TYPE: Record<string, string> = {
   transit: "/bus.svg",
   school: "/graduation-cap.svg",
@@ -74,6 +76,8 @@ export function MapboxMap({
   selectedAmenities = [],
   isAmenityLoading = false,
 }: MapboxMapProps) {
+  const { config: cityConfig } = useCity();
+  const cityRef = useRef(cityConfig);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
@@ -159,14 +163,14 @@ export function MapboxMap({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/sym7534/cmmgpkjan00a701qsb6jbchc8",
-      center: [-79.3832, 43.6532],
-      zoom: 14,
+      center: cityRef.current.center,
+      zoom: cityRef.current.zoom,
       pitch: 45,
       bearing: -10,
       dragRotate: false,
       antialias: false,
       maxTileCacheSize: 20,
-      maxBounds: [[-79.65, 43.55], [-79.10, 43.85]],
+      maxBounds: maxBounds(cityRef.current),
     });
 
     mapRef.current = map;
@@ -426,17 +430,7 @@ export function MapboxMap({
       // ── GTA boundary mask ──────────────────────────────────────────────────
       map.addSource("gta-mask", {
         type: "geojson",
-        data: {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]],
-              scaleRing(GTA_MASK_INNER_RING, GTA_MASK_CENTER, GTA_MASK_RADIUS_SCALE),
-            ],
-          },
-        },
+        data: maskGeoJson(cityRef.current),
       });
       map.addLayer({
         id: "gta-mask",
@@ -479,6 +473,19 @@ export function MapboxMap({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Re-centre map, bounds, and mask when the selected city changes
+  useEffect(() => {
+    cityRef.current = cityConfig;
+    const map = mapRef.current;
+    if (!map) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    map.setMaxBounds(null as any);
+    map.jumpTo({ center: cityConfig.center, zoom: cityConfig.zoom });
+    map.setMaxBounds(maxBounds(cityConfig));
+    const src = map.getSource("gta-mask") as mapboxgl.GeoJSONSource | undefined;
+    src?.setData(maskGeoJson(cityConfig));
+  }, [cityConfig]);
 
   // Re-sync markers when listings change (filter/sort)
   useEffect(() => {
