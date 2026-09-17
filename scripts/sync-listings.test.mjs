@@ -1,7 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizeRentfaster } from "./sources/rentfaster.mjs";
-import { cellKey, toRow, planEnrichment } from "./sync-listings.mjs";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+import { normalizeRentfaster, parseRentfasterDetail, fetchRentfasterDetail } from "./sources/rentfaster.mjs";
+import { cellKey, toRow, planEnrichment, planDetail, mergeDetail } from "./sync-listings.mjs";
 
 const RF_RECORD = {
   id: 593209,
@@ -154,4 +156,67 @@ test("planEnrichment re-enriches an existing row whose nearby is still empty", (
   const raws = [{ ...RAW, id: "rf-old" }];
   const plan = planEnrichment(raws, existing, 10);
   assert.ok(plan.fresh.includes("rf-old"));
+});
+
+const DETAIL_JSON =
+  '{"ref_id":1,"sq_feet":"637, 370","features":["Elevator","Fridge"],"parking":["underground"],"cats":true,"dogs":true,"utilities_included":["Heat","Water"],"lease_term":"Long Term","slide":"https:\\/\\/x\\/slide.jpg","title":"Nice place"}';
+const DETAIL_HTML = `<html><body><script>var listing = ${DETAIL_JSON};</script><script>var again = ${DETAIL_JSON};</script></body></html>`;
+
+test("parseRentfasterDetail maps the embedded listing object", () => {
+  assert.deepEqual(parseRentfasterDetail(DETAIL_HTML), {
+    sqft: 637,
+    amenities: ["Elevator", "Fridge", "Underground parking", "Pet-friendly", "Heat included", "Water included"],
+    leaseTerm: "Long Term",
+    photo: "https://x/slide.jpg",
+    description: "Nice place",
+  });
+});
+
+test("parseRentfasterDetail handles blank sq_feet and no pets", () => {
+  const json = '{"ref_id":2,"sq_feet":"","features":[],"parking":[],"cats":false,"dogs":false,"utilities_included":[],"lease_term":null,"slide":null,"title":null}';
+  const result = parseRentfasterDetail(`<html>${json}</html>`);
+  assert.equal(result.sqft, null);
+  assert.ok(result.amenities.includes("No pets"));
+});
+
+test("parseRentfasterDetail returns null when no embedded object is present", () => {
+  assert.equal(parseRentfasterDetail("<html><body>nothing here</body></html>"), null);
+});
+
+test("fetchRentfasterDetail returns null on a non-200 response", async () => {
+  const fetchImpl = async () => ({ ok: false, status: 403 });
+  assert.equal(await fetchRentfasterDetail("https://x/1", { fetchImpl }), null);
+});
+
+test("parseRentfasterDetail parses the saved live sample page", () => {
+  const path = fileURLToPath(new URL("../.superpowers/sdd/2026-09-17-multi-city-listings-db/rf-detail-sample.html", import.meta.url));
+  const html = fs.readFileSync(path, "utf8");
+  const result = parseRentfasterDetail(html);
+  assert.equal(result.sqft, 637);
+  assert.ok(result.amenities.includes("Elevator"));
+});
+
+test("planDetail selects rentfaster raws missing a description", () => {
+  const raws = [
+    { id: "rf-1", source: "rentfaster" },
+    { id: "rf-2", source: "rentfaster" },
+    { id: "rc-1", source: "rentcast" },
+  ];
+  const existing = new Map([["rf-2", { description: "already have it" }]]);
+  assert.deepEqual(planDetail(raws, existing), ["rf-1"]);
+});
+
+test("mergeDetail carries forward existing detail fields when no fresh detail was fetched", () => {
+  const row = { sqft: null, amenities: [], lease_term: null, photo: null, description: null };
+  const prev = { sqft: 500, amenities: ["Elevator"], lease_term: "Long Term", photo: "https://x/old.jpg", description: "Old description" };
+  assert.deepEqual(mergeDetail(row, undefined, prev), {
+    sqft: 500, amenities: ["Elevator"], lease_term: "Long Term", photo: "https://x/old.jpg", description: "Old description",
+  });
+
+  const detail = { sqft: 700, amenities: ["Gym"], leaseTerm: "Short Term", photo: "https://x/new.jpg", description: "New description" };
+  assert.deepEqual(mergeDetail(row, detail, prev), {
+    sqft: 700, amenities: ["Gym"], lease_term: "Short Term", photo: "https://x/new.jpg", description: "New description",
+  });
+
+  assert.deepEqual(mergeDetail(row, undefined, undefined), row);
 });

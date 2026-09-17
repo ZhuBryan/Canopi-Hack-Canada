@@ -6,6 +6,7 @@ import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { fetchNearby } from "./geoapify.mjs";
+import { fetchRentfasterDetail } from "./sources/rentfaster.mjs";
 
 const SOURCES = {
   toronto: async () => (await import("./sources/rentfaster.mjs")).fetchRentfaster(),
@@ -34,6 +35,7 @@ export function toRow(raw, city, nearby) {
     photo: raw.photo,
     available: raw.available,
     lease_term: raw.leaseTerm,
+    description: raw.description ?? null,
     amenities: raw.amenities,
     nearby,
     active: true,
@@ -61,6 +63,25 @@ export function planEnrichment(raws, existing, limit) {
   return { reuse, fresh };
 }
 
+// raws whose source is rentfaster and that don't already have a description on file.
+export function planDetail(raws, existing) {
+  return raws.filter((r) => r.source === "rentfaster" && !existing.get(r.id)?.description).map((r) => r.id);
+}
+
+// Fill sqft/amenities/lease_term/photo/description from a freshly fetched detail page,
+// falling back to the existing DB row so a re-sync never overwrites them with nulls.
+export function mergeDetail(row, detail, prev) {
+  const pick = (detailVal, prevVal, rowVal) => (detailVal !== undefined && detailVal !== null ? detailVal : prevVal ?? rowVal);
+  return {
+    ...row,
+    sqft: pick(detail?.sqft, prev?.sqft, row.sqft),
+    amenities: pick(detail?.amenities, prev?.amenities, row.amenities),
+    lease_term: pick(detail?.leaseTerm, prev?.lease_term, row.lease_term),
+    photo: pick(detail?.photo, prev?.photo, row.photo),
+    description: pick(detail?.description, prev?.description, row.description),
+  };
+}
+
 async function main() {
   const { values: opts } = parseArgs({
     options: {
@@ -83,7 +104,11 @@ async function main() {
   const existing = new Map();
   if (supabase) {
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase.from("listings").select("id, lat, lng, nearby").eq("city", city).range(from, from + 999);
+      const { data, error } = await supabase
+        .from("listings")
+        .select("id, lat, lng, nearby, sqft, amenities, lease_term, photo, description")
+        .eq("city", city)
+        .range(from, from + 999);
       if (error) throw error;
       for (const r of data) existing.set(r.id, r);
       if (data.length < 1000) break;
@@ -92,7 +117,9 @@ async function main() {
 
   const { reuse, fresh } = planEnrichment(raws, existing, limit);
   console.log(`[${city}] new: ${raws.length - [...raws].filter((r) => existing.has(r.id)).length}, reuse cell cache: ${reuse.size}, geoapify: ${fresh.length}`);
+  const detailIds = planDetail(raws, existing);
   if (dry) {
+    console.log(`[${city}] detail pages: ${detailIds.length} (would fetch)`);
     console.log(JSON.stringify(raws.slice(0, 3), null, 2));
     return;
   }
@@ -108,7 +135,16 @@ async function main() {
     }
   }
 
-  const rows = raws.map((r) => toRow(r, city, enriched.get(r.id) ?? existing.get(r.id)?.nearby ?? {}));
+  const details = new Map();
+  for (let i = 0; i < detailIds.length; i++) {
+    const id = detailIds[i];
+    details.set(id, await fetchRentfasterDetail(byId.get(id).url));
+    if ((i + 1) % 100 === 0) console.log(`[${city}] detail pages: ${i + 1}/${detailIds.length}`);
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  console.log(`[${city}] detail pages: ${detailIds.length}`);
+
+  const rows = raws.map((r) => mergeDetail(toRow(r, city, enriched.get(r.id) ?? existing.get(r.id)?.nearby ?? {}), details.get(r.id), existing.get(r.id)));
   for (let i = 0; i < rows.length; i += BATCH) {
     const { error } = await supabase.from("listings").upsert(rows.slice(i, i + BATCH), { onConflict: "id" });
     if (error) throw error;
