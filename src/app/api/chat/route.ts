@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { loadListings } from "@/lib/listings-db";
+import { CITIES, DEFAULT_CITY, isCitySlug, type CitySlug } from "@/lib/cities";
+import { BUCKET_KEYS } from "@/lib/listing-score";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,69 +13,26 @@ interface ChatMessage {
 interface ChatRequest {
     messages: ChatMessage[];
     language?: "en" | "fr";
-}
-
-interface RawListing {
-    listing_id: string;
-    url: string | null;
-    title: string | null;
-    location: string | null;
-    price: string | null;
-    photo: string | null;
-    lat: number | null;
-    lng: number | null;
-    nearby?: Record<string, { count: number }>;
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-const BUCKET_KEYS = ["schools", "groceries", "restaurants", "cafes", "parks", "pharmacies", "transit"] as const;
-
-function parsePrice(raw: string | null | undefined): number {
-    if (!raw) return 0;
-    const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
-    return Number.isFinite(n) ? n : 0;
-}
-
-function extractAddress(location: string | null | undefined): string {
-    if (!location) return "Unknown address";
-    return location.split(",").map((s) => s.trim()).filter(Boolean)[0] ?? location;
-}
-
-//── Data loading ─────────────────────────────────────────────────────────────
-
-let cachedRaw: RawListing[] | null = null;
-
-async function loadRaw(): Promise<RawListing[]> {
-    if (cachedRaw) return cachedRaw;
-    const filePath = path.join(process.cwd(), "data", "rentfaster-listings.livable-data.json");
-    const raw = await readFile(filePath, "utf8");
-    cachedRaw = JSON.parse(raw);
-    return cachedRaw!;
+    city?: CitySlug;
 }
 
 // ── Gemini path ──────────────────────────────────────────────────────────────
 
-async function buildSystemPrompt(language: "en" | "fr" = "en"): Promise<string> {
-    const rawListings = await loadRaw();
-    const validListings = rawListings.filter(
-        (item) => Number.isFinite(item.lat) && Number.isFinite(item.lng)
-    );
-    const summaries = validListings
-        .map((item) => {
-            const rent = parsePrice(item.price);
-            const addr = extractAddress(item.location);
-            const nb = item.nearby ?? {};
-            const counts = BUCKET_KEYS.map((k) => nb[k]?.count ?? 0).join(",");
-            return `rf-${item.listing_id}|${addr}|$${rent}|${item.lat?.toFixed(3)},${item.lng?.toFixed(3)}|${counts}`;
+async function buildSystemPrompt(language: "en" | "fr", city: CitySlug): Promise<string> {
+    const cfg = CITIES[city];
+    const listings = await loadListings(city);
+    const summaries = listings
+        .map((l) => {
+            const counts = BUCKET_KEYS.map((k) => l.nearbyServices?.[k] ?? 0).join(",");
+            return `${l.id}|${l.address}|$${l.monthlyRent}|${l.lat.toFixed(3)},${l.lng.toFixed(3)}|${counts}`;
         })
         .join("\n");
 
     const isEnglish = language === "en";
 
     const greeting = isEnglish
-        ? "You are Canopi, a warm, perceptive AI assistant for a Toronto rental platform. You help renters find apartments and understand neighborhoods — but more importantly, you understand *people*."
-        : "Tu es Canopi, un assistant IA chaleureux et perspicace pour une plateforme de location à Toronto. Tu aides les locataires à trouver des appartements et à comprendre les quartiers — mais plus important encore, tu comprends les *gens*.";
+        ? `You are Canopi, a warm, perceptive AI assistant for ${cfg.promptBlurb}. You help renters find apartments and understand neighborhoods — but more importantly, you understand *people*.`
+        : `Tu es Canopi, un assistant IA chaleureux et perspicace pour une plateforme de location à ${cfg.label}. Tu aides les locataires à trouver des appartements et à comprendre les quartiers — mais plus important encore, tu comprends les *gens*.`;
 
     return `${greeting}
 
@@ -100,7 +58,7 @@ THE 8 PREFERENCE AXES (each 0–100):
 ---
 
 PERSONALITY & CONVERSATION PHILOSOPHY:
-You are not a form. You are not a chatbot running through a checklist. You are a sharp, emotionally intelligent friend who happens to know Toronto deeply.
+You are not a form. You are not a chatbot running through a checklist. You are a sharp, emotionally intelligent friend who happens to know ${cfg.label} deeply.
 
 When a user arrives without a specific request, your job is to *understand who they are* — not just what they want. Do this through genuine, curious conversation. Ask one question at a time. Make it feel like catching up, not an intake form.
 
@@ -171,16 +129,16 @@ CONVERSATION PACING RULES:
 
 ---
 
-LISTING DATA — ${validListings.length} real Toronto rentals (format: id|address|price|lat,lng|schools,groceries,restaurants,cafes,parks,pharmacies,transit):
+LISTING DATA — ${listings.length} real ${cfg.label} rentals (format: id|address|price|lat,lng|schools,groceries,restaurants,cafes,parks,pharmacies,transit):
 ${summaries}
 
 LISTING RECOMMENDATION RULES:
 1. When recommending, suggest 2–3 specific listings using real addresses and prices from the data.
 2. Frame recommendations as conclusions from the conversation: "Based on what you've told me, here's what I think actually fits you..."
 3. For location queries, use lat/lng to find closest listings.
-4. Toronto landmarks: CN Tower (43.643, -79.387), Union Station (43.645, -79.381), U of T (43.663, -79.396), King & Spadina (43.644, -79.396).
+4. ${cfg.label} landmarks: ${cfg.landmarks}.
 5. Format listings as: "**[Address]** — $X,XXX/mo"
-6. Always populate listingIds with the rf-XXXXX IDs of any listings you mention. Set to null if no listings are referenced.
+6. Always populate listingIds with the listing IDs (rf-… or rc-…) of any listings you mention. Set to null if no listings are referenced.
 6. After recommending, briefly explain *why* each listing fits their personality — not just their checklist.
 
 ---
@@ -267,11 +225,11 @@ function extractCandidateText(data: unknown): { text: string; finishReason: stri
     return { text, finishReason };
 }
 
-async function geminiResponse(messages: ChatMessage[], language: "en" | "fr" = "en"): Promise<GeminiResult> {
+async function geminiResponse(messages: ChatMessage[], language: "en" | "fr", city: CitySlug): Promise<GeminiResult> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("No Gemini API key");
 
-    const systemPrompt = await buildSystemPrompt(language);
+    const systemPrompt = await buildSystemPrompt(language, city);
 
     const contents = messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -353,7 +311,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ role: "assistant", content: emptyMsg });
         }
 
-        const result = await geminiResponse(messages, language);
+        const city: CitySlug = isCitySlug(body.city) ? body.city : DEFAULT_CITY;
+        const result = await geminiResponse(messages, language, city);
         return NextResponse.json({ role: "assistant", content: result.content, prefUpdate: result.prefUpdate, listingIds: result.listingIds });
     } catch (error) {
         console.error("Chat route error:", error);
