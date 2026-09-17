@@ -46,3 +46,29 @@ test("normalizeRentfaster treats Studio as 0 beds and drops non-Toronto / unpric
   assert.equal(normalizeRentfaster({ ...RF_RECORD, price: "" }), null);
   assert.equal(normalizeRentfaster({ ...RF_RECORD, latitude: null }), null);
 });
+
+import { fetchNearby, BUCKETS } from "./geoapify.mjs";
+
+test("fetchNearby builds one bucket per category from Geoapify features", async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(String(url));
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        features: [
+          { properties: { name: "Cafe A", formatted: "1 Main St", distance: 120, categories: ["catering.cafe"] } },
+        ],
+      }),
+    };
+  };
+  const nearby = await fetchNearby(43.65, -79.38, { apiKey: "k", fetchImpl, delayMs: 0 });
+  assert.equal(calls.length, BUCKETS.length);
+  assert.match(calls[0], /filter=circle:-79\.38,43\.65,500/); // schools radius 500
+  assert.equal(nearby.cafes.count, 1);
+  assert.deepEqual(nearby.cafes.places[0], {
+    name: "Cafe A", address: "1 Main St", distance_meters: 120, categories: ["catering.cafe"],
+  });
+  assert.equal(nearby.cafes.radius_meters, 1000);
+});
