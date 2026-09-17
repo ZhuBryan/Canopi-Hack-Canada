@@ -1,14 +1,6 @@
 import type { Listing, ScoreBand } from "./avenuex-data";
 import type { CityConfig } from "./cities";
 
-export type NearbyBucket = {
-  label?: string;
-  source?: string;
-  radius_meters?: number;
-  count?: number;
-  places?: { name?: string; address?: string | null; distance_meters: number | null; categories?: string[] }[];
-};
-
 export type DbRow = {
   id: string;
   city: string;
@@ -27,8 +19,7 @@ export type DbRow = {
   available: string | null;
   lease_term: string | null;
   amenities: string[];
-  nearby: Partial<Record<BucketKey, NearbyBucket>>;
-};
+} & Partial<Record<BucketKey, number | null>>;
 
 export const BUCKET_CAPS = {
   schools: 5,
@@ -41,18 +32,6 @@ export const BUCKET_CAPS = {
 } as const;
 export type BucketKey = keyof typeof BUCKET_CAPS;
 export const BUCKET_KEYS = Object.keys(BUCKET_CAPS) as BucketKey[];
-
-const EFFECTIVE_RADIUS_METERS = 1000;
-
-export function countWithinRadius(bucket: NearbyBucket | undefined): number {
-  if (!bucket) return 0;
-  if (Array.isArray(bucket.places) && bucket.places.length > 0) {
-    return bucket.places.filter(
-      (p) => Number.isFinite(p.distance_meters) && (p.distance_meters ?? Infinity) <= EFFECTIVE_RADIUS_METERS,
-    ).length;
-  }
-  return bucket.count ?? 0;
-}
 
 export function bucketScore(key: BucketKey, count: number): number {
   const cap = BUCKET_CAPS[key];
@@ -87,8 +66,7 @@ function staticMapImage(lat: number, lng: number, token: string): string {
 }
 
 export function rowToListing(row: DbRow, city: CityConfig, mapboxToken: string): Listing {
-  const nearby = row.nearby ?? {};
-  const counts = Object.fromEntries(BUCKET_KEYS.map((k) => [k, countWithinRadius(nearby[k])])) as Record<BucketKey, number>;
+  const counts = Object.fromEntries(BUCKET_KEYS.map((k) => [k, row[k] ?? 0])) as Record<BucketKey, number>;
 
   const foodDrink = Math.round((bucketScore("restaurants", counts.restaurants) + bucketScore("cafes", counts.cafes)) / 2);
   const health = bucketScore("pharmacies", counts.pharmacies);
