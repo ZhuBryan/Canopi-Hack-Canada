@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "rf-images-prod-bcdn.rentfaster.ca",
       },
+      {
+        protocol: "https",
+        hostname: "api.mapbox.com",
+      },
     ],
   },
 };
