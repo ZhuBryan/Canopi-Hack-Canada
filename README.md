@@ -27,7 +27,7 @@ An AI assistant asks indirect, personality-driven questions — *"What does a go
 ## Features
 
 - **AI chat assistant** — Conversational matching that reads between the lines. Supports English and French. Voice input/output via ElevenLabs STT/TTS.
-- **Interactive map** — Mapbox GL map showing 200+ real Canadian rentals with price pins, listing cards, and fly-to animations when the AI recommends a property.
+- **Interactive map** — Mapbox GL map showing real rentals in Toronto and San Francisco with price pins, listing cards, and fly-to animations when the AI recommends a property.
 - **8-axis preference radar** — Live spider chart that updates as Canopi learns what matters to you.
 - **Neighborhood scores** — Amenity counts (schools, cafés, parks, groceries, transit, pharmacies, restaurants) within 1 km of every listing.
 - **3D diorama view** — Three.js spatial visualization of neighborhood vitality around a selected listing.
@@ -36,19 +36,18 @@ An AI assistant asks indirect, personality-driven questions — *"What does a go
 
 ---
 
-## How we built the data pipeline
+## Data pipeline
 
-Getting structured, enriched rental data at scale was one of our core technical challenges. We used a multi-stage AI-assisted pipeline:
+Listings live in a Supabase `listings` table and are refreshed weekly by a GitHub Action (`.github/workflows/sync-listings.yml`) running:
 
-1. **Scraping** — We pulled raw rental listings from RentFaster.ca, collecting addresses, prices, unit details, and geographic coordinates across Canadian cities.
+````bash
+node scripts/sync-listings.mjs --city toronto   # RentFaster public map API
+node scripts/sync-listings.mjs --city sf        # RentCast API
+````
 
-2. **AI parsing & normalization** — Raw listing data is inconsistent: mixed formats, missing fields, non-standard descriptions. We used Gemini to parse and normalize listing text into a consistent schema — extracting bedroom counts, amenity mentions, building types, and income thresholds even when listings didn't follow any standard format.
+Each run pulls the city's active listings, enriches new ones with nearby amenities from Geoapify (schools, groceries, restaurants, cafés, parks, pharmacies, transit within 1 km — reusing results for listings in the same ~100 m cell), upserts them, and deactivates listings that disappeared. `--dry-run` prints without writing; `--limit N` caps Geoapify calls per run.
 
-3. **Geospatial enrichment** — For each listing, we queried the Overpass API (OpenStreetMap) to count nearby amenities within a 1 km radius: cafés, gyms, parks, grocery stores, pharmacies, schools, transit stops, and restaurants. This turned raw coordinates into neighborhood lifestyle scores.
-
-4. **Caching** — Enriched data is cached locally (`data/geoapify-places-cache.json`) to avoid redundant API calls and keep the app fast.
-
-The result: 200+ listings each carrying a rich neighborhood profile that the AI can reason about when making personalized recommendations.
+Env for the script: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEOAPIFY_API_KEY`, `RENTCAST_API_KEY`.
 
 ---
 
@@ -83,7 +82,10 @@ GEMINI_API_KEY=your_gemini_key
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ELEVENLABS_API_KEY=your_elevenlabs_key
+ELEVENLABS_VOICE_ID=your_elevenlabs_voice_id
 ```
+
+Run `supabase-schema.sql` in the Supabase SQL editor.
 
 ```bash
 npm run dev
@@ -102,6 +104,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key |
 | `ELEVENLABS_API_KEY` | No | ElevenLabs key for voice input/output |
+| `ELEVENLABS_VOICE_ID` | No | ElevenLabs voice ID (defaults to a preset voice) |
 
 ---
 
@@ -125,23 +128,12 @@ src/
 └── lib/
     ├── spider-prefs-context.tsx  # 8-axis preference state
     ├── auth-context.tsx          # Supabase auth provider
-    └── avenuex-data.ts           # Listing types and scoring
-data/
-├── rentfaster-listings.combined.json      # ~200 Canadian rental listings
-├── rentfaster-listings.livable-data.json  # AI-enriched listings for chat
-└── geoapify-places-cache.json             # Cached OSM amenity data
+    ├── avenuex-data.ts           # Listing types and scoring
+    └── listings-db.ts            # Supabase listings queries
 scripts/
-├── enrich-rentfaster-listings-with-places.mjs   # Geospatial enrichment
-└── clean-combined-listings.mjs                  # AI normalization pass
-```
-
----
-
-## Re-running the data pipeline
-
-```bash
-npm run enrich:places   # Pull amenity data from Overpass API
-npm run clean:combined  # Normalize and AI-parse raw listings
+├── sync-listings.mjs             # Weekly listings sync (see Data pipeline)
+├── geoapify.mjs                  # Amenity enrichment helper
+└── sources/                      # Per-city listing sources (RentFaster, RentCast)
 ```
 
 ---
@@ -154,5 +146,4 @@ npm run clean:combined  # Normalize and AI-parse raw listings
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
-| `npm run enrich:places` | Re-enrich listings with Overpass amenity data |
-| `npm run clean:combined` | Clean, normalize, and AI-parse combined listings |
+| `npm run sync` | Sync listings into Supabase (see Data pipeline) |
