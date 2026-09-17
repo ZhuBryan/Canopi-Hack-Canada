@@ -62,7 +62,7 @@ export default function SavedPage() {
 
     useEffect(() => {
         let cancelled = false;
-        fetch("/api/listings")
+        fetch("/api/listings?city=all")
             .then(res => res.json())
             .then(data => {
                 if (!cancelled) {

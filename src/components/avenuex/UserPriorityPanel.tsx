@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PrimaryButton } from "@/components/avenuex/primitives";
 import type { Listing } from "@/lib/avenuex-data";
+import { useCity } from "@/lib/city-context";
 
 const SLIDERS = [
   { key: "w_schools", label: "Schools" },
@@ -21,6 +22,7 @@ interface UserPriorityPanelProps {
 }
 
 export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps) {
+  const { city } = useCity();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [maxRent, setMaxRent] = useState(3200);
@@ -46,6 +48,7 @@ export default function UserPriorityPanel({ onResults }: UserPriorityPanelProps)
       for (const { key } of SLIDERS) {
         params.set(key, String(weights[key]));
       }
+      params.set("city", city);
       const res = await fetch(`/api/suggestions?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch suggestions");
       const data: Listing[] = await res.json();

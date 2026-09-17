@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useSpiderPrefs, type SpiderAxes } from "@/lib/spider-prefs-context";
+import { useCity } from "@/lib/city-context";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,7 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 
 export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: string) => void }) {
   const { hasProfile, setPrefs, chatOpen, openChat, closeChat } = useSpiderPrefs();
+  const { city } = useCity();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -202,7 +204,7 @@ export default function ChatPanel({ onSelectListing }: { onSelectListing?: (id: 
     setMessages(prev => [...prev, userMsg]);
     setInput(""); setLoading(true);
     try {
-      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })), language }) });
+      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })), language, city }) });
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.prefUpdate) {

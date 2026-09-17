@@ -16,6 +16,7 @@ import { useSavedListings } from "@/hooks/useSavedListings";
 import ChatPanel from "@/components/avenuex/ChatPanel";
 import SpiderChart, { SPIDER_CATEGORIES, computeMatch } from "@/components/avenuex/SpiderChart";
 import { SpiderPrefsProvider, useSpiderPrefs, type SpiderAxes } from "@/lib/spider-prefs-context";
+import { useCity } from "@/lib/city-context";
 import IntroScreen from "@/components/avenuex/IntroScreen";
 import WelcomePopup from "@/components/avenuex/WelcomePopup";
 
@@ -319,6 +320,7 @@ function sqftLabel(listing: Listing) {
 
 function HeroPageInner() {
   const { prefs } = useSpiderPrefs();
+  const { city } = useCity();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
@@ -339,24 +341,21 @@ function HeroPageInner() {
 
   useEffect(() => {
     let cancelled = false;
-
+    setLoadingListings(true);
     (async () => {
       try {
-        const res = await fetch("/api/listings");
+        const res = await fetch(`/api/listings?city=${city}`);
         if (!res.ok) throw new Error("Failed to fetch listings");
         const data: Listing[] = await res.json();
-        if (!cancelled) setListings(data);
+        if (!cancelled) { setListings(data); setSelectedId(null); }
       } catch (error) {
         console.error("Failed to load listings:", error);
       } finally {
         if (!cancelled) setLoadingListings(false);
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    return () => { cancelled = true; };
+  }, [city]);
 
   const filteredListings = useMemo<Listing[]>(() => {
     let items = listings;

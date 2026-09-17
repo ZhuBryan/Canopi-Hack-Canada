@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
 import type { Listing, ScoreBand } from "@/lib/avenuex-data";
+import { useCity } from "@/lib/city-context";
+import { CITIES, type CitySlug } from "@/lib/cities";
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -77,6 +79,7 @@ export function DesktopNavbar({
   userMenu?: ReactNode;
 }) {
   const router = useRouter();
+  const { city, setCity } = useCity();
   const hasInput = typeof onSearchValueChange === "function";
 
   return (
@@ -106,6 +109,23 @@ export function DesktopNavbar({
         )}
       </div>
       <div className="flex items-center gap-4">
+        <div className="flex rounded-full border p-0.5 text-xs" style={{ borderColor: "var(--line)" }} role="group" aria-label="City">
+          {(Object.keys(CITIES) as CitySlug[]).map((slug) => (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => setCity(slug)}
+              className="rounded-full px-3 py-1 transition"
+              style={
+                city === slug
+                  ? { backgroundColor: "var(--brand)", color: "white" }
+                  : { color: "var(--muted)" }
+              }
+            >
+              {CITIES[slug].label}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           onClick={() => router.push("/saved")}
