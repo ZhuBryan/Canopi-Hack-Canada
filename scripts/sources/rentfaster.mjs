@@ -109,9 +109,12 @@ export function parseRentfasterDetail(html) {
   };
 }
 
-export async function fetchRentfasterDetail(url, { fetchImpl = fetch } = {}) {
+// onStatus (optional) reports the HTTP status so callers can react to e.g. a 403
+// (Cloudflare block) without changing this function's null-on-failure return shape.
+export async function fetchRentfasterDetail(url, { fetchImpl = fetch, onStatus } = {}) {
   try {
     const res = await fetchImpl(url, { headers: { "user-agent": UA } });
+    onStatus?.(res.status);
     if (!res.ok) return null;
     return parseRentfasterDetail(await res.text());
   } catch {

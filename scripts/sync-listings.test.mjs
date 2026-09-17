@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { normalizeRentfaster, parseRentfasterDetail, fetchRentfasterDetail } from "./sources/rentfaster.mjs";
-import { cellKey, toRow, planEnrichment, planDetail, mergeDetail } from "./sync-listings.mjs";
+import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail } from "./sync-listings.mjs";
 
 const RF_RECORD = {
   id: 593209,
@@ -204,6 +204,12 @@ test("planDetail selects rentfaster raws missing a description", () => {
   ];
   const existing = new Map([["rf-2", { description: "already have it" }]]);
   assert.deepEqual(planDetail(raws, existing), ["rf-1"]);
+});
+
+test("takeDetailIds caps the ids attempted per run and leaves the rest for next time", () => {
+  assert.deepEqual(takeDetailIds(["a", "b", "c"], 2), ["a", "b"]);
+  assert.deepEqual(takeDetailIds(["a", "b"], 5), ["a", "b"]);
+  assert.deepEqual(takeDetailIds(["a", "b"], 0), []);
 });
 
 test("mergeDetail carries forward existing detail fields when no fresh detail was fetched", () => {

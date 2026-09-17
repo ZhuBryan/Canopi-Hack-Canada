@@ -45,7 +45,7 @@ node scripts/sync-listings.mjs --city toronto   # RentFaster public map API
 node scripts/sync-listings.mjs --city sf        # RentCast API
 ````
 
-Each run pulls the city's active listings, enriches new ones with nearby amenities from Geoapify (schools, groceries, restaurants, cafés, parks, pharmacies, transit within 1 km — reusing results for listings in the same ~100 m cell), upserts them, and deactivates listings that disappeared. `--dry-run` prints without writing; `--limit N` caps Geoapify calls per run.
+Each run pulls the city's active listings, enriches new ones with nearby amenities from Geoapify (schools, groceries, restaurants, cafés, parks, pharmacies, transit within 1 km — reusing results for listings in the same ~100 m cell), fetches RentFaster detail pages for sqft/amenities/lease term/photo/description, upserts them, and deactivates listings that disappeared. `--dry-run` prints without writing; `--limit N` caps Geoapify calls per run; `--detail-limit N` (default 300) caps RentFaster detail-page fetches per run — listings past the cap keep their existing detail fields and are picked up on the next run.
 
 Env for the script: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEOAPIFY_API_KEY`, `RENTCAST_API_KEY`.
 

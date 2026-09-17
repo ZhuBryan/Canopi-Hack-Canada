@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Sync one city's rental listings into Supabase.
-//   node scripts/sync-listings.mjs --city toronto|sf [--limit 200] [--dry-run]
+//   node scripts/sync-listings.mjs --city toronto|sf [--limit 200] [--detail-limit 300] [--dry-run]
 // Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GEOAPIFY_API_KEY, RENTCAST_API_KEY (sf only)
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
@@ -14,6 +14,7 @@ const SOURCES = {
 };
 const MIN_RENT = 500;
 const BATCH = 500;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const cellKey = (lat, lng) => `${lat.toFixed(3)}|${lng.toFixed(3)}`;
 
@@ -68,6 +69,12 @@ export function planDetail(raws, existing) {
   return raws.filter((r) => r.source === "rentfaster" && !existing.get(r.id)?.description).map((r) => r.id);
 }
 
+// Cap detail-page fetches per run — RentFaster 403s a run that fetches too many too fast.
+// Ids past the cap are simply not attempted; planDetail picks them up again next run.
+export function takeDetailIds(ids, limit) {
+  return ids.slice(0, limit);
+}
+
 // Fill sqft/amenities/lease_term/photo/description from a freshly fetched detail page,
 // falling back to the existing DB row so a re-sync never overwrites them with nulls.
 export function mergeDetail(row, detail, prev) {
@@ -87,6 +94,7 @@ async function main() {
     options: {
       city: { type: "string" },
       limit: { type: "string", default: "200" },
+      "detail-limit": { type: "string", default: "300" },
       "dry-run": { type: "boolean", default: false },
     },
   });
@@ -94,6 +102,8 @@ async function main() {
   if (!SOURCES[city]) throw new Error(`--city must be one of: ${Object.keys(SOURCES).join(", ")}`);
   const limit = parseInt(opts.limit, 10);
   if (!Number.isFinite(limit) || limit < 0) throw new Error("--limit must be a non-negative integer");
+  const detailLimit = parseInt(opts["detail-limit"], 10);
+  if (!Number.isFinite(detailLimit) || detailLimit < 0) throw new Error("--detail-limit must be a non-negative integer");
   const dry = opts["dry-run"];
 
   const raws = (await SOURCES[city]()).filter((r) => r.monthlyRent >= MIN_RENT);
@@ -118,8 +128,11 @@ async function main() {
   const { reuse, fresh } = planEnrichment(raws, existing, limit);
   console.log(`[${city}] new: ${raws.length - [...raws].filter((r) => existing.has(r.id)).length}, reuse cell cache: ${reuse.size}, geoapify: ${fresh.length}`);
   const detailIds = planDetail(raws, existing);
+  const detailIdsToFetch = takeDetailIds(detailIds, detailLimit);
   if (dry) {
-    console.log(`[${city}] detail pages: ${detailIds.length} (would fetch)`);
+    console.log(
+      `[${city}] detail pages: ${detailIdsToFetch.length} would fetch, ${detailIds.length - detailIdsToFetch.length} skipped (limit)`
+    );
     console.log(JSON.stringify(raws.slice(0, 3), null, 2));
     return;
   }
@@ -140,14 +153,32 @@ async function main() {
   console.log(`[${city}] geoapify ${fresh.length}/${fresh.length}`);
 
   const details = new Map();
-  console.log(`[${city}] fetching ${detailIds.length} detail pages…`);
-  for (let i = 0; i < detailIds.length; i++) {
-    const id = detailIds[i];
-    details.set(id, await fetchRentfasterDetail(byId.get(id).url));
-    if ((i + 1) % 50 === 0) console.log(`[${city}] detail pages: ${i + 1}/${detailIds.length}`);
-    await new Promise((r) => setTimeout(r, 200));
+  let fetched = 0;
+  let failed = 0;
+  console.log(`[${city}] fetching ${detailIdsToFetch.length} detail pages…`);
+  for (let i = 0; i < detailIdsToFetch.length; i++) {
+    const id = detailIdsToFetch[i];
+    const url = byId.get(id).url;
+    let status = null;
+    let detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
+    if (status === 403) {
+      console.log(`[${city}] detail: 403 from RentFaster, backing off 60 s`);
+      await sleep(60_000);
+      status = null;
+      detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
+      if (status === 403) {
+        console.log(`[${city}] detail: still blocked, stopping detail pass for this run (${fetched} fetched)`);
+        break;
+      }
+    }
+    details.set(id, detail);
+    if (detail) fetched++;
+    else failed++;
+    if ((fetched + failed) % 50 === 0) console.log(`[${city}] detail pages: ${fetched + failed}/${detailIdsToFetch.length}`);
+    await sleep(2000 + Math.random() * 1000);
   }
-  console.log(`[${city}] detail pages: ${detailIds.length}`);
+  const skipped = detailIds.length - fetched - failed;
+  console.log(`[${city}] detail pages: fetched ${fetched}, failed ${failed}, skipped ${skipped} (limit)`);
 
   const rows = raws.map((r) => mergeDetail(toRow(r, city, enriched.get(r.id) ?? existing.get(r.id)?.nearby ?? {}), details.get(r.id), existing.get(r.id)));
   for (let i = 0; i < rows.length; i += BATCH) {
