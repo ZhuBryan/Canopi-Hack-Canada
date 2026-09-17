@@ -1,0 +1,30 @@
+name: Sync listings
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max new listings to enrich via Geoapify per city"
+        default: "400"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GEOAPIFY_API_KEY: ${{ secrets.GEOAPIFY_API_KEY }}
+      RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: node scripts/sync-listings.mjs --city toronto --limit ${{ inputs.limit || '400' }}
+      - run: node scripts/sync-listings.mjs --city sf --limit ${{ inputs.limit || '400' }}
+        if: always()
