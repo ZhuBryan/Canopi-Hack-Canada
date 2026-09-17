@@ -49,8 +49,9 @@ function BlurText({
               whiteSpace: char === " " ? "pre" : undefined,
               opacity: mounted ? 1 : 0,
               filter: mounted ? "blur(0px)" : "blur(12px)",
-              transform: mounted ? "translateY(0)" : "translateY(6px)",
-              transition: `opacity 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, filter 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+              transform: mounted ? "translateY(0) scale(1)" : "translateY(6px) scale(0.5)",
+              // Fade/blur stay smooth; only the transform overshoots (elastic pop).
+              transition: `opacity 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, filter 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.45s cubic-bezier(0.2,1.8,0.4,1) ${delay}s`,
             }}
           >
             {char}
