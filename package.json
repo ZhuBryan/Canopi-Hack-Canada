@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "node --test scripts/*.test.mjs src/lib/*.test.ts",
     "enrich:places": "node scripts/enrich-rentfaster-listings-with-places.mjs",
-    "clean:combined": "node scripts/clean-combined-listings.mjs"
+    "clean:combined": "node scripts/clean-combined-listings.mjs",
+    "sync": "node scripts/sync-listings.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
