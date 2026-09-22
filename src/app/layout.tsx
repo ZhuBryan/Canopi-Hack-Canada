@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, DM_Sans, Inter } from "next/font/google";
-import { AvenueXProvider } from "@/lib/avenuex-store";
 import { AuthProvider } from "@/lib/auth-context";
 import { CityProvider } from "@/lib/city-context";
 import { SavedListingsProvider } from "@/hooks/useSavedListings";
@@ -37,13 +36,11 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${dmSans.variable} ${bricolageGrotesque.variable} ${inter.variable} antialiased`}
       >
-        <AvenueXProvider>
-          <AuthProvider>
-            <CityProvider>
-              <SavedListingsProvider>{children}</SavedListingsProvider>
-            </CityProvider>
-          </AuthProvider>
-        </AvenueXProvider>
+        <AuthProvider>
+          <CityProvider>
+            <SavedListingsProvider>{children}</SavedListingsProvider>
+          </CityProvider>
+        </AuthProvider>
       </body>
     </html>
   );

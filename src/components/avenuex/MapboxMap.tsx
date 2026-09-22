@@ -7,6 +7,7 @@ import type { Listing } from "@/lib/avenuex-data";
 import { scoreColor } from "@/components/avenuex/primitives";
 import { useCity } from "@/lib/city-context";
 import type { CityConfig } from "@/lib/cities";
+import { indexBuildings, minDistToGeom, vertexKeysOf, type Building } from "@/lib/building-index";
 
 interface SelectedAmenity {
   id: string;
@@ -16,6 +17,15 @@ interface SelectedAmenity {
   coords: [number, number];
   description?: string;
 }
+
+// The fill-extrusion layer's floor; nothing below this zoom needs stamping.
+const BUILDINGS_MINZOOM = 14;
+
+// The view selecting a listing flies to. Preloading uses the identical camera so
+// it warms exactly the tiles the flight will land on.
+const SELECT_ZOOM = 17.5;
+const SELECT_PITCH = 45;
+const PRELOAD_COUNT = 6;
 
 interface MapboxMapProps {
   listings: Listing[];
@@ -80,7 +90,6 @@ export function MapboxMap({
   const cityRef = useRef(cityConfig);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const listingsRef = useRef(listings);
   listingsRef.current = listings;
   const selectedIdRef = useRef<string | null>(selectedId);
@@ -89,6 +98,9 @@ export function MapboxMap({
   onSelectRef.current = onSelect;
   const selectedAmenitiesRef = useRef(selectedAmenities);
   selectedAmenitiesRef.current = selectedAmenities;
+  // Listing objects are rebuilt on every prefs drag and search keystroke; the
+  // map only needs to react when the actual set of pins changes.
+  const listingsKey = listings.map((l) => l.id).join(",");
   const highlightDirtyRef = useRef(true);
   const triggerHighlightRef = useRef<(() => void) | null>(null);
   const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
@@ -99,7 +111,9 @@ export function MapboxMap({
 
   const renderAmenityPaths = () => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
+    // Gate on the source existing, not isStyleLoaded(): that is false whenever a
+    // tile is in flight, and amenities usually arrive mid-flyTo.
     const source = map.getSource("amenity-paths") as mapboxgl.GeoJSONSource | undefined;
     if (!source) return;
 
@@ -170,7 +184,9 @@ export function MapboxMap({
       bearing: -10,
       dragRotate: false,
       antialias: false,
-      maxTileCacheSize: 20,
+      // ponytail: 20 was low enough to force a re-parse on every pan; raise it if
+      // panning still stutters, drop it if memory becomes the binding constraint.
+      maxTileCacheSize: 100,
       maxBounds: maxBounds(cityRef.current),
     });
 
@@ -203,7 +219,7 @@ export function MapboxMap({
         "source-layer": "building",
         filter: ["==", "extrude", "true"],
         type: "fill-extrusion",
-        minzoom: 14,
+        minzoom: BUILDINGS_MINZOOM,
         paint: {
           "fill-extrusion-color": [
             "case",
@@ -301,54 +317,97 @@ export function MapboxMap({
       // ── Listing building highlights ────────────────────────────────────────
       // querySourceFeatures for geographic accuracy — avoids the pitch/occlusion
       // problem of screen-space queryRenderedFeatures.
-      const listingFeatureIds = new Set<string | number>();
+      // Feature state lives on the source, not the tile, and Mapbox replays it onto
+      // tiles as they load. So a stamped building stays stamped through eviction and
+      // reload, and a listing only ever has to be resolved to its building once.
+      const stampedFeatureIds = new Set<string | number>();
+      const resolvedListingIds = new Set<string>();
+      // mapbox-streets-v8 simplifies building outlines per zoom, so a match made
+      // against z14 geometry is not the match z16 would make. Re-resolve when the
+      // tile zoom changes; above the source maxzoom the geometry stops changing.
+      const BUILDING_SOURCE_MAXZOOM = 16;
+      let resolvedAtTileZoom = -1;
 
-      const applyListingHighlights = () => {
-        if (!highlightDirtyRef.current) return;
-        highlightDirtyRef.current = false;
-        listingFeatureIds.forEach((id) => {
+      const clearListingHighlights = () => {
+        stampedFeatureIds.forEach((id) => {
           map.setFeatureState(
             { source: "composite", sourceLayer: "building", id },
             { listingScore: 0 }
           );
         });
-        listingFeatureIds.clear();
+        stampedFeatureIds.clear();
+        resolvedListingIds.clear();
+      };
 
-        const buildingFeatures = map.querySourceFeatures("composite", {
-          sourceLayer: "building",
-          filter: ["==", "extrude", "true"],
-        });
+      const applyListingHighlights = () => {
+        if (!highlightDirtyRef.current) return;
+        highlightDirtyRef.current = false;
 
-        for (const listing of listingsRef.current) {
+        // The 3d-buildings layer starts at z14, so below that every listing in the
+        // city was being matched against every loaded building for nothing.
+        if (map.getZoom() < BUILDINGS_MINZOOM) return;
+        const view = map.getBounds();
+        if (!view) return;
+
+        const tileZoom = Math.min(Math.floor(map.getZoom()), BUILDING_SOURCE_MAXZOOM);
+        if (tileZoom !== resolvedAtTileZoom) {
+          clearListingHighlights();
+          resolvedAtTileZoom = tileZoom;
+        }
+
+        const pending = listingsRef.current.filter(
+          (l) => !resolvedListingIds.has(l.id) && view.contains([l.lng, l.lat])
+        );
+        // Everything on screen is already stamped — skip the geometry extraction
+        // entirely. This is what makes panning back over old ground free.
+        if (pending.length === 0) return;
+
+        // Only a miss against fully loaded tiles means "no building here". Before
+        // that, a miss just means the tile has not arrived, so keep the listing
+        // pending and let the next sourcedata/idle pass try again.
+        const tilesLoaded = map.isSourceLoaded("composite");
+
+        // Bounds once per building, vertex keys on first use, and a cell index so
+        // each listing scans its own block instead of every loaded building.
+        const grid = indexBuildings(
+          map.querySourceFeatures("composite", {
+            sourceLayer: "building",
+            filter: ["==", "extrude", "true"],
+          })
+        );
+
+        for (const listing of pending) {
           // Find nearest building — skip features outside a ~300m bbox first
           const pad = 0.003;
-          let nearest: (typeof buildingFeatures)[number] | null = null;
+          let nearest: Building | null = null;
           let nearestDist = Infinity;
-          for (const feature of buildingFeatures) {
-            if (feature.id == null) continue;
-            const b = geomBounds(feature.geometry);
-            if (!b || b.maxLng < listing.lng - pad || b.minLng > listing.lng + pad ||
-                       b.maxLat < listing.lat - pad || b.minLat > listing.lat + pad) continue;
-            const d = minDistToGeom(listing.lng, listing.lat, feature.geometry);
-            if (d < nearestDist) { nearestDist = d; nearest = feature; }
+          for (const bld of grid.near(listing.lng, listing.lat, pad)) {
+            const b = bld.bounds;
+            if (b.maxLng < listing.lng - pad || b.minLng > listing.lng + pad ||
+                b.maxLat < listing.lat - pad || b.minLat > listing.lat + pad) continue;
+            const d = minDistToGeom(listing.lng, listing.lat, bld.geometry);
+            if (d < nearestDist) { nearestDist = d; nearest = bld; }
           }
-          if (!nearest) continue;
+          if (!nearest) {
+            if (tilesLoaded) resolvedListingIds.add(listing.id);
+            continue;
+          }
+          resolvedListingIds.add(listing.id);
 
           // Stamp nearest + every building sharing a vertex with it (wider bbox)
-          const anchorKeys = vertexKeySet(nearest.geometry, 5);
+          const anchorKeys = new Set(vertexKeysOf(nearest));
           const pad2 = 0.005;
-          for (const feature of buildingFeatures) {
-            if (feature.id == null) continue;
-            const b = geomBounds(feature.geometry);
-            if (!b || b.maxLng < listing.lng - pad2 || b.minLng > listing.lng + pad2 ||
-                       b.maxLat < listing.lat - pad2 || b.minLat > listing.lat + pad2) continue;
+          for (const bld of grid.near(listing.lng, listing.lat, pad2)) {
+            const b = bld.bounds;
+            if (b.maxLng < listing.lng - pad2 || b.minLng > listing.lng + pad2 ||
+                b.maxLat < listing.lat - pad2 || b.minLat > listing.lat + pad2) continue;
             const touches =
-              feature.id === nearest.id ||
-              vertexKeys(feature.geometry, 5).some((k) => anchorKeys.has(k));
+              bld.id === nearest.id ||
+              vertexKeysOf(bld).some((k) => anchorKeys.has(k));
             if (touches) {
-              listingFeatureIds.add(feature.id);
+              stampedFeatureIds.add(bld.id);
               map.setFeatureState(
-                { source: "composite", sourceLayer: "building", id: feature.id },
+                { source: "composite", sourceLayer: "building", id: bld.id },
                 { listingScore: listing.score }
               );
             }
@@ -365,6 +424,7 @@ export function MapboxMap({
       };
 
       triggerHighlightRef.current = () => {
+        clearListingHighlights();
         highlightDirtyRef.current = true;
         scheduleHighlight();
       };
@@ -446,7 +506,6 @@ export function MapboxMap({
       // ── Disable 3D facades so our fill-extrusion can render ──────────────────
       // Standard style's show3dFacades renders opaque 3D building models on top
       // of fill-extrusion layers, hiding our score-colored buildings.
-      // Disable Standard style's building renderers so only our fill-extrusion shows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (map as any).setConfigProperty("basemap", "show3dFacades", false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -458,21 +517,72 @@ export function MapboxMap({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (map as any).setConfigProperty("basemap", "lightPreset", "day");
 
-      // ── Markers ────────────────────────────────────────────────────────────
-      for (const listing of listingsRef.current) {
-        addMarker(map, listing, listing.id === selectedId);
+      // ── Listing price pins ─────────────────────────────────────────────────
+      ensurePinIcons(map, pinColors(listingsRef.current));
+      map.addSource("listing-pins", {
+        type: "geojson",
+        data: pinsGeoJson(listingsRef.current),
+      });
+      map.addLayer({
+        id: "listing-pins",
+        type: "symbol",
+        source: "listing-pins",
+        filter: selectedPinFilter(selectedIdRef.current, false),
+        layout: {
+          "icon-image": ["concat", "pin-", ["get", "color"]],
+          "icon-text-fit": "width",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "text-field": ["get", "price"],
+          "text-font": PIN_FONT,
+          "text-size": 11,
+          // The DOM markers were anchored bottom, so the pill sat above the point.
+          "text-anchor": "bottom",
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+          // Best-scoring listings draw on top.
+          "symbol-sort-key": ["-", 100, ["get", "score"]],
+        },
+        paint: { "text-color": "#ffffff" },
+      });
+      map.addLayer({
+        id: "listing-pin-selected",
+        type: "symbol",
+        source: "listing-pins",
+        filter: selectedPinFilter(selectedIdRef.current),
+        layout: {
+          "icon-image": ["concat", "pin-sel-", ["get", "color"]],
+          "icon-text-fit": "width",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "text-field": ["get", "price"],
+          "text-font": PIN_FONT,
+          // 11 × the 1.15 scale the selected DOM marker used.
+          "text-size": 12.65,
+          "text-anchor": "bottom",
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+        },
+        paint: { "text-color": "#ffffff" },
+      });
+
+      for (const layer of ["listing-pins", "listing-pin-selected"]) {
+        map.on("click", layer, (event) => {
+          const id = event.features?.[0]?.properties?.id;
+          if (typeof id === "string") onSelectRef.current(id);
+        });
+        map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = "move"; });
       }
+
       renderAmenityPaths();
     });
 
     return () => {
       amenityPopupRef.current?.remove();
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current.clear();
       map.remove();
       mapRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Re-centre map, bounds, and mask when the selected city changes
@@ -488,56 +598,74 @@ export function MapboxMap({
     src?.setData(maskGeoJson(cityConfig));
   }, [cityConfig]);
 
-  // Re-sync markers when listings change (filter/sort)
+  // Re-feed the pin source when the set of listings changes (filter/search/city)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    // Before load the source does not exist yet and the load handler seeds it
+    // from listingsRef; after load, setData works regardless of tile state.
+    const source = map?.getSource("listing-pins") as mapboxgl.GeoJSONSource | undefined;
+    if (!map || !source) return;
 
-    const currentIds = new Set(listings.map((l) => l.id));
-    markersRef.current.forEach((marker, id) => {
-      if (!currentIds.has(id)) {
-        marker.remove();
-        markersRef.current.delete(id);
-      }
-    });
-
-    for (const listing of listings) {
-      if (!markersRef.current.has(listing.id)) {
-        addMarker(map, listing, listing.id === selectedId);
-      }
-    }
-
-    markersRef.current.forEach((marker, id) => {
-      applyMarkerStyle(marker.getElement(), id === selectedId);
-    });
+    ensurePinIcons(map, pinColors(listings));
+    source.setData(pinsGeoJson(listings));
 
     // Re-stamp building colors when listings change
     triggerHighlightRef.current?.();
-  }, [listings, selectedId]);
+    // listingsKey stands in for listings on purpose: re-scoring on a prefs change
+    // rebuilds the array but not the pin set.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingsKey]);
 
-  // Update marker styles + fly when selectedId changes
+  // Highlight the selected pin + fly to it
   useEffect(() => {
-    markersRef.current.forEach((marker, id) => {
-      applyMarkerStyle(marker.getElement(), id === selectedId);
-    });
+    const map = mapRef.current;
+    if (map?.getLayer("listing-pin-selected")) {
+      map.setFilter("listing-pins", selectedPinFilter(selectedId, false));
+      map.setFilter("listing-pin-selected", selectedPinFilter(selectedId));
+    }
 
     if (selectedId && mapRef.current) {
-      const listing = listings.find((l) => l.id === selectedId);
+      const listing = listingsRef.current.find((l) => l.id === selectedId);
       if (listing) {
         mapRef.current.flyTo({
           center: [listing.lng, listing.lat],
-          zoom: 17.5,
-          pitch: 45,
+          zoom: SELECT_ZOOM,
+          pitch: SELECT_PITCH,
           duration: 900,
           essential: true,
         });
       }
     }
-  }, [selectedId, listings]);
+  }, [selectedId]);
 
   useEffect(() => {
     renderAmenityPaths();
-  }, [selectedId, listings, selectedAmenities]);
+  }, [selectedId, listingsKey, selectedAmenities]);
+
+  // Warm the building tiles for the listings most likely to be opened next, so
+  // selecting one flies into geometry that is already parsed and on the GPU.
+  // preloadOnly clones the transform, so this never moves the camera.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getSource("listing-pins")) return;
+
+    const timers = listings.slice(0, PRELOAD_COUNT).map((listing, i) =>
+      window.setTimeout(() => {
+        // jumpTo calls stop() internally, which would abort a flyTo in progress,
+        // and preloading should never compete with a gesture for bandwidth.
+        if (map.isMoving()) return;
+        map.jumpTo({
+          center: [listing.lng, listing.lat],
+          zoom: SELECT_ZOOM,
+          pitch: SELECT_PITCH,
+          preloadOnly: true,
+        });
+      }, 400 + i * 250)
+    );
+
+    return () => timers.forEach((t) => window.clearTimeout(t));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingsKey]);
 
   // Toggle POI/transit labels via Mapbox Standard style config
   useEffect(() => {
@@ -574,20 +702,6 @@ export function MapboxMap({
       if (loadingHideTimerRef.current) clearTimeout(loadingHideTimerRef.current);
     };
   }, []);
-
-  function addMarker(map: mapboxgl.Map, listing: Listing, active: boolean) {
-    const el = document.createElement("div");
-    el.style.cssText = markerBaseStyle(active, listing.score);
-    el.dataset.score = String(listing.score);
-    el.textContent = listing.shortPrice;
-    el.addEventListener("click", () => onSelectRef.current(listing.id));
-
-    const marker = new mapboxgl.Marker({ element: el, anchor: "bottom" })
-      .setLngLat([listing.lng, listing.lat])
-      .addTo(map);
-
-    markersRef.current.set(listing.id, marker);
-  }
 
   return (
     <div className="relative h-full w-full">
@@ -634,26 +748,66 @@ export function MapboxMap({
   );
 }
 
-function markerBaseStyle(active: boolean, score: number): string {
-  return [
-    `background: ${scoreColor(score)}`,
-    "color: white",
-    "padding: 5px 12px",
-    "border-radius: 999px",
-    "font-size: 11px",
-    "font-weight: 700",
-    "cursor: pointer",
-    `border: 2px solid ${active ? "#0f172a" : "white"}`,
-    "white-space: nowrap",
-    "transition: background 0.15s, border-color 0.15s",
-    "font-family: var(--font-dm-sans), sans-serif",
-    "letter-spacing: -0.3px",
-    `transform: scale(${active ? "1.15" : "1"})`,
-    `z-index: ${active ? "10" : "1"}`,
-    "display: inline-block",
-    "width: max-content",
-    "line-height: 1.2",
-  ].join("; ");
+// Price pins live in a symbol layer, not in DOM markers: a city can return 1,300+
+// listings and Mapbox repositions every DOM marker on every frame, which is what
+// pinned panning at single-digit fps. Symbols are drawn on the GPU and Mapbox
+// declutters them for free.
+
+// Mapbox symbols can only use fonts served from its glyph endpoint, and this
+// account 404s on DM Sans — Open Sans Bold is the nearest match to the 700-weight
+// DM Sans the DOM markers used. Upload DM Sans in Mapbox Studio to use it here.
+const PIN_FONT = ["Open Sans Bold", "Arial Unicode MS Bold"];
+
+// Drawn at 2× so the pill is 20 CSS px tall; only the flat middle stretches, so
+// icon-text-fit can widen it to whatever the price string needs.
+function pillImage(fill: string, border: string): ImageData | null {
+  const W = 64, H = 40;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.beginPath();
+  ctx.roundRect(2, 2, W - 4, H - 4, (H - 4) / 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = border;
+  ctx.stroke();
+  return ctx.getImageData(0, 0, W, H);
+}
+
+// Taken from the data rather than a hardcoded band list, so a new score colour
+// can never resolve to a missing icon.
+function pinColors(listings: Listing[]): Set<string> {
+  return new Set(listings.map((l) => scoreColor(l.score)));
+}
+
+function ensurePinIcons(map: mapboxgl.Map, colors: Iterable<string>): void {
+  for (const color of colors) {
+    for (const [key, border] of [[`pin-${color}`, "#ffffff"], [`pin-sel-${color}`, "#0f172a"]]) {
+      if (map.hasImage(key)) continue;
+      const image = pillImage(color, border);
+      if (image) {
+        map.addImage(key, image, { pixelRatio: 2, stretchX: [[24, 40]], content: [22, 6, 42, 34] });
+      }
+    }
+  }
+}
+
+function pinsGeoJson(listings: Listing[]): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: listings.map((l) => ({
+      type: "Feature",
+      properties: { id: l.id, price: l.shortPrice, color: scoreColor(l.score), score: l.score },
+      geometry: { type: "Point", coordinates: [l.lng, l.lat] },
+    })),
+  };
+}
+
+function selectedPinFilter(selectedId: string | null, match = true): mapboxgl.FilterSpecification {
+  return [match ? "==" : "!=", ["get", "id"], selectedId ?? ""];
 }
 
 function colorForAmenityType(type: string): string {
@@ -732,56 +886,3 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-function applyMarkerStyle(el: HTMLElement, active: boolean) {
-  el.style.borderColor = active ? "#0f172a" : "white";
-  el.style.transform = `scale(${active ? "1.15" : "1"})`;
-  el.style.zIndex = active ? "10" : "1";
-}
-
-function rings(geom: GeoJSON.Geometry): [number, number][][] {
-  if (geom.type === "Polygon") return geom.coordinates as [number, number][][];
-  if (geom.type === "MultiPolygon") return (geom.coordinates as [number, number][][][]).flat();
-  return [];
-}
-
-function minDistToGeom(px: number, py: number, geom: GeoJSON.Geometry): number {
-  let min = Infinity;
-  for (const ring of rings(geom)) {
-    let inside = false;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const [xi, yi] = ring[i], [xj, yj] = ring[j];
-      if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
-    }
-    if (inside) return 0;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const [x1, y1] = ring[j], [x2, y2] = ring[i];
-      const dx = x2 - x1, dy = y2 - y1, lenSq = dx * dx + dy * dy;
-      const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
-      min = Math.min(min, (px - x1 - t * dx) ** 2 + (py - y1 - t * dy) ** 2);
-    }
-  }
-  return Math.sqrt(min);
-}
-
-function vertexKeySet(geom: GeoJSON.Geometry, decimals: number): Set<string> {
-  return new Set(vertexKeys(geom, decimals));
-}
-
-function vertexKeys(geom: GeoJSON.Geometry, decimals: number): string[] {
-  return rings(geom).flat().map(([vx, vy]) => `${vx.toFixed(decimals)},${vy.toFixed(decimals)}`);
-}
-
-function geomBounds(geom: GeoJSON.Geometry): { minLng: number; maxLng: number; minLat: number; maxLat: number } | null {
-  const r = rings(geom);
-  if (r.length === 0) return null;
-  let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-  for (const ring of r) {
-    for (const [lng, lat] of ring) {
-      if (lng < minLng) minLng = lng;
-      if (lng > maxLng) maxLng = lng;
-      if (lat < minLat) minLat = lat;
-      if (lat > maxLat) maxLat = lat;
-    }
-  }
-  return { minLng, maxLng, minLat, maxLat };
-}

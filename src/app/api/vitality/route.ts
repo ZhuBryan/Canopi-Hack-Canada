@@ -11,9 +11,19 @@ type CacheEntry = {
   payload: VitalityPayload;
 };
 
+// A cold listing can spend 15s+ waiting on Overpass; keep Vercel from killing the
+// function before the mirror loop and the fallback get to answer.
+export const maxDuration = 30;
+
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const vitalityCache = new Map<string, CacheEntry>();
 const inflightRequests = new Map<string, Promise<VitalityPayload>>();
+
+// Overpass is a volunteer service that IP-bans clients who keep hitting it while
+// it is failing. After a full miss, answer from cache/503 for a minute instead of
+// sending the next 8 prefetches into the same wall.
+const BREAKER_MS = 60 * 1000;
+let overpassDownUntil = 0;
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
@@ -77,16 +87,29 @@ function fallbackNameForType(type: Amenity["type"]): string {
 async function fetchOverpassJson(query: string): Promise<OverpassResponse> {
   for (const endpoint of OVERPASS_ENDPOINTS) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6500);
+    // Must outlive the query's own [timeout:N] plus queueing; a shorter abort
+    // throws away answers that were about to arrive and re-runs them on the next
+    // mirror, which is how we end up over quota.
+    const timeout = setTimeout(() => controller.abort(), 20000);
     try {
       const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, {
         signal: controller.signal,
-        cache: "no-store",
+        // Shared Next data cache (Vercel Data Cache in prod): every instance and
+        // every user reuses one Overpass answer per listing for a week. Only 200s
+        // are stored, so a bad day at Overpass is not cached.
+        next: { revalidate: 7 * 24 * 60 * 60 },
+        // Overpass policy requires an identifying User-Agent; the .de mirrors answer
+        // Node's default with 406 / a reset, which left only kumi.systems serving us.
+        headers: { "User-Agent": "Canopi/1.0 (+https://github.com/ZhuBryan/HackCanada)" },
       });
+      // 429 means this IP is over quota; trying the next mirror only deepens it.
+      if (response.status === 429) break;
       if (!response.ok) continue;
       return (await response.json()) as OverpassResponse;
     } catch {
-      // Try next mirror.
+      // A timeout means Overpass is slow everywhere today; a second mirror only
+      // doubles the wait. Fast failures (DNS, reset) are worth another try.
+      if (controller.signal.aborted) break;
     } finally {
       clearTimeout(timeout);
     }
@@ -115,17 +138,34 @@ export async function GET(request: Request) {
   if (cached && cached.expiresAt > now) {
     return NextResponse.json(cached.payload);
   }
+  // Stale cache if we have it, otherwise an explicit 503 the client already handles.
+  const fallback = () =>
+    cached?.payload
+      ? NextResponse.json(cached.payload)
+      : NextResponse.json(
+          { error: "Failed to fetch vitality data from Overpass", vitalityScore: 0, amenities: [] },
+          { status: 503 }
+        );
+
+  if (now < overpassDownUntil) return fallback();
+
   const inflight = inflightRequests.get(cacheKey);
   if (inflight) {
-    const sharedPayload = await inflight;
-    return NextResponse.json(sharedPayload);
+    // A prefetch and a click for the same listing share one Overpass call. If it
+    // fails, answer with the same fallback rather than leaking a 500 or firing a
+    // second round at rate-limited mirrors.
+    try {
+      return NextResponse.json(await inflight);
+    } catch {
+      return fallback();
+    }
   }
 
   const radius = 500; // Search radius in meters
 
   // Overpass QL Query: Finding cafes, groceries, transit, and healthcare (clinics)
   const overpassQuery = `
-    [out:json][timeout:12];
+    [out:json][timeout:15];
     (
       nwr["amenity"="cafe"](around:${radius},${lat},${lng});
       nwr["amenity"="restaurant"](around:${radius},${lat},${lng});
@@ -239,17 +279,8 @@ export async function GET(request: Request) {
     return NextResponse.json(payload);
   } catch (error) {
     inflightRequests.delete(cacheKey);
-    console.error("Overpass API Error:", error);
-    if (cached?.payload) {
-      return NextResponse.json(cached.payload);
-    }
-    return NextResponse.json(
-      {
-        error: "Failed to fetch vitality data from Overpass",
-        vitalityScore: 0,
-        amenities: [],
-      },
-      { status: 503 }
-    );
+    overpassDownUntil = Date.now() + BREAKER_MS;
+    console.error("Overpass API Error (pausing Overpass for 60s):", error);
+    return fallback();
   }
 }

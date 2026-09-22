@@ -19,8 +19,6 @@ export type Listing = {
   scoreStatus: string;
   scoreBand: ScoreBand;
   image: string;
-  pinX: string;
-  pinY: string;
   lat: number;
   lng: number;
   availableDate: string;
@@ -88,8 +86,6 @@ export const listingsCatalog: Listing[] = [
     scoreBand: "great",
     image:
       "https://images.unsplash.com/photo-1771305081139-c2e0747e5f4c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "43%",
-    pinY: "33%",
     lat: 43.6475,
     lng: -79.3969,
     availableDate: "May 1, 2026",
@@ -129,8 +125,6 @@ export const listingsCatalog: Listing[] = [
     scoreBand: "great",
     image:
       "https://images.unsplash.com/photo-1666532937489-331f2f8f4668?auto=format&fit=crop&w=1000&q=80",
-    pinX: "52%",
-    pinY: "40%",
     lat: 43.6657,
     lng: -79.3989,
     availableDate: "May 15, 2026",
@@ -163,8 +157,6 @@ export const listingsCatalog: Listing[] = [
     scoreBand: "medium",
     image:
       "https://images.unsplash.com/photo-1702014861373-527115231f8c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "61%",
-    pinY: "26%",
     lat: 43.642,
     lng: -79.3777,
     availableDate: "Jun 1, 2026",
@@ -197,8 +189,6 @@ export const listingsCatalog: Listing[] = [
     scoreBand: "medium",
     image:
       "https://images.unsplash.com/photo-1679494422425-844a04e11f5d?auto=format&fit=crop&w=1000&q=80",
-    pinX: "71%",
-    pinY: "50%",
     lat: 43.6632,
     lng: -79.3833,
     availableDate: "Apr 1, 2026",
@@ -231,8 +221,6 @@ export const listingsCatalog: Listing[] = [
     scoreBand: "great",
     image:
       "https://images.unsplash.com/photo-1760334335399-a6c983b541dd?auto=format&fit=crop&w=1000&q=80",
-    pinX: "48%",
-    pinY: "58%",
     lat: 43.6422,
     lng: -79.3806,
     availableDate: "May 20, 2026",
@@ -265,7 +253,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Excellent neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1771305081139-c2e0747e5f4c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "20%",
     lat: 43.6699, lng: -79.3848,
     availableDate: "Apr 15, 2026", leaseTerm: "12 months",
     about: "Premium Yorkville condo at Toronto's most iconic intersection. Steps from Bloor-Yonge subway, upscale dining, and boutique shopping.",
@@ -288,7 +275,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Great neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1760334335399-a6c983b541dd?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6491, lng: -79.3826,
     availableDate: "May 1, 2026", leaseTerm: "12 months",
     about: "Spacious 2-bedroom in the heart of the Financial District. Steps from PATH network, restaurants, and Union Station.",
@@ -311,7 +297,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Excellent neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1666532937489-331f2f8f4668?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "20%",
     lat: 43.6693, lng: -79.3838,
     availableDate: "Apr 1, 2026", leaseTerm: "12 months",
     about: "Quiet side-street gem steps from Bloor Street and the Annex. Large windows, updated finishes, walkable to everything.",
@@ -334,7 +319,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Great neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1702014861373-527115231f8c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6481, lng: -79.3793,
     availableDate: "Jun 1, 2026", leaseTerm: "12 months",
     about: "High-floor Financial District unit with unobstructed lake views. Direct underground PATH access keeps you connected year-round.",
@@ -357,7 +341,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Great neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1631049421656-e0b38ea1705a?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6477, lng: -79.3908,
     availableDate: "May 15, 2026", leaseTerm: "12 months",
     about: "Trendy Entertainment District 1-bed surrounded by top restaurants, theatres, and nightlife. Lively neighbourhood with easy transit.",
@@ -380,7 +363,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Great neighborhood access",
     scoreBand: "great",
     image: "https://images.unsplash.com/photo-1679494422425-844a04e11f5d?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6448, lng: -79.3921,
     availableDate: "Apr 20, 2026", leaseTerm: "10 months",
     about: "Compact but well-laid-out unit on a quiet street in the Entertainment District. Close to the subway and major landmarks.",
@@ -403,7 +385,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Moderate neighborhood access",
     scoreBand: "medium",
     image: "https://images.unsplash.com/photo-1771305081139-c2e0747e5f4c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6389, lng: -79.4006,
     availableDate: "May 1, 2026", leaseTerm: "12 months",
     about: "Newer build in the CityPlace neighbourhood near the waterfront. Walking distance to the lake and Canoe Landing Park.",
@@ -426,7 +407,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Moderate neighborhood access",
     scoreBand: "medium",
     image: "https://images.unsplash.com/photo-1760334335399-a6c983b541dd?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6453, lng: -79.3892,
     availableDate: "Jun 1, 2026", leaseTerm: "8 months",
     about: "Mid-rise condo in the Metro Hall area, convenient for downtown commuters. Moderate amenity access with grocery nearby.",
@@ -449,7 +429,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Moderate neighborhood access",
     scoreBand: "medium",
     image: "https://images.unsplash.com/photo-1666532937489-331f2f8f4668?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6447, lng: -79.3937,
     availableDate: "Apr 1, 2026", leaseTerm: "6 months",
     about: "Studio in the heart of King West. Great for young professionals seeking nightlife proximity and flexible lease terms.",
@@ -472,7 +451,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Moderate neighborhood access",
     scoreBand: "medium",
     image: "https://images.unsplash.com/photo-1702014861373-527115231f8c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6542, lng: -79.3731,
     availableDate: "May 1, 2026", leaseTerm: "12 months",
     about: "Affordable studio east of downtown with easy Queen streetcar access. Decent transit links but limited nearby grocery options.",
@@ -495,7 +473,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Below average neighborhood access",
     scoreBand: "medium",
     image: "https://images.unsplash.com/photo-1679494422425-844a04e11f5d?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6563, lng: -79.3815,
     availableDate: "Apr 15, 2026", leaseTerm: "12 months",
     about: "Busy Dundas/Yonge corridor unit. High foot traffic area with transit access, though limited green space and health services nearby.",
@@ -518,7 +495,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Below average neighborhood access",
     scoreBand: "warning",
     image: "https://images.unsplash.com/photo-1631049421656-e0b38ea1705a?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6535, lng: -79.3680,
     availableDate: "May 1, 2026", leaseTerm: "12 months",
     about: "Budget-friendly unit on Jarvis. Value pick for price-conscious renters — limited walkability but close to transit.",
@@ -541,7 +517,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Limited neighborhood access",
     scoreBand: "warning",
     image: "https://images.unsplash.com/photo-1771305081139-c2e0747e5f4c?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6401, lng: -79.3801,
     availableDate: "Jun 1, 2026", leaseTerm: "12 months",
     about: "Waterfront unit with lake views but isolated from daily amenities. Grocery, dining, and health services require transit or a drive.",
@@ -564,7 +539,6 @@ export const listingsCatalog: Listing[] = [
     scoreStatus: "Limited neighborhood access",
     scoreBand: "warning",
     image: "https://images.unsplash.com/photo-1760334335399-a6c983b541dd?auto=format&fit=crop&w=1000&q=80",
-    pinX: "50%", pinY: "50%",
     lat: 43.6423, lng: -79.3869,
     availableDate: "Apr 1, 2026", leaseTerm: "6 months",
     about: "Affordable studio near the convention centre. Sparse amenity coverage — best for those who work downtown and don't need much nearby.",

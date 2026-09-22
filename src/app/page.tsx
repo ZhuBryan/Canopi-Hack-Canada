@@ -304,6 +304,13 @@ const SERVICE_ROWS = [
 
 const FILTER_OPTIONS: FilterType[] = ["All", "Apartment", "House", "Condo"];
 
+// Stable identity so the map's amenity effect doesn't re-run on every render.
+const NO_AMENITIES: LiveAmenity[] = [];
+
+// Cards rendered per page. The map still gets every listing — pins are cheap now,
+// card subtrees are not.
+const CARD_PAGE = 60;
+
 function bedLabel(listing: Listing) {
   if (listing.bedsLabel) return listing.bedsLabel;
   return listing.beds === 0 ? "Studio" : `${listing.beds} Bed${listing.beds > 1 ? "s" : ""}`;
@@ -331,9 +338,27 @@ function HeroPageInner() {
   const [loadingLiveAmenities, setLoadingLiveAmenities] = useState(false);
   const [liveAmenitiesForListingId, setLiveAmenitiesForListingId] = useState<string | null>(null);
   const selectedIdRef = useRef<string | null>(selectedId);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const liveAmenitiesCacheRef = useRef<Map<string, LiveAmenity[]>>(new Map());
   const prefetchingVitalityRef = useRef<Set<string>>(new Set());
   const { isSaved, toggleSave, savedIds, isLoggedIn } = useSavedListings();
+
+  const [visibleCount, setVisibleCount] = useState(CARD_PAGE);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisibleCount((n) => n + CARD_PAGE);
+      },
+      // Load the next page well before the user can reach the end of the list, so
+      // the window is never visible as a window.
+      { rootMargin: "1500px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     selectedIdRef.current = selectedId;
@@ -390,6 +415,15 @@ function HeroPageInner() {
         return [...items].sort((a, b) => (b.personalScore ?? b.score) - (a.personalScore ?? a.score));
     }
   }, [listings, search, filter, sort, prefs]);
+
+  // Start the list over whenever the query that produced it changes.
+  const listKey = `${city}|${search}|${filter}|${sort}`;
+  const [prevListKey, setPrevListKey] = useState(listKey);
+  if (listKey !== prevListKey) {
+    setPrevListKey(listKey);
+    setVisibleCount(CARD_PAGE);
+  }
+  const visibleListings = filteredListings.slice(0, visibleCount);
 
   const selectedListing = useMemo(
     () => (selectedId ? (listings.find((l) => l.id === selectedId) ?? null) : null),
@@ -456,30 +490,34 @@ function HeroPageInner() {
   }, [selectedListing]);
 
   useEffect(() => {
-    const candidates = filteredListings.slice(0, 8);
-    candidates.forEach((listing, index) => {
-      if (liveAmenitiesCacheRef.current.has(listing.id)) return;
-      if (prefetchingVitalityRef.current.has(listing.id)) return;
-      prefetchingVitalityRef.current.add(listing.id);
-
-      window.setTimeout(() => {
-        fetch(`/api/vitality?lat=${listing.lat}&lng=${listing.lng}`)
-          .then(async (response) => {
-            if (!response.ok) return;
-            const payload = (await response.json()) as { amenities?: LiveAmenity[] };
-            liveAmenitiesCacheRef.current.set(
-              listing.id,
-              Array.isArray(payload.amenities) ? payload.amenities : []
-            );
-          })
-          .catch(() => {
-            // Ignore background prefetch failures; foreground fetch still handles UX.
-          })
-          .finally(() => {
-            prefetchingVitalityRef.current.delete(listing.id);
-          });
-      }, index * 180);
-    });
+    // Overpass allows ~2 concurrent queries per IP. Prefetching one listing at a
+    // time leaves the other slot for the listing the user actually clicks; the
+    // old 8-wide burst got us 429s that tripped the server's breaker on the click.
+    let cancelled = false;
+    (async () => {
+      for (const listing of filteredListings.slice(0, 8)) {
+        if (cancelled) return;
+        if (liveAmenitiesCacheRef.current.has(listing.id)) continue;
+        if (prefetchingVitalityRef.current.has(listing.id)) continue;
+        prefetchingVitalityRef.current.add(listing.id);
+        try {
+          const response = await fetch(`/api/vitality?lat=${listing.lat}&lng=${listing.lng}`);
+          if (!response.ok) continue;
+          const payload = (await response.json()) as { amenities?: LiveAmenity[] };
+          liveAmenitiesCacheRef.current.set(
+            listing.id,
+            Array.isArray(payload.amenities) ? payload.amenities : []
+          );
+        } catch {
+          // Ignore background prefetch failures; foreground fetch still handles UX.
+        } finally {
+          prefetchingVitalityRef.current.delete(listing.id);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [filteredListings]);
 
   return (
@@ -541,7 +579,7 @@ function HeroPageInner() {
                 <p className="text-xs" style={{ color: "var(--muted-light)" }}>Loading listings…</p>
               </div>
             )}
-            {!loadingListings && filteredListings.map((listing) => (
+            {!loadingListings && visibleListings.map((listing) => (
               <button
                 key={listing.id}
                 type="button"
@@ -603,6 +641,7 @@ function HeroPageInner() {
                 </div>
               </button>
             ))}
+            <div ref={sentinelRef} aria-hidden />
             {filteredListings.length === 0 && (
               <p className="mt-8 text-center text-xs" style={{ color: "var(--muted)" }}>
                 No listings match your search.
@@ -617,7 +656,7 @@ function HeroPageInner() {
             listings={filteredListings}
             selectedId={selectedId}
             onSelect={setSelectedId}
-            selectedAmenities={selectedId && liveAmenitiesForListingId === selectedId ? liveAmenities : []}
+            selectedAmenities={selectedId && liveAmenitiesForListingId === selectedId ? liveAmenities : NO_AMENITIES}
             isAmenityLoading={loadingLiveAmenities && selectedId != null}
           />
           <PrefsWidget />
@@ -846,16 +885,16 @@ export default function HeroPage() {
   const [introComplete, setIntroComplete] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // Skip intro if already seen this session
+  // Skip intro once this browser has seen it (localStorage survives closing the tab)
   useEffect(() => {
-    if (sessionStorage.getItem("introComplete") === "true") {
+    if (localStorage.getItem("introComplete") === "true") {
       setIntroComplete(true);
     }
   }, []);
 
   const handleIntroComplete = useCallback(() => {
     setIntroComplete(true);
-    sessionStorage.setItem("introComplete", "true");
+    localStorage.setItem("introComplete", "true");
     // Show welcome popup shortly after fade-in
     setTimeout(() => setShowWelcome(true), 600);
   }, []);

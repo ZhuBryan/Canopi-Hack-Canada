@@ -95,8 +95,6 @@ export function rowToListing(row: DbRow, city: CityConfig, mapboxToken: string):
     scoreStatus: deriveStatus(scoreBand),
     scoreBand,
     image: row.photo ?? staticMapImage(row.lat, row.lng, mapboxToken),
-    pinX: "50%",
-    pinY: "50%",
     lat: row.lat,
     lng: row.lng,
     availableDate: row.available ?? "Available now",
