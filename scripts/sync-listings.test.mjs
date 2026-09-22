@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { normalizeRentfaster, parseRentfasterDetail, fetchRentfasterDetail } from "./sources/rentfaster.mjs";
-import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail } from "./sync-listings.mjs";
+import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail, hasPlaceCoords } from "./sync-listings.mjs";
 
 const RF_RECORD = {
   id: 593209,
@@ -61,7 +61,10 @@ test("fetchNearby builds one bucket per category from Geoapify features", async 
       status: 200,
       json: async () => ({
         features: [
-          { properties: { name: "Cafe A", formatted: "1 Main St", distance: 120, categories: ["catering.cafe"] } },
+          {
+            properties: { name: "Cafe A", formatted: "1 Main St", distance: 120, categories: ["catering.cafe"], lat: 43.651, lon: -79.381 },
+            geometry: { type: "Point", coordinates: [-79.381, 43.651] },
+          },
         ],
       }),
     };
@@ -72,6 +75,7 @@ test("fetchNearby builds one bucket per category from Geoapify features", async 
   assert.equal(nearby.cafes.count, 1);
   assert.deepEqual(nearby.cafes.places[0], {
     name: "Cafe A", address: "1 Main St", distance_meters: 120, categories: ["catering.cafe"],
+    lat: 43.651, lon: -79.381,
   });
   assert.equal(nearby.cafes.radius_meters, 1000);
 });
@@ -136,8 +140,10 @@ test("toRow maps RawListing to a listings row", () => {
   assert.equal(typeof row.seen_at, "string");
 });
 
+const NEARBY_WITH_COORDS = { cafes: { count: 1, places: [{ name: "Cafe A", lat: 43.6534, lon: -79.383 }] } };
+
 test("planEnrichment reuses a neighbour's nearby and caps fresh fetches", () => {
-  const existing = new Map([["rf-old", { lat: 43.65340, lng: -79.38300, nearby: { cafes: { count: 9 } } }]]);
+  const existing = new Map([["rf-old", { lat: 43.65340, lng: -79.38300, nearby: NEARBY_WITH_COORDS }]]);
   const raws = [
     RAW,                                              // same cell as rf-old → reuse
     { ...RAW, id: "rf-2", lat: 43.70, lng: -79.40 },  // new cell → fresh
@@ -145,7 +151,7 @@ test("planEnrichment reuses a neighbour's nearby and caps fresh fetches", () => 
     { ...RAW, id: "rf-old" },                          // already in DB → skip
   ];
   const plan = planEnrichment(raws, existing, 1);
-  assert.deepEqual(plan.reuse.get("rf-1"), { cafes: { count: 9 } });
+  assert.deepEqual(plan.reuse.get("rf-1"), NEARBY_WITH_COORDS);
   assert.deepEqual(plan.fresh, ["rf-2"]);
   assert.equal(plan.reuse.has("rf-old"), false);
 });
@@ -156,6 +162,24 @@ test("planEnrichment re-enriches an existing row whose nearby is still empty", (
   const raws = [{ ...RAW, id: "rf-old" }];
   const plan = planEnrichment(raws, existing, 10);
   assert.ok(plan.fresh.includes("rf-old"));
+});
+
+test("planEnrichment re-enriches a row whose places predate coordinate capture", () => {
+  // Enriched before geoapify.mjs stored lat/lon: it has places, but none can be drawn.
+  const stale = { cafes: { count: 1, places: [{ name: "Cafe A", distance_meters: 120 }] } };
+  const existing = new Map([["rf-old", { lat: 43.65321, lng: -79.38329, nearby: stale }]]);
+  const plan = planEnrichment([{ ...RAW, id: "rf-old" }], existing, 10);
+  assert.ok(plan.fresh.includes("rf-old"));
+  // and it must not be handed to a neighbour as a cell-cache hit either
+  const neighbour = planEnrichment([{ ...RAW, id: "rf-near" }], existing, 10);
+  assert.equal(neighbour.reuse.has("rf-near"), false);
+});
+
+test("hasPlaceCoords accepts a sparse area with no places at all", () => {
+  // Every bucket empty is a real answer for a rural listing, not a stale row.
+  assert.equal(hasPlaceCoords({ cafes: { count: 0, places: [] } }), true);
+  assert.equal(hasPlaceCoords({}), false);
+  assert.equal(hasPlaceCoords(null), false);
 });
 
 const DETAIL_JSON =

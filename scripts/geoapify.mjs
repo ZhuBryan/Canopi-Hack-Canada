@@ -31,12 +31,21 @@ export async function fetchNearby(lat, lng, { apiKey, fetchImpl = fetch, delayMs
         `&filter=circle:${lng},${lat},${b.radius}&bias=proximity:${lng},${lat}` +
         `&limit=${LIMIT}&apiKey=${apiKey}`;
       const data = await getJson(url, fetchImpl);
-      const places = (data.features ?? []).map((f) => ({
-        name: f.properties?.name ?? "Unnamed",
-        address: f.properties?.formatted ?? null,
-        distance_meters: Number.isFinite(f.properties?.distance) ? f.properties.distance : null,
-        categories: f.properties?.categories ?? [],
-      }));
+      const places = (data.features ?? []).map((f) => {
+        // Coordinates are what lets the app draw a tether from the listing to the
+        // place. Without them the only source for that is Overpass at request time.
+        const [gLon, gLat] = f.geometry?.coordinates ?? [];
+        const lat = Number.isFinite(f.properties?.lat) ? f.properties.lat : gLat;
+        const lon = Number.isFinite(f.properties?.lon) ? f.properties.lon : gLon;
+        return {
+          name: f.properties?.name ?? "Unnamed",
+          address: f.properties?.formatted ?? null,
+          distance_meters: Number.isFinite(f.properties?.distance) ? f.properties.distance : null,
+          categories: f.properties?.categories ?? [],
+          lat: Number.isFinite(lat) ? lat : null,
+          lon: Number.isFinite(lon) ? lon : null,
+        };
+      });
       return [b.id, { label: b.label, source: "geoapify", radius_meters: b.radius, count: places.length, places }];
     })
   );

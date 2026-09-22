@@ -455,7 +455,7 @@ function HeroPageInner() {
       let lastError: unknown = null;
       for (let attempt = 0; attempt < 2; attempt += 1) {
         try {
-          const response = await fetch(`/api/vitality?lat=${selectedListing.lat}&lng=${selectedListing.lng}`, {
+          const response = await fetch(`/api/vitality?lat=${selectedListing.lat}&lng=${selectedListing.lng}&id=${encodeURIComponent(listingId)}`, {
             signal: controller.signal,
           });
           if (!response.ok) throw new Error("Failed to load vitality");
@@ -501,7 +501,9 @@ function HeroPageInner() {
         if (prefetchingVitalityRef.current.has(listing.id)) continue;
         prefetchingVitalityRef.current.add(listing.id);
         try {
-          const response = await fetch(`/api/vitality?lat=${listing.lat}&lng=${listing.lng}`);
+          const response = await fetch(
+            `/api/vitality?lat=${listing.lat}&lng=${listing.lng}&id=${encodeURIComponent(listing.id)}`
+          );
           // Overpass is struggling. Keep warming the cache and we just spend the
           // server's budget tripping its breaker, so the listing the user actually
           // clicks comes back empty and draws no amenity tethers. Yield instead.

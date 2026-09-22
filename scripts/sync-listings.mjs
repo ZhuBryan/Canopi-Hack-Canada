@@ -44,17 +44,33 @@ export function toRow(raw, city, nearby) {
   };
 }
 
+// Rows enriched before Geoapify coordinates were captured have places but no lat/lon,
+// so the app cannot draw tethers to them. Treat those as unenriched and let the normal
+// per-run limit backfill them, rather than forcing one big re-sync through the quota.
+export function hasPlaceCoords(nearby) {
+  if (!nearby) return false;
+  const buckets = Object.values(nearby);
+  if (buckets.length === 0) return false;
+  const places = buckets.flatMap((b) => b?.places ?? []);
+  // A bucket can legitimately be empty in a sparse area; only claim the row is stale
+  // when it has places and none of them carry coordinates.
+  if (places.length === 0) return true;
+  return places.some((p) => Number.isFinite(p?.lat) && Number.isFinite(p?.lon));
+}
+
 // existing: Map<id, {lat, lng, nearby}> for rows already in the DB for this city.
 export function planEnrichment(raws, existing, limit) {
   const byCell = new Map();
   for (const e of existing.values()) {
-    if (e.nearby && Object.keys(e.nearby).length) byCell.set(cellKey(e.lat, e.lng), e.nearby);
+    if (e.nearby && Object.keys(e.nearby).length && hasPlaceCoords(e.nearby)) {
+      byCell.set(cellKey(e.lat, e.lng), e.nearby);
+    }
   }
   const reuse = new Map();
   const fresh = [];
   for (const r of raws) {
     const prev = existing.get(r.id);
-    if (prev && prev.nearby && Object.keys(prev.nearby).length) continue;
+    if (prev && prev.nearby && Object.keys(prev.nearby).length && hasPlaceCoords(prev.nearby)) continue;
     const cached = byCell.get(cellKey(r.lat, r.lng));
     if (cached) reuse.set(r.id, cached);
     else if (fresh.length < limit) fresh.push(r.id);

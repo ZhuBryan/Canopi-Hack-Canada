@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Amenity } from "@/lib/types";
+import { loadNearby } from "@/lib/listings-db";
+import { amenitiesFromNearby, describeAmenity, fallbackNameForType } from "@/lib/nearby-amenities";
 
 type VitalityPayload = {
   vitalityScore: number;
@@ -58,45 +60,6 @@ type OverpassResponse = {
   elements: OverpassElement[];
 };
 
-function describeAmenity(type: Amenity["type"], distance: number): string {
-  const walk = Math.max(1, Math.round(distance / 80));
-  switch (type) {
-    case "grocery":
-      return `Grocery option about ${walk} min away for quick essentials runs.`;
-    case "cafe":
-      return `Cafe about ${walk} min away for coffee, study, or casual meetups.`;
-    case "transit":
-      return `Transit stop around ${walk} min away to support easier commuting.`;
-    case "healthcare":
-      return `Healthcare access roughly ${walk} min away for prescriptions or urgent needs.`;
-    case "park":
-      return `Park around ${walk} min away for walks, exercise, and downtime.`;
-    default:
-      return `Nearby amenity about ${walk} min away.`;
-  }
-}
-
-function fallbackNameForType(type: Amenity["type"]): string {
-  switch (type) {
-    case "grocery":
-      return "Nearby Grocery";
-    case "cafe":
-      return "Nearby Cafe";
-    case "restaurant":
-      return "Nearby Restaurant";
-    case "transit":
-      return "Nearby Transit";
-    case "healthcare":
-      return "Nearby Healthcare";
-    case "park":
-      return "Nearby Park";
-    case "school":
-      return "Nearby School";
-    default:
-      return "Nearby Amenity";
-  }
-}
-
 async function fetchOverpassJson(query: string): Promise<OverpassResponse> {
   const deadline = Date.now() + TOTAL_BUDGET_MS;
   for (const endpoint of OVERPASS_ENDPOINTS) {
@@ -146,6 +109,22 @@ export async function GET(request: Request) {
 
   const lat = parseFloat(latParam);
   const lng = parseFloat(lngParam);
+
+  // Preferred source: the Geoapify buckets the weekly sync already wrote for this
+  // listing. No third-party call on the request path, so the tethers draw whether or
+  // not Overpass is having a good day. Rows never enriched, rows enriched before
+  // coordinates were captured, and the static demo listings all return null here and
+  // fall through to Overpass below.
+  const id = searchParams.get("id");
+  if (id) {
+    try {
+      const payload = amenitiesFromNearby(await loadNearby(id), lat, lng);
+      if (payload) return NextResponse.json(payload);
+    } catch (error) {
+      console.error("nearby lookup failed, falling back to Overpass:", error);
+    }
+  }
+
   const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
   const now = Date.now();
   const cached = vitalityCache.get(cacheKey);
