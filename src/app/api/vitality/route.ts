@@ -20,13 +20,26 @@ const vitalityCache = new Map<string, CacheEntry>();
 const inflightRequests = new Map<string, Promise<VitalityPayload>>();
 
 // Overpass is a volunteer service that IP-bans clients who keep hitting it while
-// it is failing. After a full miss, answer from cache/503 for a minute instead of
-// sending the next 8 prefetches into the same wall.
-const BREAKER_MS = 60 * 1000;
+// it is failing, so a run of misses has to back off. But one slow answer is not an
+// outage: tripping on the first miss blanked every other listing for a full minute,
+// which is what left the amenity tethers empty for the listing the user clicked.
+const BREAKER_MS = 30 * 1000;
+const BREAKER_AFTER = 3;
 let overpassDownUntil = 0;
+let consecutiveFailures = 0;
+
+// maxDuration is 30s and one wedged mirror must not eat all of it. Cap each
+// attempt, and stop starting mirrors once the budget cannot cover another —
+// a 20s-per-mirror abort let a single bad request run past 28s and time out.
+// A healthy mirror answers this query in 3-8s, so 10s is generous; two of them
+// still fit in the budget.
+const MIRROR_TIMEOUT_MS = 10000;
+const TOTAL_BUDGET_MS = 22000;
+// kumi.systems is left out on purpose: it timed out on every probe, and sitting
+// second in the list it ate the whole remaining budget before lz4 — which answers
+// in ~4s — was ever tried. These two fail independently enough to be worth both.
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
 ];
 
@@ -85,12 +98,13 @@ function fallbackNameForType(type: Amenity["type"]): string {
 }
 
 async function fetchOverpassJson(query: string): Promise<OverpassResponse> {
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    if (deadline - Date.now() < MIRROR_TIMEOUT_MS) break;
     const controller = new AbortController();
-    // Must outlive the query's own [timeout:N] plus queueing; a shorter abort
-    // throws away answers that were about to arrive and re-runs them on the next
-    // mirror, which is how we end up over quota.
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    // Long enough to outlive the query's own [timeout:15] plus queueing, short
+    // enough that two mirrors still fit inside the budget.
+    const timeout = setTimeout(() => controller.abort(), MIRROR_TIMEOUT_MS);
     try {
       const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, {
         signal: controller.signal,
@@ -102,14 +116,14 @@ async function fetchOverpassJson(query: string): Promise<OverpassResponse> {
         // Node's default with 406 / a reset, which left only kumi.systems serving us.
         headers: { "User-Agent": "Canopi/1.0 (+https://github.com/ZhuBryan/HackCanada)" },
       });
-      // 429 means this IP is over quota; trying the next mirror only deepens it.
-      if (response.status === 429) break;
+      // A 429 or 504 from one mirror says nothing about the other — in practice one
+      // serves the exact query the other just refused — so spend the budget on it.
+      // Sustained rate-limiting is what the breaker below is for.
       if (!response.ok) continue;
       return (await response.json()) as OverpassResponse;
     } catch {
-      // A timeout means Overpass is slow everywhere today; a second mirror only
-      // doubles the wait. Fast failures (DNS, reset) are worth another try.
-      if (controller.signal.aborted) break;
+      // Mirror health varies independently — .de answers while kumi/lz4 hang — so
+      // a timeout here is worth passing to the next mirror, which the budget bounds.
     } finally {
       clearTimeout(timeout);
     }
@@ -275,12 +289,19 @@ export async function GET(request: Request) {
       payload,
     });
     inflightRequests.delete(cacheKey);
+    consecutiveFailures = 0;
 
     return NextResponse.json(payload);
   } catch (error) {
     inflightRequests.delete(cacheKey);
-    overpassDownUntil = Date.now() + BREAKER_MS;
-    console.error("Overpass API Error (pausing Overpass for 60s):", error);
+    consecutiveFailures += 1;
+    if (consecutiveFailures >= BREAKER_AFTER) {
+      overpassDownUntil = Date.now() + BREAKER_MS;
+      consecutiveFailures = 0;
+      console.error("Overpass API Error (pausing Overpass for 30s):", error);
+    } else {
+      console.error(`Overpass API Error (${consecutiveFailures}/${BREAKER_AFTER}):`, error);
+    }
     return fallback();
   }
 }

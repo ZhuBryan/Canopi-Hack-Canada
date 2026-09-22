@@ -502,7 +502,10 @@ function HeroPageInner() {
         prefetchingVitalityRef.current.add(listing.id);
         try {
           const response = await fetch(`/api/vitality?lat=${listing.lat}&lng=${listing.lng}`);
-          if (!response.ok) continue;
+          // Overpass is struggling. Keep warming the cache and we just spend the
+          // server's budget tripping its breaker, so the listing the user actually
+          // clicks comes back empty and draws no amenity tethers. Yield instead.
+          if (!response.ok) return;
           const payload = (await response.json()) as { amenities?: LiveAmenity[] };
           liveAmenitiesCacheRef.current.set(
             listing.id,
