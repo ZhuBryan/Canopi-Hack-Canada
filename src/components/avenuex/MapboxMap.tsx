@@ -101,6 +101,8 @@ export function MapboxMap({
   // Listing objects are rebuilt on every prefs drag and search keystroke; the
   // map only needs to react when the actual set of pins changes.
   const listingsKey = listings.map((l) => l.id).join(",");
+  // What the pin source currently holds, so moveend can skip redundant setData.
+  const pinKeyRef = useRef<string>("");
   const highlightDirtyRef = useRef(true);
   const triggerHighlightRef = useRef<(() => void) | null>(null);
   const amenityPopupRef = useRef<mapboxgl.Popup | null>(null);
@@ -521,7 +523,7 @@ export function MapboxMap({
       ensurePinIcons(map, pinColors(listingsRef.current));
       map.addSource("listing-pins", {
         type: "geojson",
-        data: pinsGeoJson(listingsRef.current),
+        data: pinsGeoJson(pinsInView(map, listingsRef.current, selectedIdRef.current)),
       });
       map.addLayer({
         id: "listing-pins",
@@ -575,6 +577,18 @@ export function MapboxMap({
         map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = "move"; });
       }
 
+      // Re-feed the pins as the camera moves. The key check keeps a pan that
+      // reveals no new listings from re-tiling the source for nothing.
+      map.on("moveend", () => {
+        const source = map.getSource("listing-pins") as mapboxgl.GeoJSONSource | undefined;
+        if (!source) return;
+        const inView = pinsInView(map, listingsRef.current, selectedIdRef.current);
+        const key = inView.map((l) => l.id).join(",");
+        if (key === pinKeyRef.current) return;
+        pinKeyRef.current = key;
+        source.setData(pinsGeoJson(inView));
+      });
+
       renderAmenityPaths();
     });
 
@@ -607,7 +621,9 @@ export function MapboxMap({
     if (!map || !source) return;
 
     ensurePinIcons(map, pinColors(listings));
-    source.setData(pinsGeoJson(listings));
+    const inView = pinsInView(map, listings, selectedIdRef.current);
+    pinKeyRef.current = inView.map((l) => l.id).join(",");
+    source.setData(pinsGeoJson(inView));
 
     // Re-stamp building colors when listings change
     triggerHighlightRef.current?.();
@@ -793,6 +809,26 @@ function ensurePinIcons(map: mapboxgl.Map, colors: Iterable<string>): void {
       }
     }
   }
+}
+
+// The symbol layer rasterizes every label it is given, and collision is off, so
+// 1300+ pins are drawn on every frame even where a few dozen are on screen and the
+// rest stack invisibly. Feeding it only what can be seen is the same picture for a
+// fraction of the per-frame work. Padded by a full viewport on each side so a pin
+// is in the source long before it can scroll in; the selected pin is always kept,
+// since flyTo starts before the camera reaches it.
+function pinsInView(map: mapboxgl.Map, listings: Listing[], selectedId: string | null): Listing[] {
+  const b = map.getBounds();
+  if (!b) return listings;
+  const padLng = b.getEast() - b.getWest();
+  const padLat = b.getNorth() - b.getSouth();
+  const west = b.getWest() - padLng, east = b.getEast() + padLng;
+  const south = b.getSouth() - padLat, north = b.getNorth() + padLat;
+  return listings.filter(
+    (l) =>
+      l.id === selectedId ||
+      (l.lng >= west && l.lng <= east && l.lat >= south && l.lat <= north)
+  );
 }
 
 function pinsGeoJson(listings: Listing[]): GeoJSON.FeatureCollection {
