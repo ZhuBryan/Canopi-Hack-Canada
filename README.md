@@ -8,7 +8,7 @@
 
 Canopi is an AI-powered rental discovery platform that understands *who you are*, not just what you're searching for. Through lifestyle-revealing conversation, it learns your priorities and surfaces rentals across Canada that actually fit your life.
 
-**Live demo:** https://hack-canada.vercel.app
+**Live demo:** https://canopi-psi.vercel.app/
 
 ---
 
