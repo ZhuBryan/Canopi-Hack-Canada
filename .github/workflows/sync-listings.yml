@@ -2,7 +2,8 @@ name: Sync listings
 
 on:
   schedule:
-    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+    # ponytail: daily until the Geoapify backlog clears, then back to "0 9 * * 1" (Mondays)
+    - cron: "0 9 * * *" # daily 09:00 UTC; 200/city stays under the 3000/day quota
   workflow_dispatch:
     inputs:
       limit:
