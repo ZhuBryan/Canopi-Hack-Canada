@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { normalizeRentfaster, parseRentfasterDetail, fetchRentfasterDetail } from "./sources/rentfaster.mjs";
-import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail, hasPlaceCoords } from "./sync-listings.mjs";
+import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail, hasPlaceCoords, isBlockedStatus } from "./sync-listings.mjs";
+import { resolveRealtorUrl, pickRentalHit } from "./sources/realtor.mjs";
 
 const RF_RECORD = {
   id: 593209,
@@ -242,14 +243,20 @@ test("parseRentfasterDetail parses the saved live sample page", () => {
   assert.ok(result.amenities.includes("Elevator"));
 });
 
-test("planDetail selects rentfaster raws missing a description", () => {
+test("planDetail selects rentfaster raws missing a description and rentcast raws not yet keyed to a listing", () => {
   const raws = [
     { id: "rf-1", source: "rentfaster" },
     { id: "rf-2", source: "rentfaster" },
     { id: "rc-1", source: "rentcast" },
+    { id: "rc-2", source: "rentcast" },
+    { id: "rc-3", source: "rentcast" },
   ];
-  const existing = new Map([["rf-2", { description: "already have it" }]]);
-  assert.deepEqual(planDetail(raws, existing), ["rf-1"]);
+  const existing = new Map([
+    ["rf-2", { description: "already have it" }],
+    ["rc-2", { url: "https://www.google.com/search?q=1%20Main%20St%20for%20rent" }],
+    ["rc-3", { url: "https://www.realtor.com/rentals/details/1-Main-St_San-Francisco_CA_94103_M12345-67890" }],
+  ]);
+  assert.deepEqual(planDetail(raws, existing), ["rf-1", "rc-1", "rc-2"]);
 });
 
 test("takeDetailIds caps the ids attempted per run and leaves the rest for next time", () => {
@@ -259,16 +266,77 @@ test("takeDetailIds caps the ids attempted per run and leaves the rest for next 
 });
 
 test("mergeDetail carries forward existing detail fields when no fresh detail was fetched", () => {
-  const row = { sqft: null, amenities: [], lease_term: null, photo: null, description: null };
-  const prev = { sqft: 500, amenities: ["Elevator"], lease_term: "Long Term", photo: "https://x/old.jpg", description: "Old description" };
+  const row = { sqft: null, amenities: [], lease_term: null, photo: null, description: null, url: "https://www.rentfaster.ca/properties/a-1" };
+  const prev = { sqft: 500, amenities: ["Elevator"], lease_term: "Long Term", photo: "https://x/old.jpg", description: "Old description", url: "https://www.rentfaster.ca/properties/old-1" };
   assert.deepEqual(mergeDetail(row, undefined, prev), {
     sqft: 500, amenities: ["Elevator"], lease_term: "Long Term", photo: "https://x/old.jpg", description: "Old description",
+    url: "https://www.rentfaster.ca/properties/a-1", // a real source URL always wins over the stored one
   });
 
   const detail = { sqft: 700, amenities: ["Gym"], leaseTerm: "Short Term", photo: "https://x/new.jpg", description: "New description" };
   assert.deepEqual(mergeDetail(row, detail, prev), {
     sqft: 700, amenities: ["Gym"], lease_term: "Short Term", photo: "https://x/new.jpg", description: "New description",
+    url: "https://www.rentfaster.ca/properties/a-1",
   });
 
   assert.deepEqual(mergeDetail(row, undefined, undefined), row);
+});
+
+test("mergeDetail keeps a resolved listing link over the Google-search fallback", () => {
+  const google = "https://www.google.com/search?q=1%20Main%20St%20for%20rent";
+  const realtor = "https://www.realtor.com/rentals/details/1-Main-St_San-Francisco_CA_94103_M12345-67890";
+  const row = { sqft: 400, amenities: [], lease_term: null, photo: null, description: null, url: google };
+  assert.equal(mergeDetail(row, { url: realtor }, undefined).url, realtor); // freshly resolved
+  assert.equal(mergeDetail(row, null, { url: realtor }).url, realtor); // resolved on an earlier run
+  assert.equal(mergeDetail(row, null, { url: google }).url, google); // lookup missed: keep the fallback
+  assert.equal(mergeDetail(row, null, undefined).url, google);
+  // An older stored fallback must not shadow the fresh one.
+  assert.equal(mergeDetail(row, null, { url: "https://www.google.com/search?q=old" }).url, google);
+});
+
+test("isBlockedStatus counts challenges, rate limits, server errors and timeouts, not misses", () => {
+  for (const s of [0, 403, 429, 500, 503]) assert.equal(isBlockedStatus(s), true, String(s));
+  for (const s of [null, 200, 301, 404]) assert.equal(isBlockedStatus(s), false, String(s));
+});
+
+// Trimmed from live Realtor.com suggest responses captured 2026-09-30.
+const NATOMA_HITS = [
+  { mpr_id: "2014955772", line: "637 Natoma St Apt 5", city: "San Francisco", state_code: "CA", postal_code: "94103", prop_status: ["for_rent"] },
+  { mpr_id: "2534582811", line: "637 Natoma St Apt 6", city: "San Francisco", state_code: "CA", postal_code: "94103", prop_status: ["recently_sold", "off_market"] },
+];
+
+test("resolveRealtorUrl keys a listing to its Realtor.com rental page by address, unit and zip", async () => {
+  let asked;
+  const fetchImpl = async (url) => {
+    asked = url;
+    return { ok: true, status: 200, json: async () => ({ autocomplete: NATOMA_HITS }) };
+  };
+  const statuses = [];
+  const got = await resolveRealtorUrl("637 Natoma St, Apt 5, San Francisco, CA 94103", { fetchImpl, onStatus: (s) => statuses.push(s) });
+  assert.deepEqual(got, { url: "https://www.realtor.com/rentals/details/637-Natoma-St-Apt-5_San-Francisco_CA_94103_M20149-55772" });
+  assert.match(asked, /input=637%20Natoma%20St%20Apt%205%20San%20Francisco%20CA%2094103$/);
+  assert.deepEqual(statuses, [200]);
+});
+
+test("pickRentalHit rejects other units, other zips and listings not for rent", () => {
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St Apt 6", zip: "94103" }), null); // off market
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St Apt 5", zip: "94110" }), null);
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St", zip: "94103" }), null); // building != unit
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St, Unit 5", zip: "94103" }).mpr_id, "2014955772"); // Apt == Unit
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St, #5", zip: "94103" }).mpr_id, "2014955772"); // # == Apt
+  assert.equal(pickRentalHit(NATOMA_HITS, { line: "637 Natoma St, #55", zip: "94103" }), null);
+  const mixed = [{ ...NATOMA_HITS[0], line: "875 California St Unit 202", postal_code: "94108", prop_status: ["for_sale", "for_rent"] }];
+  assert.ok(pickRentalHit(mixed, { line: "875 California St Unit 202", zip: "94108" }));
+});
+
+test("resolveRealtorUrl returns null on a miss, a non-200, a network error or an unparseable address", async () => {
+  const empty = async () => ({ ok: true, status: 200, json: async () => ({ autocomplete: [] }) });
+  assert.equal(await resolveRealtorUrl("1 Nowhere St, San Francisco, CA 94103", { fetchImpl: empty }), null);
+  const statuses = [];
+  const forbidden = async () => ({ ok: false, status: 403, json: async () => ({}) });
+  assert.equal(await resolveRealtorUrl("637 Natoma St, Apt 5, San Francisco, CA 94103", { fetchImpl: forbidden, onStatus: (s) => statuses.push(s) }), null);
+  const boom = async () => { throw new Error("ECONNRESET"); };
+  assert.equal(await resolveRealtorUrl("637 Natoma St, Apt 5, San Francisco, CA 94103", { fetchImpl: boom, onStatus: (s) => statuses.push(s) }), null);
+  assert.deepEqual(statuses, [403, 0]);
+  assert.equal(await resolveRealtorUrl("no commas here", { fetchImpl: empty }), null);
 });

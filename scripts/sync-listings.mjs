@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { fetchNearby } from "./geoapify.mjs";
 import { fetchRentfasterDetail } from "./sources/rentfaster.mjs";
+import { resolveRealtorUrl } from "./sources/realtor.mjs";
 
 const SOURCES = {
   toronto: async () => (await import("./sources/rentfaster.mjs")).fetchRentfaster(),
@@ -83,10 +84,31 @@ export function planEnrichment(raws, existing, limit) {
   return { reuse, fresh };
 }
 
-// raws whose source is rentfaster and that don't already have a description on file.
+// RentCast rows start out linking to a Google search for the address (see rentcast.mjs).
+export const isSearchFallback = (url) => !url || url.startsWith("https://www.google.com/search");
+
+// rentfaster raws without a description on file, and rentcast raws not yet keyed to a listing page.
 export function planDetail(raws, existing) {
-  return raws.filter((r) => r.source === "rentfaster" && !existing.get(r.id)?.description).map((r) => r.id);
+  return raws
+    .filter((r) => {
+      const prev = existing.get(r.id);
+      if (r.source === "rentfaster") return !prev?.description;
+      if (r.source === "rentcast") return isSearchFallback(prev?.url);
+      return false;
+    })
+    .map((r) => r.id);
 }
+
+// Per-source detail fetcher: (raw, { onStatus }) => Promise<detail | null>, never throws.
+// pauseMs paces requests: RentFaster pages challenge a fast run; a Realtor lookup is one small JSON call.
+const DETAIL_SOURCES = {
+  rentfaster: { fetch: (r, opts) => fetchRentfasterDetail(r.url, opts), pauseMs: 3000 },
+  rentcast: { fetch: (r, opts) => resolveRealtorUrl(r.fullAddress, opts), pauseMs: 1000 },
+};
+
+// Challenged, rate-limited, erroring or timed out (status 0): after 10 in a row, stop the pass so
+// the run still reaches the upsert instead of burning the job's time limit.
+export const isBlockedStatus = (status) => status === 0 || status === 403 || status === 429 || status >= 500;
 
 // Cap detail-page fetches per run — RentFaster 403s a run that fetches too many too fast.
 // Ids past the cap are simply not attempted; planDetail picks them up again next run.
@@ -105,6 +127,9 @@ export function mergeDetail(row, detail, prev) {
     lease_term: pick(detail?.leaseTerm, prev?.lease_term, row.lease_term),
     photo: pick(detail?.photo, prev?.photo, row.photo),
     description: pick(detail?.description, prev?.description, row.description),
+    // A resolved listing link beats the source's Google-search fallback, and once stored it
+    // must survive re-syncs that rebuild the row with the fallback again.
+    url: detail?.url ?? (isSearchFallback(row.url) && !isSearchFallback(prev?.url) ? prev.url : row.url),
   };
 }
 
@@ -135,7 +160,7 @@ async function main() {
     for (let from = 0; ; from += 1000) {
       const { data, error } = await supabase
         .from("listings")
-        .select("id, lat, lng, nearby, sqft, amenities, lease_term, photo, description")
+        .select("id, url, lat, lng, nearby, sqft, amenities, lease_term, photo, description")
         .eq("city", city)
         .range(from, from + 999);
       if (error) throw error;
@@ -174,28 +199,29 @@ async function main() {
   const details = new Map();
   let fetched = 0;
   let failed = 0;
-  let consecutive403 = 0;
+  let consecutiveBlocked = 0;
   console.log(`[${city}] fetching ${detailIdsToFetch.length} detail pages…`);
   for (let i = 0; i < detailIdsToFetch.length; i++) {
     const id = detailIdsToFetch[i];
-    const url = byId.get(id).url;
+    const r = byId.get(id);
+    const { fetch: fetchDetail, pauseMs } = DETAIL_SOURCES[r.source];
     let status = null;
-    const detail = await fetchRentfasterDetail(url, { onStatus: (s) => (status = s) });
-    if (status === 403) {
-      consecutive403++;
-      console.log(`[${city}] detail: 403 (challenged); skipping`);
+    const detail = await fetchDetail(r, { onStatus: (s) => (status = s) });
+    if (isBlockedStatus(status)) {
+      consecutiveBlocked++;
+      console.log(`[${city}] detail: ${status || "timeout/network error"}; skipping`);
     } else {
-      consecutive403 = 0;
+      consecutiveBlocked = 0;
     }
     details.set(id, detail);
     if (detail) fetched++;
     else failed++;
-    if (consecutive403 >= 10) {
-      console.log(`[${city}] detail: 10 consecutive 403s, stopping detail pass (${fetched} fetched)`);
+    if (consecutiveBlocked >= 10) {
+      console.log(`[${city}] detail: 10 consecutive blocked/failed requests, stopping detail pass (${fetched} fetched)`);
       break;
     }
     if ((fetched + failed) % 50 === 0) console.log(`[${city}] detail pages: ${fetched + failed}/${detailIdsToFetch.length}`);
-    await sleep(3000 + Math.random() * 1500);
+    if (status !== null) await sleep(pauseMs + Math.random() * (pauseMs / 2)); // no request made, nothing to pace
   }
   const skipped = detailIds.length - fetched - failed;
   console.log(`[${city}] detail pages: fetched ${fetched}, failed ${failed}, skipped ${skipped} (limit)`);
