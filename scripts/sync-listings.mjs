@@ -14,6 +14,9 @@ const SOURCES = {
 };
 const MIN_RENT = 500;
 const BATCH = 500;
+// ponytail: rows carry up to ~60KB of nearby JSON each; 500 per upsert (~20MB) hit the
+// statement timeout. 50 keeps each statement ~2-3MB.
+const UPSERT_BATCH = 50;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const cellKey = (lat, lng) => `${lat.toFixed(3)}|${lng.toFixed(3)}`;
@@ -198,8 +201,8 @@ async function main() {
   console.log(`[${city}] detail pages: fetched ${fetched}, failed ${failed}, skipped ${skipped} (limit)`);
 
   const rows = raws.map((r) => mergeDetail(toRow(r, city, enriched.get(r.id) ?? existing.get(r.id)?.nearby ?? {}), details.get(r.id), existing.get(r.id)));
-  for (let i = 0; i < rows.length; i += BATCH) {
-    const { error } = await supabase.from("listings").upsert(rows.slice(i, i + BATCH), { onConflict: "id" });
+  for (let i = 0; i < rows.length; i += UPSERT_BATCH) {
+    const { error } = await supabase.from("listings").upsert(rows.slice(i, i + UPSERT_BATCH), { onConflict: "id" });
     if (error) throw error;
   }
 
