@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadListings } from "@/lib/listings-db";
 import { CITIES, DEFAULT_CITY, isCitySlug, type CitySlug } from "@/lib/cities";
-import { BUCKET_KEYS } from "@/lib/listing-score";
+import { encodeListingsForPrompt, LISTING_LINE_FORMAT } from "@/lib/prompt-encoding";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,12 +20,7 @@ interface ChatRequest {
 async function buildSystemPrompt(city: CitySlug): Promise<string> {
     const cfg = CITIES[city];
     const listings = await loadListings(city);
-    const summaries = listings
-        .map((l) => {
-            const counts = BUCKET_KEYS.map((k) => l.nearbyServices?.[k] ?? 0).join(",");
-            return `${l.id}|${l.address}|$${l.monthlyRent}|${l.lat.toFixed(3)},${l.lng.toFixed(3)}|${counts}`;
-        })
-        .join("\n");
+    const summaries = encodeListingsForPrompt(listings);
 
     const greeting = `You are Canopi, a warm, perceptive AI assistant for ${cfg.promptBlurb}. You help renters find apartments and understand neighborhoods — but more importantly, you understand *people*.`;
 
@@ -124,7 +119,7 @@ CONVERSATION PACING RULES:
 
 ---
 
-LISTING DATA — ${listings.length} real ${cfg.label} rentals (format: id|address|price|lat,lng|schools,groceries,restaurants,cafes,parks,pharmacies,transit):
+LISTING DATA — ${listings.length} real ${cfg.label} rentals (format: ${LISTING_LINE_FORMAT}):
 ${summaries}
 
 LISTING RECOMMENDATION RULES:
