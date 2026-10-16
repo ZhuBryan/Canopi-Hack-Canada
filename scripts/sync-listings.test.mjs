@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { normalizeRentfaster, parseRentfasterDetail, fetchRentfasterDetail } from "./sources/rentfaster.mjs";
 import { cellKey, toRow, planEnrichment, planDetail, takeDetailIds, mergeDetail, hasPlaceCoords, isBlockedStatus } from "./sync-listings.mjs";
-import { resolveRealtorUrl, pickRentalHit } from "./sources/realtor.mjs";
+import { resolveRealtorUrl, pickRentalHit, parseRealtorPage } from "./sources/realtor.mjs";
 
 const RF_RECORD = {
   id: 593209,
@@ -250,13 +250,15 @@ test("planDetail selects rentfaster raws missing a description and rentcast raws
     { id: "rc-1", source: "rentcast" },
     { id: "rc-2", source: "rentcast" },
     { id: "rc-3", source: "rentcast" },
+    { id: "rc-4", source: "rentcast" },
   ];
   const existing = new Map([
     ["rf-2", { description: "already have it" }],
     ["rc-2", { url: "https://www.google.com/search?q=1%20Main%20St%20for%20rent" }],
-    ["rc-3", { url: "https://www.realtor.com/rentals/details/1-Main-St_San-Francisco_CA_94103_M12345-67890" }],
+    ["rc-3", { url: "https://www.realtor.com/rentals/details/1-Main-St_San-Francisco_CA_94103_M12345-67890" }], // linked but no photo yet: re-read the page
+    ["rc-4", { url: "https://www.realtor.com/rentals/details/2-Main-St_San-Francisco_CA_94103_M12345-67891", photo: "https://ap.rdcpix.com/x.jpg" }],
   ]);
-  assert.deepEqual(planDetail(raws, existing), ["rf-1", "rc-1", "rc-2"]);
+  assert.deepEqual(planDetail(raws, existing), ["rf-1", "rc-1", "rc-2", "rc-3"]);
 });
 
 test("takeDetailIds caps the ids attempted per run and leaves the rest for next time", () => {
@@ -308,7 +310,7 @@ const NATOMA_HITS = [
 test("resolveRealtorUrl keys a listing to its Realtor.com rental page by address, unit and zip", async () => {
   let asked;
   const fetchImpl = async (url) => {
-    asked = url;
+    asked ??= url; // first call is the autocomplete; the page fetch after it has no body here
     return { ok: true, status: 200, json: async () => ({ autocomplete: NATOMA_HITS }) };
   };
   const statuses = [];
@@ -316,6 +318,12 @@ test("resolveRealtorUrl keys a listing to its Realtor.com rental page by address
   assert.deepEqual(got, { url: "https://www.realtor.com/rentals/details/637-Natoma-St-Apt-5_San-Francisco_CA_94103_M20149-55772" });
   assert.match(asked, /input=637%20Natoma%20St%20Apt%205%20San%20Francisco%20CA%2094103$/);
   assert.deepEqual(statuses, [200]);
+});
+
+test("parseRealtorPage reads the lead photo and the amenities list", () => {
+  const html = '<meta property="og:image" content="https://ap.rdcpix.com/a.jpg"/><h4>Amenities and Community Features</h4><ul><li class="x">in unit laundry</li><li class="x">Cat ok</li></ul><ul><li>Other</li></ul>';
+  assert.deepEqual(parseRealtorPage(html), { photo: "https://ap.rdcpix.com/a.jpg", amenities: ["in unit laundry", "Cat ok"] });
+  assert.deepEqual(parseRealtorPage("<html></html>"), { photo: null, amenities: null });
 });
 
 test("pickRentalHit rejects other units, other zips and listings not for rent", () => {

@@ -96,12 +96,18 @@ export function parseRentfasterDetail(html) {
   } catch {
     return null;
   }
+  return detailFromObject(d);
+}
+
+// Shared by the detail page's embedded JSON and the search.json feed — same field names.
+const arr = (v) => (Array.isArray(v) ? v : []); // search.json uses false for "none"
+export function detailFromObject(d) {
   const sqftMatch = String(d.sq_feet ?? "").match(/\d+/);
   const amenities = [];
-  for (const f of d.features ?? []) amenities.push(f);
-  for (const p of d.parking ?? []) amenities.push(parkingLabel(p));
+  for (const f of arr(d.features)) amenities.push(f);
+  for (const p of arr(d.parking)) amenities.push(parkingLabel(p));
   amenities.push(petsLabel(d.cats, d.dogs));
-  for (const u of d.utilities_included ?? []) amenities.push(`${u} included`);
+  for (const u of arr(d.utilities_included)) amenities.push(`${u} included`);
   return {
     sqft: sqftMatch ? parseInt(sqftMatch[0], 10) : null,
     amenities: [...new Set(amenities)],
@@ -109,6 +115,31 @@ export function parseRentfasterDetail(html) {
     photo: d.slide || null,
     description: d.title || null,
   };
+}
+
+// search.json carries the detail-page fields (features, parking, pets, slide photo) and is not
+// Cloudflare-challenged like /properties/* pages. 48 per page, cur_page-indexed.
+// Returns Map<"rf-<id>", detail>.
+export async function fetchRentfasterSearchDetails({ maxPages = 200, pauseMs = 1500 } = {}) {
+  const out = new Map();
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  for (let page = 0; page < maxPages; page++) {
+    let res;
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      res = await fetch(`${BASE}/api/search.json?city_id=${CITY_ID}&novelty=0&cur_page=${page}`, {
+        headers: { "user-agent": UA, accept: "application/json" },
+      });
+      if (res.status !== 429) break;
+      await sleep(15_000 * attempt); // rate limited: back off, then retry the same page
+    }
+    if (!res.ok) throw new Error(`rentfaster search page ${page}: HTTP ${res.status}`);
+    const { listings = [] } = await res.json();
+    const before = out.size;
+    for (const r of listings) if (r.city === "Toronto") out.set(`rf-${r.id}`, detailFromObject(r));
+    if (listings.length === 0 || out.size === before) break; // empty or repeating page = past the end
+    await sleep(pauseMs);
+  }
+  return out;
 }
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);

@@ -2,7 +2,7 @@
 // Realtor.com's address autocomplete (the endpoint its own search box calls; undocumented,
 // no key) returns the property id, and the rental page URL is built from that id.
 // Verified 2026-09-30: 8/8 sampled SF listings resolved (6 to the unit, 2 to the building
-// when RentCast has no unit). Only the link is stored; the page itself is never fetched.
+// when RentCast has no unit). The page is then read once for its lead photo and amenities (best effort).
 const SUGGEST = "https://parser-external.geo.moveaws.com/suggest";
 
 // Unit designators are dropped so "Apt 5", "Unit 5" and "#5" compare equal (Realtor writes
@@ -40,6 +40,18 @@ export function pickRentalHit(autocomplete, { line, zip }) {
   ) ?? null;
 }
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128 Safari/537.36";
+const decode = (t) => t.replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').trim();
+
+// og:image is the listing's lead photo; amenities are the <li>s under "Amenities and Community Features".
+export function parseRealtorPage(html) {
+  const photo = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? null;
+  const at = html.indexOf("Amenities and Community Features");
+  const list = at === -1 ? "" : html.slice(at, html.indexOf("</ul>", at));
+  const amenities = [...list.matchAll(/<li[^>]*>([^<]+)<\/li>/g)].map((m) => decode(m[1])).filter(Boolean);
+  return { photo, amenities: amenities.length ? amenities : null };
+}
+
 // Same contract as fetchRentfasterDetail: resolves to a detail object ({ url }) or null, never throws.
 export async function resolveRealtorUrl(fullAddress, { fetchImpl = fetch, onStatus } = {}) {
   const addr = splitAddress(fullAddress);
@@ -53,7 +65,14 @@ export async function resolveRealtorUrl(fullAddress, { fetchImpl = fetch, onStat
     onStatus?.(res.status);
     if (!res.ok) return null;
     const hit = pickRentalHit((await res.json()).autocomplete, addr);
-    return hit ? { url: realtorRentalUrl(hit) } : null;
+    if (!hit) return null;
+    const url = realtorRentalUrl(hit);
+    // The page is only a bonus (photo + amenities): if it is blocked or odd, the link alone still counts.
+    try {
+      const page = await fetchImpl(url, { headers: { "user-agent": UA, accept: "text/html" }, signal: AbortSignal.timeout(15_000) });
+      if (page.ok) return { url, ...parseRealtorPage(await page.text()) };
+    } catch {}
+    return { url };
   } catch {
     onStatus?.(0);
     return null;

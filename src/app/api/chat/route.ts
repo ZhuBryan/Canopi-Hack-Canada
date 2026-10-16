@@ -226,8 +226,8 @@ async function geminiResponse(messages: ChatMessage[], city: CitySlug): Promise<
         parts: [{ text: m.content }],
     }));
 
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    const callGemini = () => fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -236,6 +236,7 @@ async function geminiResponse(messages: ChatMessage[], city: CitySlug): Promise<
                 contents,
                 generationConfig: {
                     maxOutputTokens: 8000,
+                    thinkingConfig: { thinkingLevel: "low" }, // hidden thinking counts against maxOutputTokens
                     temperature: 0.4,
                     responseMimeType: "application/json",
                     responseSchema: {
@@ -268,6 +269,13 @@ async function geminiResponse(messages: ChatMessage[], city: CitySlug): Promise<
             }),
         }
     );
+
+    // Gemini sheds load with 429/503 in short bursts; a couple of quick retries ride them out.
+    let res = await callGemini();
+    for (let attempt = 1; attempt <= 3 && (res.status === 429 || res.status === 503); attempt++) {
+        await new Promise((r) => setTimeout(r, 1500 * attempt));
+        res = await callGemini();
+    }
 
     if (!res.ok) {
         const text = await res.text();

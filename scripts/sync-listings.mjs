@@ -6,7 +6,7 @@ import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { fetchNearby } from "./geoapify.mjs";
-import { fetchRentfasterDetail } from "./sources/rentfaster.mjs";
+import { fetchRentfasterDetail, fetchRentfasterSearchDetails } from "./sources/rentfaster.mjs";
 import { resolveRealtorUrl } from "./sources/realtor.mjs";
 
 const SOURCES = {
@@ -15,9 +15,11 @@ const SOURCES = {
 };
 const MIN_RENT = 500;
 const BATCH = 500;
+const STALE_BATCH = 50; // SF ids are address strings; 500 of them overflow the request URL (400 Bad Request)
 // ponytail: rows carry up to ~60KB of nearby JSON each; 500 per upsert (~20MB) hit the
 // statement timeout. 50 keeps each statement ~2-3MB.
 const UPSERT_BATCH = 50;
+const READ_PAGE = 100;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const cellKey = (lat, lng) => `${lat.toFixed(3)}|${lng.toFixed(3)}`;
@@ -87,13 +89,13 @@ export function planEnrichment(raws, existing, limit) {
 // RentCast rows start out linking to a Google search for the address (see rentcast.mjs).
 export const isSearchFallback = (url) => !url || url.startsWith("https://www.google.com/search");
 
-// rentfaster raws without a description on file, and rentcast raws not yet keyed to a listing page.
+// rentfaster raws without a description on file, and rentcast raws not yet keyed to a listing page or lacking its photo.
 export function planDetail(raws, existing) {
   return raws
     .filter((r) => {
       const prev = existing.get(r.id);
       if (r.source === "rentfaster") return !prev?.description;
-      if (r.source === "rentcast") return isSearchFallback(prev?.url);
+      if (r.source === "rentcast") return isSearchFallback(prev?.url) || !prev?.photo;
       return false;
     })
     .map((r) => r.id);
@@ -157,22 +159,26 @@ async function main() {
   const supabase = dry ? null : createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
   const existing = new Map();
   if (supabase) {
-    for (let from = 0; ; from += 1000) {
+    // ponytail: each row carries up to ~60KB of nearby JSON; 1000 per page hit the statement timeout.
+    for (let from = 0; ; from += READ_PAGE) {
       const { data, error } = await supabase
         .from("listings")
         .select("id, url, lat, lng, nearby, sqft, amenities, lease_term, photo, description")
         .eq("city", city)
-        .range(from, from + 999);
+        .range(from, from + READ_PAGE - 1);
       if (error) throw error;
       for (const r of data) existing.set(r.id, r);
-      if (data.length < 1000) break;
+      if (data.length < READ_PAGE) break;
     }
   }
 
   const { reuse, fresh } = planEnrichment(raws, existing, limit);
   console.log(`[${city}] new: ${raws.length - [...raws].filter((r) => existing.has(r.id)).length}, reuse cell cache: ${reuse.size}, geoapify: ${fresh.length}`);
   const detailIds = planDetail(raws, existing);
-  const detailIdsToFetch = takeDetailIds(detailIds, detailLimit);
+  // RentFaster: the search feed has the detail fields without the challenged page fetch.
+  const feedDetails = city === "toronto" ? await fetchRentfasterSearchDetails().catch((e) => (console.warn(`[${city}] search feed failed: ${e.message}`), new Map())) : new Map();
+  if (city === "toronto") console.log(`[${city}] search feed details: ${feedDetails.size}`);
+  const detailIdsToFetch = takeDetailIds(detailIds.filter((id) => !feedDetails.has(id)), detailLimit);
   if (dry) {
     console.log(
       `[${city}] detail pages: ${detailIdsToFetch.length} would fetch, ${detailIds.length - detailIdsToFetch.length} skipped (limit)`
@@ -196,7 +202,7 @@ async function main() {
   }
   console.log(`[${city}] geoapify ${fresh.length}/${fresh.length}`);
 
-  const details = new Map();
+  const details = new Map(feedDetails);
   let fetched = 0;
   let failed = 0;
   let consecutiveBlocked = 0;
@@ -234,8 +240,8 @@ async function main() {
 
   const seen = new Set(rows.map((r) => r.id));
   const stale = [...existing.keys()].filter((id) => !seen.has(id));
-  for (let i = 0; i < stale.length; i += BATCH) {
-    const { error } = await supabase.from("listings").update({ active: false }).in("id", stale.slice(i, i + BATCH));
+  for (let i = 0; i < stale.length; i += STALE_BATCH) {
+    const { error } = await supabase.from("listings").update({ active: false }).in("id", stale.slice(i, i + STALE_BATCH));
     if (error) throw error;
   }
   console.log(`[${city}] upserted ${rows.length}, deactivated ${stale.length}`);
